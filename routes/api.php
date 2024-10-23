@@ -5,6 +5,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\DigiflazController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,6 +17,14 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+
+// DIGIFLAZZ
+Route::controller(DigiflazController::class)->prefix('product')->group(function () {
+    Route::post('/get-product-prepaid', 'get_product_prepaid');
+    Route::post('/get-product-pasca', 'get_product_pasca');
+    Route::post('/topup', 'digiflazTopup');
+});
+
 
 // Authentication Route
 Route::middleware(['auth', 'json'])->prefix('auth')->group(function () {

@@ -19,14 +19,20 @@ class PermissionSeeder extends Seeder
         // Reset cached roles and permissions
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $menuMaster = ['master', 'master-user', 'master-role'];
         $menuWebsite = ['website', 'setting'];
+        $menuUserMitra = ['mitra', 'mitra-user-admin', 'mitra-user-mitra', 'mitra-hak-akses', 'master-user', 'master-role'];
+        $menuMaster = ['master', 'master-brand', 'master-operator-code'];
+        $menuProduct = ['produk', 'produk-prabayar', 'produk-pascabayar'];
+        $menuPPOB = ['PPOB'];
+        $menuLaporan = ['laporan', 'laporan-grafik-penjualan', 'laporan-transaksi-prabayar', 'laporan-transaksi-pascabayar'];
+        $menuIsiSaldo = ['isi-saldo', 'isi-saldo-tarik-tiket', 'isi-saldo-histori'];
+
 
         $permissionsByRole = [
-            'admin' => ['dashboard', ...$menuMaster, ...$menuWebsite],
+            'admin' => ['dashboard', ...$menuWebsite, ...$menuUserMitra, ...$menuMaster, ...$menuProduct, ...$menuPPOB, ...$menuLaporan, ...$menuIsiSaldo],
         ];
 
-        $insertPermissions = fn ($role) => collect($permissionsByRole[$role])
+        $insertPermissions = fn($role) => collect($permissionsByRole[$role])
             ->map(function ($name) {
                 $check = Permission::whereName($name)->first();
 
@@ -50,7 +56,7 @@ class PermissionSeeder extends Seeder
 
             DB::table('role_has_permissions')
                 ->insert(
-                    collect($permissionIds)->map(fn ($id) => [
+                    collect($permissionIds)->map(fn($id) => [
                         'role_id' => $role->id,
                         'permission_id' => $id
                     ])->toArray()

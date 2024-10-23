@@ -27,54 +27,186 @@ const routes: Array<RouteRecordRaw> = [
             {
                 path: "/dashboard",
                 name: "dashboard",
-                component: () => import("@/pages/dashboard/Index.vue"),
+                component: () => import("@/pages/admin/Dashboard.vue"),
                 meta: {
                     pageTitle: "Dashboard",
                     breadcrumbs: ["Dashboard"],
                 },
             },
             {
-                path: "/dashboard/profile",
-                name: "dashboard.profile",
-                component: () => import("@/pages/dashboard/profile/Index.vue"),
+                path: "/profile",
+                name: "admin-profile",
+                component: () => import("@/pages/admin/profile/Index.vue"),
                 meta: {
                     pageTitle: "Profile",
                     breadcrumbs: ["Profile"],
                 },
             },
             {
-                path: "/dashboard/setting",
-                name: "dashboard.setting",
-                component: () => import("@/pages/dashboard/setting/Index.vue"),
+                path: "/admin/setting",
+                name: "admin-setting",
+                component: () => import("@/pages/admin/setting/Index.vue"),
                 meta: {
                     pageTitle: "Website Setting",
                     breadcrumbs: ["Website", "Setting"],
                 },
             },
 
-            // MASTER
+            // USER
             {
-                path: "/dashboard/master/users/roles",
-                name: "dashboard.master.users.roles",
+                path: "/user/hak-akses",
+                name: "mitra-hak-akses",
                 component: () =>
-                    import("@/pages/dashboard/master/users/roles/Index.vue"),
+                    import("@/pages/admin/user/hak-akses/Index.vue"),
                 meta: {
-                    pageTitle: "User Roles",
-                    breadcrumbs: ["Master", "Users", "Roles"],
+                    pageTitle: "Hak Akses",
+                    breadcrumbs: ["Admin", "Hak Akses"],
                 },
             },
             {
-                path: "/dashboard/master/users",
-                name: "dashboard.master.users",
+                path: "/user/user-admin",
+                name: "mitra-user-admin",
                 component: () =>
-                    import("@/pages/dashboard/master/users/Index.vue"),
+                    import("@/pages/admin/user/user-admin/Index.vue"),
                 meta: {
-                    pageTitle: "Users",
-                    breadcrumbs: ["Master", "Users"],
+                    pageTitle: "User Admin",
+                    breadcrumbs: ["Admin", "User Admin"],
+                },
+            },
+            {
+                path: "/user/user-mitra",
+                name: "mitra-user-mitra",
+                component: () =>
+                    import("@/pages/admin/user/user-mitra/Index.vue"),
+                meta: {
+                    pageTitle: "Hak Akses",
+                    breadcrumbs: ["Admin", "Hak Akses"],
+                },
+            },
+            // ISI SALDO
+            {
+                path: "/isi-saldo/histori",
+                name: "isi-saldo-histori",
+                component: () =>
+                    import("@/pages/admin/isi-saldo/histori/Index.vue"),
+                meta: {
+                    pageTitle: "Histori Isi Saldo",
+                    breadcrumbs: ["Admin", "Histori Isi Saldo"],
+                },
+            },
+            {
+                path: "/isi-saldo/tarik-tiket",
+                name: "isi-saldo-tarik-tiket",
+                component: () =>
+                    import(
+                        "@/pages/admin/isi-saldo/tarik-tiket/Index.vue"
+                    ),
+                meta: {
+                    pageTitle: "Tarik Tiket",
+                    breadcrumbs: ["Admin", "Tarik Tiket"],
+                },
+            },
+
+            // LAPORAN
+
+            {
+                path: "/laporan/grafik-penjualan",
+                name: "laporan-grafik-penjualan",
+                component: () =>
+                    import(
+                        "@/pages/admin/laporan/grafik-penjualan/Index.vue"
+                    ),
+                meta: {
+                    pageTitle: "Grafik Penjualan",
+                    breadcrumbs: ["Admin", "Grafik Penjualan"],
+                },
+            },
+            {
+                path: "/laporan/transaksi-prabayar",
+                name: "laporan-transaksi-prabayar",
+                component: () =>
+                    import(
+                        "@/pages/admin/laporan/transaksi-prabayar/Index.vue"
+                    ),
+                meta: {
+                    pageTitle: "Transaksi Prabayar",
+                    breadcrumbs: ["Admin", "Transaksi Prabayar"],
+                },
+            },
+            {
+                path: "/laporan/transaksi-pascabayar",
+                name: "laporan-transaksi-pascabayar",
+                component: () =>
+                    import(
+                        "@/pages/admin/laporan/transaksi-pascabayar/Index.vue"
+                    ),
+                meta: {
+                    pageTitle: "Transaksi Pascabayar",
+                    breadcrumbs: ["Admin", "Transaksi Pascabayar"],
+                },
+            },
+
+            // MASTER
+            {
+                path: "/master/brand",
+                name: "master-brand",
+                component: () =>
+                    import("@/pages/admin/master/master-brand/Index.vue"),
+                meta: {
+                    pageTitle: "Brand",
+                    breadcrumbs: ["Admin", "Brand"],
+                },
+            },
+            {
+                path: "/master/operator-code",
+                name: "master-operator-code",
+                component: () =>
+                    import(
+                        "@/pages/admin/master/master-operator-code/Index.vue"
+                    ),
+                meta: {
+                    pageTitle: "Operator Code",
+                    breadcrumbs: ["Admin", "Operator Code"],
+                },
+            },
+
+            // PPOB
+            {
+                path: "/ppob",
+                name: "ppob",
+                component: () => import("@/pages/admin/ppob/Index.vue"),
+                meta: {
+                    pageTitle: "PPOB",
+                    breadcrumbs: ["Admin", "PPOB"],
+                },
+            },
+
+            // PRODUK
+
+            {
+                path: "/produk/prabayar",
+                name: "produk-prabayar",
+                component: () =>
+                    import("@/pages/admin/produk/prabayar/Index.vue"),
+                meta: {
+                    pageTitle: "Prabayar",
+                    breadcrumbs: ["Admin", "Prabayar"],
+                },
+            },
+            {
+                path: "/produk/pascabayar",
+                name: "produk-pascabayar",
+                component: () =>
+                    import("@/pages/admin/produk/pascabayar/Index.vue"),
+                meta: {
+                    pageTitle: "Pascabayar",
+                    breadcrumbs: ["Admin", "Pascabayar"],
                 },
             },
         ],
     },
+
+    // AUTH
     {
         path: "/",
         component: () => import("@/layouts/AuthLayout.vue"),
@@ -151,8 +283,9 @@ router.beforeEach(async (to, from, next) => {
 
     // current page view title
     if (to.meta.pageTitle) {
-        document.title = `${to.meta.pageTitle} - ${import.meta.env.VITE_APP_NAME
-            }`;
+        document.title = `${to.meta.pageTitle} - ${
+            import.meta.env.VITE_APP_NAME
+        }`;
     } else {
         document.title = import.meta.env.VITE_APP_NAME as string;
     }

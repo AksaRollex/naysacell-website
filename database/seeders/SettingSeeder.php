@@ -17,16 +17,14 @@ class SettingSeeder extends Seeder
         DB::table('settings')->truncate();
 
         Setting::create([
-            'app' => 'e-SAKIP DLH',
-            'description' =>  'Aplikasi e-SAKIP Dinas Lingkungan Hidup',
+            'app' => 'NAYSA CELL',
+            'description' =>  'Aplikasi NAYSA CELL Topup PPOB',
             'logo' =>  '/media/logo.png',
-            'bg_auth' =>  '/media/misc/bg-auth.jpg',
-            'banner' =>  '/media/misc/banner.jpg',
-            'pemerintah' =>  'Pemerintah Provinsi Jawa Timur',
-            'dinas' =>  'Dinas Lingkungan Hidup',
-            'alamat' =>  '',
-            'telepon' =>  '',
-            'email' =>  '',
+            'bg_auth' =>  '/media/background.jpg',
+            'banner' =>  '/media/banner.jpg',
+            'alamat' =>  'Sambiarum Lor, Surabaya',
+            'telepon' =>  '085336970707',
+            'email' =>  'naysacell@gmail.com',
         ]);
     }
 }

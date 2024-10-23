@@ -2,13 +2,9 @@
     <!--begin::Form-->
     <div class="w-100">
         <!--begin::Heading-->
-        <div class="text-center mb-10">
+        <div class="text-center mb-5">
             <router-link to="/">
-                <img
-                    :src="setting?.logo"
-                    :alt="setting?.app"
-                    class="w-200px mb-8"
-                />
+                <img :src="setting?.logo" :alt="setting?.app" class="w-200px" />
             </router-link>
             <!--begin::Title-->
             <h1 class="mb-3">
@@ -18,20 +14,7 @@
         </div>
         <!--begin::Heading-->
 
-        <ul class="nav nav-tabs nav-line-tabs mb-5 fs-6">
-            <li class="nav-item">
-                <a
-                    class="nav-link active"
-                    data-bs-toggle="tab"
-                    href="#with-email"
-                    >Email</a
-                >
-            </li>
-            <!-- <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="tab" href="#with-phone">{{ $t('login.telepon') }}</a>
-            </li> -->
-        </ul>
-
+        <ul class="nav nav-tabs nav-line-tabs mb-5 fs-6"></ul>
         <div class="tab-content" id="myTabContent">
             <div
                 class="tab-pane fade show active"
@@ -42,17 +25,13 @@
             </div>
         </div>
 
-        <div class="border-bottom border-gray-300 w-100 mt-5 mb-10"></div>
-
-        <!--begin::Link-->
-        <!-- <div class="text-gray-400 fw-semobold fs-4 text-center">
-            {{ $t('login.daftar_label') }}
+        <div class="text-gray-400 fw-semobold fs-1x text-center">
+            Daftar Mitra ? 
 
             <router-link to="/auth/sign-up" class="link-primary fw-bold">
-                {{ $t('login.daftar') }}
+                {{ $t('Klik Disini ') }}
             </router-link>
-        </div> -->
-        <!--end::Link-->
+        </div> 
     </div>
     <!--end::Form-->
 </template>
