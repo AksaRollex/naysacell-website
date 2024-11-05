@@ -21,6 +21,11 @@ class ProductPasca extends Model
         'product_sku',
     ];
 
+    public function scopeFindBySKU($query, $value)
+    {
+        $query->where('product_sku', $value);
+    }
+
     public function insert_data($data)
     {
         $insertData = [];
@@ -32,21 +37,17 @@ class ProductPasca extends Model
                 'product_provider' => $result['brand'],
                 'product_seller' => $result['seller_name'],
                 'product_transaction_admin' => $result['admin'],
-                'product_transaction_fee' => $result['comission'],
+                'product_transaction_fee' => $result['commission'],
+
             ];
         }
-
-        self::upsert([
-            $insertData,
-            ['product_sku'],
-            [
-                'product_name',
-                'product_category',
-                'product_provider',
-                'product_seller',
-                'product_transaction_admin',
-                'product_transaction_fee',
-            ]
+        self::upsert($insertData, ['product_sku'], [
+            'product_name',
+            'product_category',
+            'product_provider',
+            'product_seller',
+            'product_transaction_admin',
+            'product_transaction_fee'
         ]);
     }
 }

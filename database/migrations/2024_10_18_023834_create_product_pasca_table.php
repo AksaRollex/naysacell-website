@@ -14,13 +14,15 @@ return new class extends Migration
         Schema::create('product_pasca', function (Blueprint $table) {
             $table->id();
             $table->string('product_name');
+            $table->string('product_category');
             $table->string('product_provider');
             $table->string('product_seller');
             $table->integer('product_transaction_admin');
             $table->integer('product_transaction_fee');
             $table->string('product_sku');
-            $table->unique('product_sku');
             $table->timestamps();
+
+            $table->unique('product_sku');
         });
     }
 

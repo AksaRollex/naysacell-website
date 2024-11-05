@@ -15,8 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('code');
             $table->date('date_generate');
-            $table->unique('code');
             $table->timestamps();
+            
+            $table->unique('code');
         });
     }
 

@@ -14,6 +14,7 @@ const { delete: deleteUser } = useDelete({
     onSuccess: () => paginateRef.value.refetch(),
 });
 
+
 const columns = [
     column.accessor("no", {
         header: "#",
@@ -75,7 +76,7 @@ watch(openForm, (val) => {
 
     <div class="card">
         <div class="card-header align-items-center">
-            <h2 class="mb-0">List Users</h2>
+            <h2 class="mb-0">List Mitra</h2>
             <button
                 type="button"
                 class="btn btn-sm btn-primary ms-auto"

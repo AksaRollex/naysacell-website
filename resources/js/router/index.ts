@@ -17,6 +17,14 @@ declare module "vue-router" {
 
 const routes: Array<RouteRecordRaw> = [
     {
+        path: "/welcome",
+        name: "welcome",
+        component: () => import("@/pages/user/Index.vue"),
+        meta : {
+            pageTitle: "Landing Page",
+        }
+    },
+    {
         path: "/",
         redirect: "/dashboard",
         component: () => import("@/layouts/default-layout/DefaultLayout.vue"),

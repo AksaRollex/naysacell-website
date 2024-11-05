@@ -7,6 +7,7 @@
                 <div
                     class="m-0 d-flex justify-content-between align-items-center"
                 >
+                    <!-- <img src="../../../public/media/menu/handphone-icon.png" alt="" srcset=""> -->
                     <div>
                         <span class="text-gray-500 fw-semibold fs-6 cursor"
                             >Pulsa & Paket Data</span
