@@ -44,6 +44,25 @@ class UserController extends Controller
         return response()->json($data);
     }
 
+    public function indexAdmin(Request $request)
+    {
+        $per = $request->per ?? 10;
+        $page = $request->page ? $request->page - 1 : 0;
+
+        DB::statement('set @no=0+' . $page * $per);
+        $data = User::when($request->role_id, function ($q) use ($request) {
+            $q->whereHas('roles', function ($query) use ($request) {
+                $query->where('id', $request->role_id);
+            });
+        })->when($request->search, function (Builder $query, string $search) use ($request) {
+                $query->where('name', 'like', "%$search%")
+                    ->orWhere('email', 'like', "%$search%")
+                    ->orWhere('phone', 'like', "%$search%");
+        })->latest()->paginate($per, ['*', DB::raw('@no := @no + 1 AS no')]);
+
+        return response()->json($data);
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -51,9 +70,9 @@ class UserController extends Controller
     {
         $validatedData = $request->validated();
 
-        if ($request->hasFile('photo')) {
-            $validatedData['photo'] = $request->file('photo')->store('photo', 'public');
-        }
+        // if ($request->hasFile('photo')) {
+        //     $validatedData['photo'] = $request->file('photo')->store('photo', 'public');
+        // }
 
         $user = User::create($validatedData);
 
@@ -84,17 +103,17 @@ class UserController extends Controller
     {
         $validatedData = $request->validated();
 
-        if ($request->hasFile('photo')) {
-            if ($user->photo) {
-                Storage::disk('public')->delete($user->photo);
-            }
-            $validatedData['photo'] = $request->file('photo')->store('photo', 'public');
-        } else {
-            if ($user->photo) {
-                Storage::disk('public')->delete($user->photo);
-                $validatedData['photo'] = null;
-            }
-        }
+        // if ($request->hasFile('photo')) {
+        //     if ($user->photo) {
+        //         Storage::disk('public')->delete($user->photo);
+        //     }
+        //     $validatedData['photo'] = $request->file('photo')->store('photo', 'public');
+        // } else {
+        //     if ($user->photo) {
+        //         Storage::disk('public')->delete($user->photo);
+        //         $validatedData['photo'] = null;
+        //     }
+        // }
 
         $user->update($validatedData);
 
@@ -120,6 +139,26 @@ class UserController extends Controller
 
         return response()->json([
             'success' => true
+        ]);
+    }
+
+    public function storeUser(Request $request)
+    {
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+            'phone' => $request->phone,
+            'address' => $request->address,
+        ]);
+
+        // $roleId = $request->role_id ?? 3;
+        // $role = Role::findById($roleId);
+        // $user->assignRole($role);
+
+        return response()->json([
+            'success' => true,
+            'user' => $user
         ]);
     }
 }

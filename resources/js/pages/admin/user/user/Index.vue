@@ -36,6 +36,7 @@ const columns = [
         ${cell.getValue() ?? "Kosong"}
         `,
     }),
+
     column.accessor("uuid", {
         header: "Aksi",
         cell: (cell) =>
@@ -84,7 +85,7 @@ watch(openForm, (val) => {
 
     <div class="card">
         <div class="card-header align-items-center">
-            <h2 class="mb-0">List Mitra</h2>
+            <h2 class="mb-0">Daftar Daftar User</h2>
             <button
                 type="button"
                 class="btn btn-sm btn-primary ms-auto"
@@ -99,8 +100,8 @@ watch(openForm, (val) => {
             <paginate
                 ref="paginateRef"
                 id="table-users"
+                :payload="{ role_id: 3 }"
                 url="/master/users/admin"
-                :payload="{ role_id: 2 }"
                 :columns="columns"
             ></paginate>
         </div>

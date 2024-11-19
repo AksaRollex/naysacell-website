@@ -7,8 +7,14 @@
             <!--end::Label-->
 
             <!--begin::Input-->
-            <Field tabindex="1" class="form-control form-control-lg form-control-solid" type="text" name="email"
-                autocomplete="off" v-model="data.email" />
+            <Field
+                tabindex="1"
+                class="form-control form-control-lg form-control-solid"
+                type="text"
+                name="email"
+                autocomplete="off"
+                v-model="data.email"
+            />
             <!--end::Input-->
             <div class="fv-plugins-message-container">
                 <div class="fv-help-block">
@@ -37,12 +43,20 @@
             <!--begin::Input-->
             <div class="position-relative mb-3">
                 <!--begin::Input-->
-                <Field tabindex="2" class="form-control form-control-lg form-control-solid" type="password" name="password"
-                    v-model="data.password" autocomplete="off" />
+                <Field
+                    tabindex="2"
+                    class="form-control form-control-lg form-control-solid"
+                    type="password"
+                    name="password"
+                    v-model="data.password"
+                    autocomplete="off"
+                />
                 <!--end::Input-->
 
                 <!--begin::Visibility toggle-->
-                <span class="btn btn-sm btn-icon position-absolute translate-middle top-50 end-0 me-n2">
+                <span
+                    class="btn btn-sm btn-icon position-absolute translate-middle top-50 end-0 me-n2"
+                >
                     <i class="bi bi-eye-slash fs-2" @click="togglePassword"></i>
                 </span>
                 <!--end::Visibility toggle-->
@@ -67,11 +81,18 @@
         <!--begin::Actions-->
         <div class="text-center">
             <!--begin::Submit button-->
-            <button tabindex="3" type="submit" ref="submitButton" class="btn btn-lg btn-primary w-100 mb-5">
+            <button
+                tabindex="3"
+                type="submit"
+                ref="submitButton"
+                class="btn btn-lg btn-primary w-100 mb-5"
+            >
                 <span class="indicator-label">Login</span>
 
                 <span class="indicator-progress">
-                    <span class="spinner-border spinner-border-sm align-middle ms-2"></span>
+                    <span
+                        class="spinner-border spinner-border-sm align-middle ms-2"
+                    ></span>
                 </span>
             </button>
             <!--end::Submit button-->
@@ -87,8 +108,8 @@ import { useAuthStore } from "@/stores/auth";
 import { useRouter } from "vue-router";
 import * as Yup from "yup";
 import axios from "@/libs/axios";
-import { toast } from "vue3-toastify"
-import { blockBtn, unblockBtn } from "@/libs/utils"
+import { toast } from "vue3-toastify";
+import { blockBtn, unblockBtn } from "@/libs/utils";
 
 export default defineComponent({
     setup() {
@@ -99,52 +120,69 @@ export default defineComponent({
 
         //Create form validation object
         const login = Yup.object().shape({
-            email: Yup.string().email('Email tidak valid').required("Harap masukkan Email").label("Email"),
-            password: Yup.string().min(8, 'Password minimal terdiri dari 8 karakter').required('Harap masukkan password').label("Password"),
+            email: Yup.string()
+                .email("Email tidak valid")
+                .required("Harap masukkan Email")
+                .label("Email"),
+            password: Yup.string()
+                .min(8, "Password minimal terdiri dari 8 karakter")
+                .required("Harap masukkan password")
+                .label("Password"),
         });
 
         return {
             login,
             submitButton,
             getAssetPath,
-            store, router
+            store,
+            router,
         };
     },
     data() {
         return {
             data: {
-                email: '',
-                password: '',
+                email: "",
+                password: "",
             },
-        }
+        };
     },
     methods: {
         submit() {
             blockBtn(this.submitButton);
 
-            axios.post("/auth/login", { ...this.data, type: "email" }).then(res => {
-                this.store.setAuth(res.data.user, res.data.token);
-                this.router.push("/dashboard");
-            }).catch(error => {
-                toast.error(error.response.data.message);
-            }).finally(() => {
-                unblockBtn(this.submitButton);
-            });
+            axios
+                .post("/auth/login", { ...this.data, type: "email" })
+                .then((res) => {
+                    this.store.setAuth(res.data.user, res.data.token);
+                    if (
+                        res.data.user.role.id === 1 ||
+                        res.data.user.role.id === 2
+                    ) {
+                        this.router.push("/admin/dashboard");
+                    } else if (res.data.user.role.id === 3) {
+                        this.router.push("/dashboard");
+                    }
+                })
+                .catch((error) => {
+                    toast.error(error.response.data.message);
+                })
+                .finally(() => {
+                    unblockBtn(this.submitButton);
+                });
         },
         togglePassword(ev) {
             const type = document.querySelector("[name=password]").type;
 
-            if (type === 'password') {
-                document.querySelector("[name=password]").type = 'text';
+            if (type === "password") {
+                document.querySelector("[name=password]").type = "text";
                 ev.target.classList.add("bi-eye");
                 ev.target.classList.remove("bi-eye-slash");
             } else {
-                document.querySelector("[name=password]").type = 'password';
+                document.querySelector("[name=password]").type = "password";
                 ev.target.classList.remove("bi-eye");
                 ev.target.classList.add("bi-eye-slash");
             }
-
-        }
-    }
-})
+        },
+    },
+});
 </script>

@@ -20,7 +20,8 @@ class PermissionSeeder extends Seeder
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         $menuWebsite = ['website', 'setting'];
-        $menuUserMitra = ['mitra', 'mitra-user-admin', 'mitra-user-mitra', 'mitra-hak-akses', 'master-user', 'master-role'];
+        $menuUserMitra = ['mitra', 'mitra-user-admin', 'mitra-user-mitra', 'mitra-hak-akses', 'mitra-user'];
+        $api = ['master-user', 'master-role', 'master-product', 'master-laporan'];
         $menuMaster = ['master', 'master-brand', 'master-operator-code'];
         $menuProduct = ['produk', 'produk-prabayar', 'produk-pascabayar'];
         $menuPPOB = ['PPOB'];
@@ -29,8 +30,8 @@ class PermissionSeeder extends Seeder
 
 
         $permissionsByRole = [
-            'admin' => ['dashboard', ...$menuWebsite, ...$menuUserMitra, ...$menuMaster, ...$menuProduct, ...$menuPPOB, ...$menuLaporan, ...$menuIsiSaldo],
-            'mitra' => ['dashboard', 'website' , ...$menuProduct, ...$menuPPOB, ...$menuIsiSaldo],
+            'admin' => ['dashboard', ...$menuWebsite, ...$menuUserMitra, ...$api, ...$menuMaster, ...$menuProduct, ...$menuPPOB, ...$menuLaporan, ...$menuIsiSaldo],
+            'mitra' => ['dashboard', 'website', ...$menuProduct, ...$menuPPOB, ...$menuIsiSaldo],
         ];
 
         $insertPermissions = fn($role) => collect($permissionsByRole[$role])

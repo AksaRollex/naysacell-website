@@ -27,6 +27,15 @@ const columns = [
     column.accessor("phone", {
         header: "No. Telp",
     }),
+    // column.accessor("address", {
+    //     header: "Alamat",
+    // }),
+    column.accessor("role.full_name", {
+        header: "Role",
+        cell: (cell) => `
+        ${cell.getValue() ?? "Kosong"}
+        `,
+    }),
     column.accessor("uuid", {
         header: "Aksi",
         cell: (cell) =>
@@ -90,7 +99,8 @@ watch(openForm, (val) => {
             <paginate
                 ref="paginateRef"
                 id="table-users"
-                url="/master/users"
+                :payload="{ role_id: 1 }"
+                url="/master/users/admin"
                 :columns="columns"
             ></paginate>
         </div>

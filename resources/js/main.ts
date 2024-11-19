@@ -118,7 +118,7 @@ let cssRule =
 let cssRule2 =
     "display:block;border-radius: 0 3px 3px 0;padding:3px 15px;background:#fff;color:#666;font-size: 30px;font-family:Arial, Helvetica, sans-serif;";
 console.log(
-    "%cMCFLYON" + "%cSystem, Apps & Website Development",
+    "%cNAYSA CELL" + "%cAplikasi PPOB Terbaik",
     cssRule,
     cssRule2
 );
@@ -130,9 +130,9 @@ cssRule2 =
 const cssRule3 =
     "border-radius: 0 3px 3px 0;padding:3px 15px;background:#35495e;color:#108bc3;font-size: 12px;font-weight: bold;";
 console.log(
-    "%cThis System Development by Mcflyon Teknologi Indonesia visit" +
+    "%cThis System Development by NAYSA CELL" +
         "%c@" +
-        "%chttps://www.mcflyon.co.id",
+        "%chttps://www.naysacell.my.id",
     cssRule,
     cssRule2,
     cssRule3

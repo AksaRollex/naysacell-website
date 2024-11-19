@@ -5,5 +5,6 @@ export interface User {
     email: string;
     password?: string;
     phone?: BigInteger;
+    address?: string;
     role_id: BigInteger;
 }

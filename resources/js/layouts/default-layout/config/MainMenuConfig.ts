@@ -25,17 +25,22 @@ const MainMenuConfig: Array<MenuItem> = [
                 name: "mitra",
                 sub: [
                     {
-                        heading: "User Admin",
+                        heading: "List Admin",
                         name: "mitra-user-admin",
                         route: "/user/user-admin",
                     },
                     {
-                        heading: "User Mitra",
+                        heading: "List Mitra",
                         name: "mitra-user-mitra",
                         route: "/user/user-mitra",
                     },
                     {
-                        heading: "Hak Akses",
+                        heading : "List User",
+                        name : "mitra-user",
+                        route : "/user/user"
+                    },
+                    {
+                        heading: "List Role & Hak Akses",
                         name: "mitra-hak-akses",
                         route: "/user/hak-akses",
                     },

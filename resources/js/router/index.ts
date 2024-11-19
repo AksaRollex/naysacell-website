@@ -20,9 +20,9 @@ const routes: Array<RouteRecordRaw> = [
         path: "/welcome",
         name: "welcome",
         component: () => import("@/pages/user/Index.vue"),
-        meta : {
+        meta: {
             pageTitle: "Landing Page",
-        }
+        },
     },
     {
         path: "/",
@@ -67,8 +67,8 @@ const routes: Array<RouteRecordRaw> = [
                 component: () =>
                     import("@/pages/admin/user/hak-akses/Index.vue"),
                 meta: {
-                    pageTitle: "Hak Akses",
-                    breadcrumbs: ["Admin", "Hak Akses"],
+                    pageTitle: "Dafrar Role & Hak Akses",
+                    breadcrumbs: ["Dashboard", "Role & Hak Akses"],
                 },
             },
             {
@@ -77,8 +77,8 @@ const routes: Array<RouteRecordRaw> = [
                 component: () =>
                     import("@/pages/admin/user/user-admin/Index.vue"),
                 meta: {
-                    pageTitle: "User Admin",
-                    breadcrumbs: ["Admin", "User Admin"],
+                    pageTitle: "Daftar Admin",
+                    breadcrumbs: ["Dashboard", "User Admin"],
                 },
             },
             {
@@ -87,8 +87,17 @@ const routes: Array<RouteRecordRaw> = [
                 component: () =>
                     import("@/pages/admin/user/user-mitra/Index.vue"),
                 meta: {
-                    pageTitle: "Hak Akses",
-                    breadcrumbs: ["Admin", "Hak Akses"],
+                    pageTitle: "Daftar Mitra",
+                    breadcrumbs: ["Dashboard", "Mitra"],
+                },
+            },
+            {
+                path: "/user/user",
+                name: "mitra-user-user",
+                component: () => import("@/pages/admin/user/user/Index.vue"),
+                meta: {
+                    pageTitle: "Daftar User",
+                    breadcrumbs: ["Dashboard", "User"],
                 },
             },
             // ISI SALDO
@@ -106,9 +115,7 @@ const routes: Array<RouteRecordRaw> = [
                 path: "/isi-saldo/tarik-tiket",
                 name: "isi-saldo-tarik-tiket",
                 component: () =>
-                    import(
-                        "@/pages/admin/isi-saldo/tarik-tiket/Index.vue"
-                    ),
+                    import("@/pages/admin/isi-saldo/tarik-tiket/Index.vue"),
                 meta: {
                     pageTitle: "Tarik Tiket",
                     breadcrumbs: ["Admin", "Tarik Tiket"],
@@ -121,9 +128,7 @@ const routes: Array<RouteRecordRaw> = [
                 path: "/laporan/grafik-penjualan",
                 name: "laporan-grafik-penjualan",
                 component: () =>
-                    import(
-                        "@/pages/admin/laporan/grafik-penjualan/Index.vue"
-                    ),
+                    import("@/pages/admin/laporan/grafik-penjualan/Index.vue"),
                 meta: {
                     pageTitle: "Grafik Penjualan",
                     breadcrumbs: ["Admin", "Grafik Penjualan"],
@@ -197,8 +202,8 @@ const routes: Array<RouteRecordRaw> = [
                 component: () =>
                     import("@/pages/admin/produk/prabayar/Index.vue"),
                 meta: {
-                    pageTitle: "Prabayar",
-                    breadcrumbs: ["Admin", "Prabayar"],
+                    pageTitle: "Produk Prabayar",
+                    breadcrumbs: ["Produk", "Prabayar"],
                 },
             },
             {
@@ -207,8 +212,8 @@ const routes: Array<RouteRecordRaw> = [
                 component: () =>
                     import("@/pages/admin/produk/pascabayar/Index.vue"),
                 meta: {
-                    pageTitle: "Pascabayar",
-                    breadcrumbs: ["Admin", "Pascabayar"],
+                    pageTitle: "Produk Pascabayar",
+                    breadcrumbs: ["Produk", "Pascabayar"],
                 },
             },
         ],
