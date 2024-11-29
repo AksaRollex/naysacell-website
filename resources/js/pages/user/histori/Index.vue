@@ -1,14 +1,11 @@
 <script setup lang="ts">
 import { h, ref, watch } from "vue";
-import { useDelete } from "@/libs/hooks";
-import Form from "./Form.vue";
 import { createColumnHelper } from "@tanstack/vue-table";
 import type { User } from "@/types";
 
 const column = createColumnHelper<User>();
 const paginateRef = ref<any>(null);
 const selected = ref<string>("");
-const openForm = ref<boolean>(false);
 
 const columns = [
     column.accessor("no", {
@@ -29,59 +26,30 @@ const columns = [
     column.accessor("transaction_message", {
         header: "Pesan",
     }),
+    column.accessor("transaction_user_id", {
+        header: "User ID",
+    }),
     column.accessor("transaction_status", {
         header: "Status",
     }),
     column.accessor("transaction_total", {
         header: "Total",
     }),
-    column.accessor("uuid", {
-        header: "Aksi",
-        cell: (cell) =>
-            h("div", { class: "d-flex gap-2" }, [
-                h(
-                    "button",
-                    {
-                        class: "btn btn-sm btn-icon btn-info",
-                        onClick: () => {
-                            selected.value = cell.getValue();
-                            openForm.value = true;
-                        },
-                    },
-                    h("i", { class: "la la-pencil fs-2" })
-                ),
-            ]),
-    }),
 ];
 
 const refresh = () => paginateRef.value.refetch();
-
-watch(openForm, (val) => {
-    if (!val) {
-        selected.value = "";
-    }
-    window.scrollTo(0, 0);
-});
 </script>
 
 <template>
-    <Form
-        :selected="selected"
-        @close="openForm = false"
-        v-if="openForm"
-        @refresh="refresh"
-    />
-
     <div class="card">
         <div class="card-header align-items-center">
-            <h2 class="mb-0">Daftar Laporan Pasca</h2>
+            <h2 class="mb-0">Histori Transaksi</h2>
         </div>
         <div class="card-body">
             <paginate
                 ref="paginateRef"
-                id="table-laporan-pascabayar"
-                url="/master/laporan"
-                :payload="{ transaction_type: 'Pasca' }"
+                id="table-laporan-histori"
+                url="/auth/histori"
                 :columns="columns"
             ></paginate>
         </div>

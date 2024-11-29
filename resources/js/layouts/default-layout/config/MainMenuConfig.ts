@@ -19,29 +19,29 @@ const MainMenuConfig: Array<MenuItem> = [
         pages: [
             // USER / MITRA
             {
-                sectionTitle: "User / Mitra",
+                sectionTitle: "User",
                 route: "/admin",
                 keenthemesIcon: "people",
-                name: "mitra",
+                name: "user",
                 sub: [
                     {
                         heading: "List Admin",
-                        name: "mitra-user-admin",
+                        name: "user-admin",
                         route: "/user/user-admin",
                     },
+                    // {
+                    //     heading: "List Mitra",
+                    //     name: "user-mitra",
+                    //     route: "/user/user-mitra",
+                    // },
                     {
-                        heading: "List Mitra",
-                        name: "mitra-user-mitra",
-                        route: "/user/user-mitra",
-                    },
-                    {
-                        heading : "List User",
-                        name : "mitra-user",
-                        route : "/user/user"
+                        heading: "List User",
+                        name: "user",
+                        route: "/user/user",
                     },
                     {
                         heading: "List Role & Hak Akses",
-                        name: "mitra-hak-akses",
+                        name: "hak-akses",
                         route: "/user/hak-akses",
                     },
                 ],
@@ -57,12 +57,12 @@ const MainMenuConfig: Array<MenuItem> = [
                     {
                         heading: "Brand",
                         name: "master-brand",
-                        route : "/master/brand",
+                        route: "/master/brand",
                     },
                     {
                         heading: "Kode Operator",
                         name: "master-operator-code",
-                        route : "/master/operator-code",
+                        route: "/master/operator-code",
                     },
                 ],
             },
@@ -77,12 +77,12 @@ const MainMenuConfig: Array<MenuItem> = [
                     {
                         heading: "Prabayar",
                         name: "produk-prabayar",
-                        route : "/produk/prabayar",
+                        route: "/produk/prabayar",
                     },
                     {
                         heading: "Pascabayar",
                         name: "produk-pascabayar",
-                        route : "/produk/pascabayar",
+                        route: "/produk/pascabayar",
                     },
                 ],
             },
@@ -92,7 +92,15 @@ const MainMenuConfig: Array<MenuItem> = [
                 heading: "PPOB",
                 name: "PPOB",
                 keenthemesIcon: "lots-shopping",
-                route : "/ppob",
+                route: "/ppob",
+            },
+
+            // HISTORI
+            {
+                heading: "Histori",
+                name: "histori",
+                keenthemesIcon: "archive",
+                route: "/histori",
             },
 
             // LAPORAN
@@ -105,17 +113,22 @@ const MainMenuConfig: Array<MenuItem> = [
                     {
                         heading: "Grafik Penjualan",
                         name: "laporan-grafik-penjualan",
-                        route : "/laporan/grafik-penjualan",
+                        route: "/laporan/grafik-penjualan",
                     },
                     {
                         heading: "Transaksi Prabayar",
                         name: "laporan-transaksi-prabayar",
-                        route : "/laporan/transaksi-prabayar",
+                        route: "/laporan/transaksi-prabayar",
                     },
                     {
                         heading: "Transaksi Pascabayar",
                         name: "laporan-transaksi-pascabayar",
-                        route : "/laporan/transaksi-pascabayar",
+                        route: "/laporan/transaksi-pascabayar",
+                    },
+                    {
+                        heading: "Semua Transaksi",
+                        name: "laporan-semua-transaksi",
+                        route: "/laporan/transaksi-semua",
                     },
                 ],
             },
@@ -130,12 +143,12 @@ const MainMenuConfig: Array<MenuItem> = [
                     {
                         heading: "Tarik Tiket",
                         name: "isi-saldo-tarik-tiket",
-                        route : "/isi-saldo/tarik-tiket",
+                        route: "/isi-saldo/tarik-tiket",
                     },
                     {
                         heading: "Histori Isi Saldo",
                         name: "isi-saldo-histori",
-                        route : "/isi-saldo/histori",
+                        route: "/isi-saldo/histori",
                     },
                 ],
             },

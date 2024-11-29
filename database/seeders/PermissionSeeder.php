@@ -20,18 +20,22 @@ class PermissionSeeder extends Seeder
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         $menuWebsite = ['website', 'setting'];
-        $menuUserMitra = ['mitra', 'mitra-user-admin', 'mitra-user-mitra', 'mitra-hak-akses', 'mitra-user'];
+        $menuUser = ['user', 'user-admin', 'hak-akses', 'user-user'];
         $api = ['master-user', 'master-role', 'master-product', 'master-laporan'];
         $menuMaster = ['master', 'master-brand', 'master-operator-code'];
         $menuProduct = ['produk', 'produk-prabayar', 'produk-pascabayar'];
-        $menuPPOB = ['PPOB'];
-        $menuLaporan = ['laporan', 'laporan-grafik-penjualan', 'laporan-transaksi-prabayar', 'laporan-transaksi-pascabayar'];
-        $menuIsiSaldo = ['isi-saldo', 'isi-saldo-tarik-tiket', 'isi-saldo-histori'];
-
+        $menuPPOB = ['PPOB', 'ppob-internet', 'ppob-pulsapaketdata', 'ppob-pln', 'ppob-pdam', 'ppob-bpjs', 'bpjs-dompetelektronik'];
+        $menuLaporan = ['laporan', 'laporan-grafik-penjualan', 'laporan-transaksi-prabayar', 'laporan-transaksi-pascabayar', 'laporan-semua-transaksi'];
+        $menuIsiSaldo = [
+            'isi-saldo',
+            // 'isi-saldo-tarik-tiket',
+            'isi-saldo-histori'
+        ];
+        $menuHistori = ['histori'];
 
         $permissionsByRole = [
-            'admin' => ['dashboard', ...$menuWebsite, ...$menuUserMitra, ...$api, ...$menuMaster, ...$menuProduct, ...$menuPPOB, ...$menuLaporan, ...$menuIsiSaldo],
-            'mitra' => ['dashboard', 'website', ...$menuProduct, ...$menuPPOB, ...$menuIsiSaldo],
+            'admin' => ['dashboard', ...$menuWebsite, ...$menuUser, ...$api, ...$menuMaster, ...$menuProduct, ...$menuPPOB, ...$menuLaporan, ...$menuIsiSaldo],
+            'user' => ['dashboard', 'website', ...$menuPPOB, ...$menuIsiSaldo, ...$menuHistori],
         ];
 
         $insertPermissions = fn($role) => collect($permissionsByRole[$role])
@@ -51,7 +55,7 @@ class PermissionSeeder extends Seeder
 
         $permissionIdsByRole = [
             'admin' => $insertPermissions('admin'),
-            'mitra' => $insertPermissions('mitra')
+            'user' => $insertPermissions('user')
         ];
 
         foreach ($permissionIdsByRole as $role => $permissionIds) {

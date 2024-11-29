@@ -100,7 +100,7 @@ watch(openForm, (val) => {
             <paginate
                 ref="paginateRef"
                 id="table-users"
-                :payload="{ role_id: 3 }"
+                :payload="{ role_id: 2 }"
                 url="/master/users/admin"
                 :columns="columns"
             ></paginate>

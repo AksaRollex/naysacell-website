@@ -89,4 +89,14 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->getAllPermissions()->pluck('name');
     }
+
+    public function productsPrepaid()
+    {
+        return $this->belongsTo(ProductPrepaid::class);
+    }
+
+    public function transactions()
+    {
+        return $this->hasMany(TransactionModel::class, 'transaction_user_id', 'id');
+    }
 }

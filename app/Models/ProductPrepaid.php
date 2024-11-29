@@ -70,4 +70,9 @@ class ProductPrepaid extends Model
             ]
         );
     }
+
+    public function User()
+    {
+        return $this->hasMany(User::class);
+    }
 }

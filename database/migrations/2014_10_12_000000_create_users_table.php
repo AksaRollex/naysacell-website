@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('photo')->nullable();
             $table->string('address');
             $table->string('password');
+            $table->string('product_prepaid_id')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

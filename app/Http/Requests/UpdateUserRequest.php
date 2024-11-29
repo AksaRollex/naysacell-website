@@ -36,7 +36,8 @@ class UpdateUserRequest extends FormRequest
                 Rule::unique('users')->ignore($this->user->id)
             ],
             'photo' => 'nullable|image',
-            'role_id' => 'required|numeric'
+            'role_id' => 'required|numeric',
+            'address' => 'required'
         ];
     }
 }

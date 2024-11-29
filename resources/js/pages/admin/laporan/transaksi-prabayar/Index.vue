@@ -80,7 +80,8 @@ watch(openForm, (val) => {
             <paginate
                 ref="paginateRef"
                 id="table-laporan-prabayar"
-                url="/master/laporan-prabayar"
+                url="/master/laporan"
+                :payload="{ transaction_type: 'Prepaid' }"
                 :columns="columns"
             ></paginate>
         </div>

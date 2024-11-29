@@ -1,4 +1,5 @@
-<<script setup lang="ts">
+<
+<script setup lang="ts">
 import { block, unblock } from "@/libs/utils";
 import { onMounted, ref, watch, computed } from "vue";
 import * as Yup from "yup";
@@ -33,6 +34,7 @@ const formSchema = Yup.object().shape({
         .nullable(),
     phone: Yup.string().required("Nomor Telepon harus diisi"),
     role_id: Yup.string().required("Pilih role"),
+    address: Yup.string().required("Alamat harus diisi"),
 });
 
 function getEdit() {
@@ -58,6 +60,7 @@ function submit() {
     formData.append("email", user.value.email);
     formData.append("phone", user.value.phone);
     formData.append("role_id", user.value.role_id);
+    formData.append("address", user.value.address);
 
     if (user.value?.password) {
         formData.append("password", user.value.password);
@@ -99,14 +102,12 @@ function submit() {
         });
 }
 
-const role = useRole();
+const Role = useRole();
 const roles = computed(() =>
-    role.data.value
-        ?.filter((item: Role) => item.full_name === "Mitra")
-        .map((item: Role) => ({
-            id: item.id,
-            name: item.full_name,
-        }))
+    Role.data.value?.map((item: Role) => ({
+        id: item.id,
+        text: item.full_name,
+    }))
 );
 
 onMounted(async () => {
@@ -185,6 +186,28 @@ watch(
                         <div class="fv-plugins-message-container">
                             <div class="fv-help-block">
                                 <ErrorMessage name="email" />
+                            </div>
+                        </div>
+                    </div>
+                    <!--end::Input group-->
+                </div>
+                <div class="col-md-6">
+                    <!--begin::Input group-->
+                    <div class="fv-row mb-7">
+                        <label class="form-label fw-bold fs-6 required">
+                            Alamat
+                        </label>
+                        <Field
+                            class="form-control form-control-lg form-control-solid"
+                            type="text"
+                            name="address"
+                            autocomplete="off"
+                            v-model="user.address"
+                            placeholder="Masukkan Alamat"
+                        />
+                        <div class="fv-plugins-message-container">
+                            <div class="fv-help-block">
+                                <ErrorMessage name="address" />
                             </div>
                         </div>
                     </div>

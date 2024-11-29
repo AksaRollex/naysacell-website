@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
+use Carbon\Carbon;
 
 class DigiflazController extends Controller
 {
@@ -38,6 +39,8 @@ class DigiflazController extends Controller
         $this->model_transaction = new TransactionModel();
     }
 
+
+    // START PREPAID
     public function get_product_prepaid()
     {
         $response = Http::withHeaders($this->header)->post($this->url . '/price-list', [
@@ -64,18 +67,65 @@ class DigiflazController extends Controller
         return response()->json($data);
     }
 
+    public function getPBBPrepaid($id)
+    {
+        $base = ProductPrepaid::find($id);
+
+        return response()->json([
+            'data' => $base,
+        ], 200);
+    }
+
+    public function updatePBBPrepaid(Request $request, $id)
+    {
+
+        $base = ProductPrepaid::find($id);
+        if ($base) {
+            $base->update($request->all());
+
+            return response()->json([
+                'status' => 'true',
+                'message' => 'Harga Berhasil Dirubah'
+            ]);
+        } else {
+            return response([
+                'message' => 'Harga Gagal Dirubah'
+            ]);
+        }
+    }
+
+    // END PREPAID
+
+
+    // START PASCA
+
     // DATA NULL
     public function get_product_pasca()
     {
         $response = Http::withHeaders($this->header)->post($this->url . '/price-list', [
             "cmd" => "pasca",
-            "username" => $this->user,
-            "sign" => md5($this->user . $this->key . "pricelist"),
+            "username" => "xodowuD7P3xW",
+            "sign" => md5("xodowuD7P3xW" . "dev-1de865d0-9106-11ef-9d19-7b95349a8fc8" . "pricelist"),
         ]);
 
         $data = json_decode($response->getBody(), true);
         return $response->json($data['data']);
     }
+
+    public function indexPasca(Request $request)
+    {
+        $per = $request->per ?? 20;
+        $page = $request->page ? $request->page - 1 : 0;
+
+        DB::statement('set @no=0+' . $page * $per);
+        $data = ProductPasca::when($request->search, function (Builder $query, string $search) {
+            $query->where('product_name', 'like', "%$search%");
+        })->latest()->paginate($per, ['*', DB::raw('@no := @no + 1 AS no')]);
+
+        return response()->json($data);
+    }
+
+    // END PASCA
 
     public function digiflazTopup(Request $request)
     {
@@ -95,19 +145,54 @@ class DigiflazController extends Controller
         return response()->json(['data' => $data, 'status' => 'success'], 200);
     }
 
-    public function indexLaporanPrabayar(Request $request)
+    public function laporan(Request $request)
     {
         $per = $request->per ?? 20;
         $page = $request->page ? $request->page - 1 : 0;
-
         DB::statement('set @no=0+' . $page * $per);
-        $data = TransactionModel::when($request->search, function (Builder $query, string $search) {
-            $query->where('transaction_status', 'like', "%$search%")
-                ->orWhere('transaction_type', 'like', "%$search%")
-                ->orWhere('customer_no', 'like', "%$search%");
-        })->latest()->paginate($per, ['*', DB::raw('@no := @no + 1 AS no')]);
 
+        $data = TransactionModel::when($request->transaction_type, function ($query) use ($request) {
+            $query->where('transaction_type', $request->transaction_type);
+        })
+            ->when($request->search, function (Builder $query, string $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('transaction_status', 'like', "%$search%")
+                        ->orWhere('transaction_type', 'like', "%$search%")
+                        ->orWhere('customer_no', 'like', "%$search%");
+                });
+            })
+            ->latest()
+            ->paginate($per, ['*', DB::raw('@no := @no + 1 AS no')]);
         return response()->json($data);
+    }
+
+
+    // public function histori()
+    // {
+    //     $titik = TransactionModel::with('user')->where('created_at', '>=', Carbon::now()->subMonth())
+    //         ->whereHas('user', function ($q) {
+    //             $q->where('id', '2');
+    //         })
+    //         ->take(3)
+    //         ->get();
+    //     return response()->json(['data' => $titik]);
+    // }
+
+    public function histori(Request $request)
+    {
+        if (request()->wantsJson()) {
+            $per = (($request->per) ? $request->per : 10);
+            $page = (($request->page) ? $request->page - 1 : 0);
+
+            DB::statement('set @no=0+' . $page * $per);
+            $data = TransactionModel::where(function ($q) use ($request) {
+                $q->where('transaction_status', 'LIKE', '%' . $request->search . '%');
+            })->where('transaction_status')->orWhere('transaction_user_id', auth()->user()->id)->orderBy('created_at', 'DESC')->paginate($per, ['*', DB::raw('@no := @no + 1 AS no')]);
+
+            return response()->json($data);
+        } else {
+            return abort(404);
+        }
     }
 
     public function digiflazCekTagihan(Request $request)

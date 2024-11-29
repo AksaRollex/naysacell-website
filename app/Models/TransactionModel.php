@@ -51,4 +51,8 @@ class TransactionModel extends Model
             'transaction_user_id' => 2
         ]);
     }
+
+    public function user () {
+        return $this->belongsTo(User::class, 'transaction_user_id', 'id');
+    }
 }

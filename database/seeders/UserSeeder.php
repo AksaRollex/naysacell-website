@@ -17,21 +17,24 @@ class UserSeeder extends Seeder
             'email' => 'admin@gmail.com',
             'password' => bcrypt('12345678'),
             'phone' => '08123456789',
-            'address' => 'Jl. Raya Jakarta',
+            'address' => 'Jl. Raya Surabaya',
+            'photo' => '/media/logo.png',
         ])->assignRole('admin');
-        User::create([
-            'name' => 'Mitra 1',
-            'email' => 'mitra1@gmail.com',
-            'password' => bcrypt('12345678'),
-            'phone' => '08234234234',
-            'address' => 'Jl. Raya Jakarta',
-        ])->assignRole('mitra');
         User::create([
             'name' => 'User 1',
             'email' => 'user1@gmail.com',
             'password' => bcrypt('12345678'),
             'phone' => '082342342234',
-            'address' => 'Jl. Raya Jakarta',
+            'address' => 'Jl. Raya Yogyakarta',
+            'photo' => '/media/logo.png',
+        ])->assignRole('user');
+        User::create([
+            'name' => 'User 2',
+            'email' => 'user2@gmail.com',
+            'password' => bcrypt('12345678'),
+            'phone' => '085643217678',
+            'address' => 'Jl. Raya Sambiarum Lor',
+            'photo' => '/media/logo.png',
         ])->assignRole('user');
     }
 }

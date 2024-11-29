@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { h, ref, watch } from "vue";
-import { useDelete } from "@/libs/hooks";
 import Form from "./Form.vue";
 import { createColumnHelper } from "@tanstack/vue-table";
 import type { User } from "@/types";
+import { currency } from "@/libs/utils";
 
 const column = createColumnHelper<User>();
 const paginateRef = ref<any>(null);
@@ -17,19 +17,21 @@ const columns = [
     column.accessor("product_name", {
         header: "Nama Produk",
     }),
-    column.accessor("product_provider", {
-        header: "Provider",
-    }),
     column.accessor("product_category", {
         header: "Kategori",
     }),
+    column.accessor("product_provider", {
+        header: "Provider",
+    }),
     column.accessor("product_seller_price", {
-        header: "Seller Price",
+        header: "HPP",
+        cell: (cell) => currency(cell.getValue() ?? 0),
     }),
     column.accessor("product_buyer_price", {
-        header: "Buyer Price",
+        header: "Harga Jual",
+        cell: (cell) => currency(cell.getValue() ?? 0),
     }),
-    column.accessor("uuid", {
+    column.accessor("id", {
         header: "Aksi",
         cell: (cell) =>
             h("div", { class: "d-flex gap-2" }, [
@@ -74,7 +76,7 @@ watch(openForm, (val) => {
             <paginate
                 ref="paginateRef"
                 id="table-product-prepaid"
-                url="/master/prepaid"
+                url="/master/product/prepaid"
                 :columns="columns"
             ></paginate>
         </div>

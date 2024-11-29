@@ -154,12 +154,9 @@ export default defineComponent({
                 .post("/auth/login", { ...this.data, type: "email" })
                 .then((res) => {
                     this.store.setAuth(res.data.user, res.data.token);
-                    if (
-                        res.data.user.role.id === 1 ||
-                        res.data.user.role.id === 2
-                    ) {
-                        this.router.push("/admin/dashboard");
-                    } else if (res.data.user.role.id === 3) {
+                    if (res.data.user.role.id === 1) {
+                        this.router.push("/dashboard");
+                    } else {
                         this.router.push("/dashboard");
                     }
                 })

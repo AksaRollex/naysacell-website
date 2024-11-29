@@ -29,6 +29,9 @@ const columns = [
     column.accessor("transaction_message", {
         header: "Pesan",
     }),
+    column.accessor("transaction_user_id", {
+        header: "User ID",
+    }),
     column.accessor("transaction_status", {
         header: "Status",
     }),
@@ -74,14 +77,13 @@ watch(openForm, (val) => {
 
     <div class="card">
         <div class="card-header align-items-center">
-            <h2 class="mb-0">Daftar Laporan Pasca</h2>
+            <h2 class="mb-0">Daftar Laporan Semua Transaksi</h2>
         </div>
         <div class="card-body">
             <paginate
                 ref="paginateRef"
-                id="table-laporan-pascabayar"
+                id="table-laporan-semua-transaksi"
                 url="/master/laporan"
-                :payload="{ transaction_type: 'Pasca' }"
                 :columns="columns"
             ></paginate>
         </div>

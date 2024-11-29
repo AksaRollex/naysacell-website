@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             SettingSeeder::class,
             ProductPrepaidSeeder::class,
+            ProductPascaSeeder::class,
             TransactionSeeder::class,
         ]);
     }
