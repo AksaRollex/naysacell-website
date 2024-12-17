@@ -31,7 +31,6 @@ class ProductPrepaid extends Model
         $query->where('product_sku', $value);
     }
 
-    // UNTUK INSERT DATA KE DATABASE 
     public function insert_data($data)
     {
         $insertData = [];
@@ -74,5 +73,10 @@ class ProductPrepaid extends Model
     public function User()
     {
         return $this->hasMany(User::class);
+    }
+
+    public function codeOperator() 
+    {
+        return $this->belongsTo(CodeOperator::class, 'product_provider');
     }
 }

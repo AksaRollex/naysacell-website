@@ -59,11 +59,11 @@ const MainMenuConfig: Array<MenuItem> = [
                         name: "master-brand",
                         route: "/master/brand",
                     },
-                    {
-                        heading: "Kode Operator",
-                        name: "master-operator-code",
-                        route: "/master/operator-code",
-                    },
+                    // {
+                    //     heading: "Kode Operator",
+                    //     name: "master-operator-code",
+                    //     route: "/master/operator-code",
+                    // },
                 ],
             },
 

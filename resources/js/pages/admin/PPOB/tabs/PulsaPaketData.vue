@@ -1,3 +1,11 @@
+<script lang="tsx" setup>
+import SearchPPOB from '@/components/SearchPPOB.vue';
+import axios from '@/libs/axios';
+
+
+</script>
+
+
 <template>
-    hai
+    <SearchPPOB />
 </template>

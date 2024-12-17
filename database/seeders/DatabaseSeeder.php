@@ -18,6 +18,8 @@ class DatabaseSeeder extends Seeder
             ProductPrepaidSeeder::class,
             ProductPascaSeeder::class,
             TransactionSeeder::class,
+            ProductProviderSeeder::class,
+            // CodeOperatorSeeder::class
         ]);
     }
 }

@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class DigiflazController extends Controller
 {
@@ -39,8 +39,6 @@ class DigiflazController extends Controller
         $this->model_transaction = new TransactionModel();
     }
 
-
-    // START PREPAID
     public function get_product_prepaid()
     {
         $response = Http::withHeaders($this->header)->post($this->url . '/price-list', [
@@ -54,97 +52,76 @@ class DigiflazController extends Controller
         $this->model->insert_data($data['data']);
     }
 
-    public function indexPrepaid(Request $request)
-    {
-        $per = $request->per ?? 20;
-        $page = $request->page ? $request->page - 1 : 0;
-
-        DB::statement('set @no=0+' . $page * $per);
-        $data = ProductPrepaid::when($request->search, function (Builder $query, string $search) {
-            $query->where('product_name', 'like', "%$search%");
-        })->latest()->paginate($per, ['*', DB::raw('@no := @no + 1 AS no')]);
-
-        return response()->json($data);
-    }
-
-    public function getPBBPrepaid($id)
-    {
-        $base = ProductPrepaid::find($id);
-
-        return response()->json([
-            'data' => $base,
-        ], 200);
-    }
-
-    public function updatePBBPrepaid(Request $request, $id)
-    {
-
-        $base = ProductPrepaid::find($id);
-        if ($base) {
-            $base->update($request->all());
-
-            return response()->json([
-                'status' => 'true',
-                'message' => 'Harga Berhasil Dirubah'
-            ]);
-        } else {
-            return response([
-                'message' => 'Harga Gagal Dirubah'
-            ]);
-        }
-    }
-
-    // END PREPAID
-
-
-    // START PASCA
-
-    // DATA NULL
     public function get_product_pasca()
     {
         $response = Http::withHeaders($this->header)->post($this->url . '/price-list', [
             "cmd" => "pasca",
-            "username" => "xodowuD7P3xW",
-            "sign" => md5("xodowuD7P3xW" . "dev-1de865d0-9106-11ef-9d19-7b95349a8fc8" . "pricelist"),
+            "username" => $this->user,
+            "sign" => md5($this->user . $this->key . "pricelist"),
+        ]);
+
+        // Debugging: Log the full response
+        Log::info('Digiflazz Pasca Response', [
+            'status' => $response->status(),
+            'body' => $response->body(),
         ]);
 
         $data = json_decode($response->getBody(), true);
-        return $response->json($data['data']);
+
+        // More debugging
+        if ($data === null) {
+            Log::error('JSON Decode Failed', [
+                'response_body' => $response->body(),
+                'json_last_error' => json_last_error_msg()
+            ]);
+            return response()->json(['error' => 'Failed to decode response'], 500);
+        }
+
+        // Only proceed if data is an array
+        if (is_array($data['data'])) {
+            $this->model_pasca->insert_data($data['data']);
+            return response()->json($data['data']);
+        } else {
+            Log::error('Data is not an array', [
+                'data_type' => gettype($data['data']),
+                'data' => $data['data']
+            ]);
+            return response()->json(['error' => 'Invalid data format'], 500);
+        }
     }
 
-    public function indexPasca(Request $request)
-    {
-        $per = $request->per ?? 20;
-        $page = $request->page ? $request->page - 1 : 0;
+    // public function digiflazTopup(Request $request)
+    // {
+    //     $ref_id = $this->getCode();
+    //     $product = ProductPrepaid::findProductBySKU($request->sku)->first();
+    //     $response = Http::withHeaders($this->header)->post($this->url . '/transaction', [
+    //         "username" => $this->user,
+    //         "buyer_sku_code" => $request->sku,
+    //         "customer_no" => $request->customer_no,
+    //         "ref_id" =>  $ref_id,
+    //         "sign" => md5($this->user . $this->key . $ref_id)
+    //     ]);
+    //     $data = json_decode($response->getBody(), true);
+    //     $this->model_transaction->insert_transaction_data($data['data'], 'Prepaid', $product->product_provider);
+    //     return response()->json($data['data']);
+    // }
 
-        DB::statement('set @no=0+' . $page * $per);
-        $data = ProductPasca::when($request->search, function (Builder $query, string $search) {
-            $query->where('product_name', 'like', "%$search%");
-        })->latest()->paginate($per, ['*', DB::raw('@no := @no + 1 AS no')]);
-
-        return response()->json($data);
-    }
-
-    // END PASCA
 
     public function digiflazTopup(Request $request)
     {
         $ref_id = $this->getCode();
-        $product = ProductPrepaid::findProductBySKU($request->sku)->first();
         $response = Http::withHeaders($this->header)->post($this->url . '/transaction', [
             "username" => $this->user,
             "buyer_sku_code" => $request->sku,
             "customer_no" => $request->customer_no,
-            "ref_id" => $ref_id,
-            "sign" => md5($this->user . $this->key . $ref_id),
+            "ref_id" =>  $ref_id,
+            "testing" => true,
+            "sign" => md5($this->user . $this->key . $ref_id)
         ]);
 
         $data = json_decode($response->getBody(), true);
-        $this->model_transaction->insert_transaction_data($data['data'], 'Prepaid', $product->product_provider);
-        // return response()->json($data, ['data']);
-        return response()->json(['data' => $data, 'status' => 'success'], 200);
+        return response()->json($data['data']);
     }
-
     public function laporan(Request $request)
     {
         $per = $request->per ?? 20;
@@ -165,18 +142,6 @@ class DigiflazController extends Controller
             ->paginate($per, ['*', DB::raw('@no := @no + 1 AS no')]);
         return response()->json($data);
     }
-
-
-    // public function histori()
-    // {
-    //     $titik = TransactionModel::with('user')->where('created_at', '>=', Carbon::now()->subMonth())
-    //         ->whereHas('user', function ($q) {
-    //             $q->where('id', '2');
-    //         })
-    //         ->take(3)
-    //         ->get();
-    //     return response()->json(['data' => $titik]);
-    // }
 
     public function histori(Request $request)
     {
@@ -203,12 +168,11 @@ class DigiflazController extends Controller
             "username" => $this->user,
             "buyer_sku_code" => $request->sku,
             "customer_no" => $request->customer_no,
-            "ref_id" => $ref_id,
-            "sign" => md5($this->user . $this->key . $ref_id),
+            "ref_id" =>  $ref_id,
+            "sign" => md5($this->user . $this->key . $ref_id)
         ]);
-
         $data = json_decode($response->getBody(), true);
-        return response()->json($data, ['data']);
+        return response()->json($data['data']);
     }
 
     public function digiflazBayarTagihan(Request $request)

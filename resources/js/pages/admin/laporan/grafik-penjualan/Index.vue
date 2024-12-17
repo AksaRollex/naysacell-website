@@ -1,29 +1,50 @@
 <template>
     <div style="width: 100%; height: 500px">
-        <LineChart :chartData="data" :chartLabels="labels" />
+      <LineChart
+        v-if="chartData.length > 0"
+        :chartData="chartData"
+        :chartLabels="chartLabels"
+      />
+      <div v-else>Loading chart...</div>
     </div>
-</template>
-
-<script>
-import LineChart from "../../../../components/LineChart.vue";
-
-export default {
+  </template>
+  
+  <script>
+  import axios from "@/libs/axios";
+  import LineChart from "@/components/LineChart.vue";
+  
+  export default {
     components: {
-        LineChart,
+      LineChart,
     },
     data() {
-        return {
-            data: [65, 59, 80, 81, 56, 55, 40],
-            labels: [
-                "January",
-                "February",
-                "March",
-                "April",
-                "May",
-                "June",
-                "July",
-            ],
-        };
+      return {
+        chartData: [],
+        chartLabels: [],
+      };
     },
-};
-</script>
+    mounted() {
+      this.fetchLaporanData();
+    },
+    methods: {
+      async fetchLaporanData() {
+        try {
+          const response = await axios.post("/master/laporan", {
+            transaction_type: null,
+            search: null,
+            page: 1,
+            per: 20,
+          });
+  
+          const data = response.data.data;
+          this.chartData = data.map((item) => item.id );
+          this.chartLabels = data.map(
+            (item) => item.transaction_date || item.label
+          );
+        } catch (error) {
+          console.error("Error fetching laporan data:", error);
+        }
+      },
+    },
+  };
+  </script>

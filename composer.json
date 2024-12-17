@@ -16,6 +16,7 @@
         "laravel/tinker": "^2.8",
         "php-open-source-saver/jwt-auth": "^2.1",
         "phpoffice/phpspreadsheet": "^1.29",
+        "sendinblue/api-v3-sdk": "^8.4",
         "spatie/laravel-permission": "^6.2",
         "spatie/laravel-sluggable": "^3.5"
     },

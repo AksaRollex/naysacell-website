@@ -2,37 +2,33 @@
 
 namespace Database\Seeders;
 
-use App\Models\ProductPasca;
-
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Http;
+use App\Models\ProductPasca;
 
 class ProductPascaSeeder extends Seeder
 {
     public function run()
     {
-        ProductPasca::create([
-            "product_name" => "Pln Postpaid",
-            "product_category" => "Pascabayar",
-            "product_transaction_admin" => 2750,
-            "product_transaction_fee" => 1800,
-            "product_sku" => "pln",
-            "product_provider" => "PLN",
-            "product_seller" => "PT. ABC",
-            // "buyer_product_status" => true,
-            // "seller_product_status" => true,
-            // "desc" => "-"
+        $header = [
+            'Content-Type' => 'application/json',
+        ];
+
+        $url = env('DIGIFLAZ_URL');
+        $user = env('DIGIFLAZ_USER');
+        $key = env('DIGIFLAZ_MODE') == 'development' ? env('DIGIFLAZ_DEV_KEY') : env('DIGIFLAZ_PROD_KEY');
+
+        // Ambil data dari API
+        $response = Http::withHeaders($header)->post($url . '/price-list', [
+            "cmd" => "pasca",
+            "username" => $user,
+            "sign" => md5($user . $key . "pricelist"),
         ]);
-        ProductPasca::create([
-            "product_name" => "aetra",
-            "product_category" => "Pascabayar",
-            "product_transaction_admin" => 2000,
-            "product_transaction_fee" => 550,
-            "product_sku" => "aetra",
-            "product_provider" => "PDAM",
-            "product_seller" => "Mr Ed",
-            // "buyer_product_status" => true,
-            // "seller_product_status" => true,
-            // "desc" => "Provinsi Jakarta"
-        ]);
+
+        $data = json_decode($response->getBody(), true);
+
+        // Simpan data ke dalam tabel menggunakan model
+        $productPascaModel = new ProductPasca();
+        $productPascaModel->insert_data($data['data']);
     }
 }

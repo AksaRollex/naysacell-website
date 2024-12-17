@@ -4,15 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
 
-class ProductProvider extends Model
+class CodeOperator extends Model
 {
     use HasFactory;
 
-    protected $table = 'product_provider';
     protected $fillable = [
-        'provider_name',
-        'provider_photo',
+        'code',
+        'name_operator',
     ];
 }

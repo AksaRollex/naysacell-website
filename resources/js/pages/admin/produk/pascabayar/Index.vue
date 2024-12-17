@@ -2,6 +2,7 @@
 import { ref } from "vue";
 import { createColumnHelper } from "@tanstack/vue-table";
 import type { User } from "@/types";
+import { currency } from "@/libs/utils";
 
 const column = createColumnHelper<User>();
 const paginateRef = ref<any>(null);
@@ -21,9 +22,11 @@ const columns = [
     }),
     column.accessor("product_transaction_admin", {
         header: "Biaya Admin",
+        cell : (cell) => currency(cell.getValue() ?? 0),
     }),
     column.accessor("product_transaction_fee", {
         header: "Komisi",
+        cell : (cell) => currency(cell.getValue() ?? 0),
     }),
 ];
 

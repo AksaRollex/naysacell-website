@@ -21,8 +21,15 @@ class PermissionSeeder extends Seeder
 
         $menuWebsite = ['website', 'setting'];
         $menuUser = ['user', 'user-admin', 'hak-akses', 'user-user'];
-        $api = ['master-user', 'master-role', 'master-product', 'master-laporan'];
-        $menuMaster = ['master', 'master-brand', 'master-operator-code'];
+        $api = [
+            'master-user',
+            'master-role',
+            'master-product',
+            'master-laporan',
+            'master-brand-operator',
+            'master-digiflazz'
+        ];
+        $menuMaster = ['master', 'master-brand', 'master-operator-code',];
         $menuProduct = ['produk', 'produk-prabayar', 'produk-pascabayar'];
         $menuPPOB = ['PPOB', 'ppob-internet', 'ppob-pulsapaketdata', 'ppob-pln', 'ppob-pdam', 'ppob-bpjs', 'bpjs-dompetelektronik'];
         $menuLaporan = ['laporan', 'laporan-grafik-penjualan', 'laporan-transaksi-prabayar', 'laporan-transaksi-pascabayar', 'laporan-semua-transaksi'];
