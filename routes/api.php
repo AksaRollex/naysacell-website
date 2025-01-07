@@ -9,40 +9,11 @@ use App\Http\Controllers\Api\DigiflazController;
 use App\Http\Controllers\Api\TripayController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\CodeOperatorController;
+use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\ProductPascaController;
 use App\Http\Controllers\ProductPrepaidController;
 use App\Http\Controllers\ProductProviderController;
-
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
-*/
-
-// Route::prefix('digiflazz')->group(function () {
-//     Route::post('get-product-prepaid', [ProductPrepaidController::class, 'get_product_prepaid']);
-//     Route::post('get-product-pasca', [ProductPascaController::class, 'get_product_pasca']);
-//     Route::post('/topup', [DigiflazController::class, 'digiflazTopup']);
-//     Route::post('/cek-tagihan', [DigiflazController::class, 'digiflazCekTagihan']);
-//     Route::post('/bayar-tagihan', [DigiflazController::class, 'digiflazBayarTagihan']);
-// });
-
-// Route::prefix('auth')->group(function() {
-//     Route::post('/email', [PasswordResetController::class, 'sendResetLink']);
-//     Route::post('/reset', [PasswordResetController::class, 'resetPassword']);
-// });
-
-Route::prefix('tripay')->group(function () {
-    Route::get('get-kategori-prabayar', [TripayController::class, 'get_kategori_prabayar']);    
-    Route::get('get-operator-prabayar', [TripayController::class, 'get_operator_prabayar']);
-    Route::get('get-produk-prabayar', [TripayController::class, 'get_produk_prabayar']);
-    Route::get('get-detail-produk-prabayar', [TripayController::class, 'get_detail_produk_prabayar']);
-});
+use App\Http\Controllers\TransactionController;
 
 // Authentication Route
 Route::middleware(['auth', 'json'])->prefix('auth')->group(function () {
@@ -58,8 +29,11 @@ Route::middleware(['auth', 'json'])->prefix('auth')->group(function () {
     Route::prefix('histori')->group(function () {
         Route::post('', [DigiflazController::class, 'histori'])->withoutMiddleware('auth');
     });
-});
 
+    // PESANAN
+    Route::post('/submit-product', [OrdersController::class, 'submitProduct']);
+    Route::post('/place-order', [OrdersController::class, 'placeOrder']);
+});
 
 Route::middleware(['auth', 'verified', 'json'])->group(function () {
 
@@ -71,6 +45,10 @@ Route::middleware(['auth', 'verified', 'json'])->group(function () {
 
         // USER
         Route::middleware('can:master-user')->group(function () {
+            // MOBILE
+            Route::get('users/get/{id}', [UserController::class, 'getById']);
+            Route::put('users/update/{id}', [UserController::class, 'updateById']);
+            // WEBSITE
             Route::get('users', [UserController::class, 'get']);
             Route::post('users', [UserController::class, 'index'])->withoutMiddleware('can:master-user');
             Route::post('users/admin', [UserController::class, 'indexAdmin']);
@@ -78,6 +56,7 @@ Route::middleware(['auth', 'verified', 'json'])->group(function () {
             Route::post('users/user', [UserController::class, 'indexUser']);
             Route::post('users/store', [UserController::class, 'store']);
             Route::post('users/update', [UserController::class, 'update']);
+            Route::delete('users/delete/{id}', [UserController::class, 'destroy']);
             Route::apiResource('users', UserController::class)
                 ->except(['index', 'store'])->scoped(['user' => 'uuid']);
         });
@@ -91,32 +70,21 @@ Route::middleware(['auth', 'verified', 'json'])->group(function () {
                 ->except(['index', 'store']);
         });
 
-        // INSERT DATA DIGIFLAZZ
-        // Route::prefix('digiflazz')->group(function () {
-        // Route::middleware('can:master-digiflazz')->group(function () {
-        // Route::post('get-product-prepaid', [ProductPrepaidController::class, 'get_product_prepaid']);
-        // Route::post('get-product-pasca', [ProductPascaController::class, 'get_product_pasca']);
-        // Route::post('/topup', [DigiflazController::class, 'digiflazTopup']);
-        // Route::post('/cek-tagihan', [DigiflazController::class, 'digiflazCekTagihan']);
-        // Route::post('/bayar-tagihan', [DigiflazController::class, 'digiflazBayarTagihan']);
-        // });
-        // });
-
         // MASTER
-        Route::prefix('master')->group(function () {
-            Route::middleware('can:master-brand-operator')->group(function () {
-                Route::prefix('brand')->group(function () {
-                    Route::post('', [ProductProviderController::class, 'index']);
-                    Route::get('get/{id}', [ProductProviderController::class, 'get']);
-                    Route::put('update/{id}', [ProductProviderController::class, 'update']);
-                    Route::post('store', [ProductProviderController::class, 'store']);
-                    Route::delete('delete/{id}', [ProductProviderController::class, 'destroy']);
-                });
-                Route::prefix('operator')->group(function () {
-                    Route::post('', [CodeOperatorController::class, 'index']);
-                });
-            });
-        });
+        // Route::prefix('master')->group(function () {
+        //     Route::middleware('can:master-brand-operator')->group(function () {
+        //         Route::prefix('brand')->group(function () {
+        //             Route::post('', [ProductProviderController::class, 'index']);
+        //             Route::get('get/{id}', [ProductProviderController::class, 'get']);
+        //             Route::put('update/{id}', [ProductProviderController::class, 'update']);
+        //             Route::post('store', [ProductProviderController::class, 'store']);
+        //             Route::delete('delete/{id}', [ProductProviderController::class, 'destroy']);
+        //         });
+        //         Route::prefix('operator')->group(function () {
+        //             Route::post('', [CodeOperatorController::class, 'index']);
+        //         });
+        //     });
+        // });
 
         // PRODUCT
         Route::prefix('product')->group(function () {
@@ -125,10 +93,12 @@ Route::middleware(['auth', 'verified', 'json'])->group(function () {
                     Route::post('', [ProductPrepaidController::class, 'indexPrepaid'])->withoutMiddleware('can:master-product');
                     Route::get('get-pbb/{id}', [ProductPrepaidController::class, 'getPBBPrepaid'])->withoutMiddleware('can:master-product');
                     Route::put('update-pbb/{id}', [ProductPrepaidController::class, 'updatePBBPrepaid']);
+                    Route::post('store-pbb', [ProductPrepaidController::class, 'storePBBPrepaid']);
+                    Route::delete('delete-pbb/{id}', [ProductPrepaidController::class, 'destroyPBBPrepaid']);
                 });
-                Route::prefix('pasca')->group(function () {
-                    Route::post('', [ProductPascaController::class, 'indexPasca'])->withoutMiddleware('can:master-product');
-                });
+                // Route::prefix('pasca')->group(function () {
+                //     Route::post('', [ProductPascaController::class, 'indexPasca'])->withoutMiddleware('can:master-product');
+                // });
             });
         });
 
@@ -139,12 +109,23 @@ Route::middleware(['auth', 'verified', 'json'])->group(function () {
 
         // LAPORAN
         Route::middleware('can:master-laporan')->group(function () {
-            Route::post('laporan', [DigiflazController::class, 'laporan']);
+            Route::post('laporan', [TransactionController::class, 'laporan']);
+            Route::delete('delete-laporan/{id}', [TransactionController::class, 'destroy']);
         });
 
         // ISI SALDO
         Route::middleware('can:master-isi-saldo')->group(function () {
             Route::post('isi-saldo', [DigiflazController::class, 'isiSaldo']);
+        });
+
+        // PESANAN
+        Route::prefix('order')->group(function () {
+            Route::middleware('can:master-order')->group(function () {
+                Route::post('', [OrdersController::class, 'index']);
+                Route::get('get/{id}', [OrdersController::class, 'get']);
+                Route::put('update/{id}', [OrdersController::class, 'update']);
+                Route::delete('delete/{id}', [OrdersController::class, 'destroy']);
+            });
         });
     });
 });
@@ -152,3 +133,34 @@ Route::middleware(['auth', 'verified', 'json'])->group(function () {
 Route::prefix('setting')->group(function () {
     Route::get('', [SettingController::class, 'index']);
 });
+
+Route::prefix('digiflazz')->group(function () {
+    Route::post('get-product-prepaid', [ProductPrepaidController::class, 'get_product_prepaid']);
+    Route::post('get-product-pasca', [ProductPascaController::class, 'get_product_pasca']);
+    Route::post('/topup', [DigiflazController::class, 'digiflazTopup']);
+    Route::post('/cek-tagihan', [DigiflazController::class, 'digiflazCekTagihan']);
+    Route::post('/bayar-tagihan', [DigiflazController::class, 'digiflazBayarTagihan']);
+});
+
+// Route::prefix('tripay')->group(function () {
+//     //CEK
+//     Route::get('cek-server', [TripayController::class, 'cek_server']);
+//     Route::get('cek-saldo', [TripayController::class, 'cek_saldo']);
+//     //PRABAYAR
+//     Route::get('get-kategori-prabayar', [TripayController::class, 'get_kategori_prabayar']);
+//     Route::get('get-operator-prabayar', [TripayController::class, 'get_operator_prabayar']);
+//     Route::get('get-produk-prabayar', [TripayController::class, 'get_produk_prabayar']);
+//     Route::post('get-detail-produk-prabayar', [TripayController::class, 'get_detail_produk_prabayar']);
+//     //PASCABAYAR
+//     Route::get('get-kategori-pascabayar', [TripayController::class, 'get_kategori_pascabayar']);
+//     Route::get('get-operator-pascabayar', [TripayController::class, 'get_operator_pascabayar']);
+//     Route::get('get-produk-pascabayar', [TripayController::class, 'get_produk_pascabayar']);
+//     Route::post('get-detail-produk-pascabayar', [TripayController::class, 'get_detail_produk_pascabayar']);
+//     //TRANSAKSI
+//     Route::post('request-transaksi-prabayar', [TripayController::class, 'request_transaksi_prabayar']);
+//     Route::post('cek-tagihan-pascabayar', [TripayController::class, 'cek_tagihan_pascabayar']);
+//     Route::post('bayar-tagihan-pascabayar', [TripayController::class, 'bayar_tagihan_pascabayar']);
+//     Route::get('riwayat-transaksi', [TripayController::class, 'riwayat_transaksi']);
+//     Route::post('detail-riwayat-transaksi', [TripayController::class, 'detail_riwayat_transaksi']);
+//     Route::post('riwayat-transaksi-bydate', [TripayController::class, 'riwayat_transaksi_bydate']);
+// });

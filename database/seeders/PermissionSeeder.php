@@ -27,7 +27,8 @@ class PermissionSeeder extends Seeder
             'master-product',
             'master-laporan',
             'master-brand-operator',
-            'master-digiflazz'
+            'master-digiflazz',
+            'master-order'
         ];
         $menuMaster = ['master', 'master-brand', 'master-operator-code',];
         $menuProduct = ['produk', 'produk-prabayar', 'produk-pascabayar'];

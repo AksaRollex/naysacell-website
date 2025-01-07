@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use SendinBlue\Client\Model\Order;
 
 class TransactionModel extends Model
 {
@@ -17,13 +18,13 @@ class TransactionModel extends Model
         'transaction_date',
         'transaction_time',
         'transaction_type',
-        'transaction_provider',
         'transaction_number',
         'transaction_sku',
         'transaction_total',
         'transaction_message',
         'transaction_status',
         'transaction_user_id',
+        // 'transaction_provider',
     ];
 
 
@@ -42,17 +43,23 @@ class TransactionModel extends Model
             'transaction_date' => Carbon::now()->format('Y-m-d'),
             'transaction_time' => Carbon::now(),
             'transaction_type' => $type,
-            'transaction_provider' => $provider,
             'transaction_number' => $data['customer_no'],
             'transaction_sku' => $data['buyer_sku_code'],
             'transaction_total' => $harga,
             'transaction_message' => $data['message'],
             'transaction_status' => $data['status'],
             'transaction_user_id' => 2
+            // 'transaction_provider' => $provider,
         ]);
     }
 
-    public function user () {
+    public function user()
+    {
         return $this->belongsTo(User::class, 'transaction_user_id', 'id');
+    }
+
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
     }
 }

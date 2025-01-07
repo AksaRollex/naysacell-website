@@ -25,7 +25,7 @@
             </div>
 
             <!-- PLN Card -->
-            <div class="col-md-4">
+            <!-- <div class="col-md-4">
                 <router-link to="/ppob/pln" class="text-decoration-none">
                     <div
                         class="card h-100 dashboard-card border-start border-warning border-4"
@@ -42,7 +42,7 @@
                         </div>
                     </div>
                 </router-link>
-            </div>
+            </div> -->
 
             <!-- Dompet Elektronik Card -->
             <div class="col-md-4">
@@ -68,7 +68,7 @@
             </div>
 
             <!-- BPJS Kesehatan Card -->
-            <div class="col-md-4">
+            <!-- <div class="col-md-4">
                 <router-link to="/ppob/bpjs" class="text-decoration-none">
                     <div
                         class="card h-100 dashboard-card border-start border-danger border-4"
@@ -87,10 +87,10 @@
                         </div>
                     </div>
                 </router-link>
-            </div>
+            </div> -->
 
             <!-- PDAM Card -->
-            <div class="col-md-4">
+            <!-- <div class="col-md-4">
                 <router-link to="/ppob/pdam" class="text-decoration-none">
                     <div
                         class="card h-100 dashboard-card border-start border-info border-4"
@@ -105,7 +105,7 @@
                         </div>
                     </div>
                 </router-link>
-            </div>
+            </div> -->
         </div>
     </div>
 </template>

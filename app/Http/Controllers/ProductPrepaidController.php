@@ -46,39 +46,55 @@ class ProductPrepaidController extends Controller
         $this->model->insert_data($data['data']);
     }
 
+    public function indexPrepaid(Request $request)
+    {
+        if (request()->wantsJson()) {
+            $per = $request->per ?? 10;
+            $page = ($request->page ?? 1) - 1;
+
+            DB::statement('set @no=0+' . $page * $per);
+
+            $query = ProductPrepaid::query();
+
+            if ($request->search) {
+                $query->where('product_name', 'LIKE', '%' . $request->search . '%');
+            }
+
+            if ($request->product_provider) {
+                $query->where('product_provider', $request->product_provider);
+            }
+
+            if ($request->product_category) {
+                $query->where('product_category', $request->product_category);
+            }
+
+            $data = $query->paginate($per, ['*', DB::raw('@no := @no + 1 AS no')]);
+
+            return response()->json($data);
+        }
+        return abort(404);
+    }
+
     // public function indexPrepaid(Request $request)
     // {
-    //     $per = $request->per ?? 20;
+    //     $per = $request->per ?? 10;
     //     $page = $request->page ? $request->page - 1 : 0;
 
     //     DB::statement('set @no=0+' . $page * $per);
-    //     $data = ProductPrepaid::when($request->search, function (Builder $query, string $search) {
-    //         $query->where('product_name', 'like', "%$search%");
-    //     })->latest()->paginate($per, ['*', DB::raw('@no := @no + 1 AS no')]);
+
+    //     $data = ProductPrepaid::when($request->product_category, function ($q) use ($request) {
+    //         $q->where('product_category', $request->product_category);
+    //     })->when($request->product_provider, function ($q) use ($request) {
+    //         $q->where('product_provider', $request->product_provider);
+    //     })
+    //         ->when($request->search, function (Builder $query, string $search) {
+    //             $query->where('product_name', 'like', "%$search%");
+    //         })
+    //         ->latest()
+    //         ->paginate($per, ['*', DB::raw('@no := @no + 1 AS no')]);
 
     //     return response()->json($data);
     // }
-
-    public function indexPrepaid(Request $request)
-    {
-        $per = $request->per ?? 20;
-        $page = $request->page ? $request->page - 1 : 0;
-
-        DB::statement('set @no=0+' . $page * $per);
-
-        $data = ProductPrepaid::when($request->product_category, function ($q) use ($request) {
-            $q->where('product_category', $request->product_category);
-        })->when($request->product_provider, function ($q) use ($request) {
-            $q->where('product_provider', $request->product_provider);
-        })
-        ->when($request->search, function (Builder $query, string $search) {
-            $query->where('product_name', 'like', "%$search%");
-        })
-        ->latest()
-        ->paginate($per, ['*', DB::raw('@no := @no + 1 AS no')]);
-
-        return response()->json($data);
-    }
 
 
     public function getPBBPrepaid($id)
@@ -92,19 +108,40 @@ class ProductPrepaidController extends Controller
 
     public function updatePBBPrepaid(Request $request, $id)
     {
-
-        $base = ProductPrepaid::find($id);
-        if ($base) {
+        try {
+            $base = ProductPrepaid::findOrFail($id);
             $base->update($request->all());
 
             return response()->json([
-                'status' => 'true',
-                'message' => 'Harga Berhasil Dirubah'
+                'status' => true,
+                'message' => 'Produk Berhasil Dirubah',
+                'data' => $base
             ]);
-        } else {
-            return response([
-                'message' => 'Harga Gagal Dirubah'
-            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Produk Gagal Dirubah: ' . $e->getMessage()
+            ], 500);
         }
+    }
+    public function storePBBPrepaid(Request $request)
+    {
+        $base = ProductPrepaid::create($request->all());
+
+        return response()->json([
+            'status' => 'true',
+            'message' => 'Produk Berhasil Ditambahkan'
+        ]);
+    }
+
+    public function destroyPBBPrepaid($id)
+    {
+        $base = ProductPrepaid::find($id);
+        $base->delete();
+
+        return response()->json([
+            'status' => 'true',
+            'message' => 'Produk Berhasil Dihapus'
+        ]);
     }
 }

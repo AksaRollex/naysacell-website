@@ -90,23 +90,6 @@ class DigiflazController extends Controller
         }
     }
 
-    // public function digiflazTopup(Request $request)
-    // {
-    //     $ref_id = $this->getCode();
-    //     $product = ProductPrepaid::findProductBySKU($request->sku)->first();
-    //     $response = Http::withHeaders($this->header)->post($this->url . '/transaction', [
-    //         "username" => $this->user,
-    //         "buyer_sku_code" => $request->sku,
-    //         "customer_no" => $request->customer_no,
-    //         "ref_id" =>  $ref_id,
-    //         "sign" => md5($this->user . $this->key . $ref_id)
-    //     ]);
-    //     $data = json_decode($response->getBody(), true);
-    //     $this->model_transaction->insert_transaction_data($data['data'], 'Prepaid', $product->product_provider);
-    //     return response()->json($data['data']);
-    // }
-
-
     public function digiflazTopup(Request $request)
     {
         $ref_id = $this->getCode();
@@ -121,26 +104,6 @@ class DigiflazController extends Controller
 
         $data = json_decode($response->getBody(), true);
         return response()->json($data['data']);
-    }
-    public function laporan(Request $request)
-    {
-        $per = $request->per ?? 20;
-        $page = $request->page ? $request->page - 1 : 0;
-        DB::statement('set @no=0+' . $page * $per);
-
-        $data = TransactionModel::when($request->transaction_type, function ($query) use ($request) {
-            $query->where('transaction_type', $request->transaction_type);
-        })
-            ->when($request->search, function (Builder $query, string $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('transaction_status', 'like', "%$search%")
-                        ->orWhere('transaction_type', 'like', "%$search%")
-                        ->orWhere('customer_no', 'like', "%$search%");
-                });
-            })
-            ->latest()
-            ->paginate($per, ['*', DB::raw('@no := @no + 1 AS no')]);
-        return response()->json($data);
     }
 
     public function histori(Request $request)

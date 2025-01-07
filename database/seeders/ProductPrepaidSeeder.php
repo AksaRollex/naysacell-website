@@ -8,6 +8,7 @@ use App\Models\ProductPrepaid;
 
 class ProductPrepaidSeeder extends Seeder
 {
+
     public function run()
     {
         $header = [
@@ -18,7 +19,6 @@ class ProductPrepaidSeeder extends Seeder
         $user = env('DIGIFLAZ_USER');
         $key = env('DIGIFLAZ_MODE') == 'development' ? env('DIGIFLAZ_DEV_KEY') : env('DIGIFLAZ_PROD_KEY');
 
-        // Ambil data dari API
         $response = Http::withHeaders($header)->post($url . '/price-list', [
             "cmd" => "prepaid",
             "username" => $user,
@@ -27,8 +27,20 @@ class ProductPrepaidSeeder extends Seeder
 
         $data = json_decode($response->getBody(), true);
 
-        // Simpan data ke dalam tabel menggunakan model
         $productPrepaidModel = new ProductPrepaid();
         $productPrepaidModel->insert_data($data['data']);
     }
+
+
+    // public function run(): void
+    // {
+    //     ProductPrepaid::create([
+    //         'product_name' => 'Pulsa Telkomsel 10000',
+    //         'product_desc' =>  'Pulsa 10000',
+    //         'product_category' => 'Pulsa',
+    //         'product_price' => '10000',
+    //         'product_stock' => 'unlimited',
+    //         'product_sku' => 'NAYSA',
+    //     ]);
+    // }
 }

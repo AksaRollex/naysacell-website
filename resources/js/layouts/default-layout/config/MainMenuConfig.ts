@@ -47,25 +47,25 @@ const MainMenuConfig: Array<MenuItem> = [
                 ],
             },
 
-            // MASTER
-            {
-                sectionTitle: "Master",
-                route: "/master",
-                name: "master",
-                keenthemesIcon: "element-11",
-                sub: [
-                    {
-                        heading: "Brand",
-                        name: "master-brand",
-                        route: "/master/brand",
-                    },
-                    // {
-                    //     heading: "Kode Operator",
-                    //     name: "master-operator-code",
-                    //     route: "/master/operator-code",
-                    // },
-                ],
-            },
+            // // MASTER
+            // {
+            //     sectionTitle: "Master",
+            //     route: "/master",
+            //     name: "master",
+            //     keenthemesIcon: "element-11",
+            //     sub: [
+            //         {
+            //             heading: "Brand",
+            //             name: "master-brand",
+            //             route: "/master/brand",
+            //         },
+            //         // {
+            //         //     heading: "Kode Operator",
+            //         //     name: "master-operator-code",
+            //         //     route: "/master/operator-code",
+            //         // },
+            //     ],
+            // },
 
             // PRODUK
             {
@@ -79,11 +79,11 @@ const MainMenuConfig: Array<MenuItem> = [
                         name: "produk-prabayar",
                         route: "/produk/prabayar",
                     },
-                    {
-                        heading: "Pascabayar",
-                        name: "produk-pascabayar",
-                        route: "/produk/pascabayar",
-                    },
+                    // {
+                    //     heading: "Pascabayar",
+                    //     name: "produk-pascabayar",
+                    //     route: "/produk/pascabayar",
+                    // },
                 ],
             },
 

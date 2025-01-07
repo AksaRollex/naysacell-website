@@ -23,12 +23,8 @@ const columns = [
     column.accessor("product_provider", {
         header: "Provider",
     }),
-    column.accessor("product_seller_price", {
-        header: "HPP",
-        cell: (cell) => currency(cell.getValue() ?? 0),
-    }),
-    column.accessor("product_buyer_price", {
-        header: "Harga Jual",
+    column.accessor("product_price", {
+        header: "Harga",
         cell: (cell) => currency(cell.getValue() ?? 0),
     }),
     column.accessor("id", {

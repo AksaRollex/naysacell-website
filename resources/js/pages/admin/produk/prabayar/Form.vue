@@ -40,7 +40,15 @@ function getEdit() {
 
 function submit() {
     const formData = new FormData();
-    formData.append("product_buyer_price", data.value.product_buyer_price);
+    formData.append("product_name", data.value.product_name);
+    formData.append("product_desc", data.value.product_desc);
+    formData.append("product_category", data.value.product_category);
+    formData.append("product_type", data.value.product_type);
+    formData.append("product_price", data.value.product_price);
+    formData.append("product_sku", data.value.product_sku);
+    formData.append("product_stock", data.value.product_stock);    
+    // formData.append("product_seller_price")
+    // formData.append("product_buyer_price", data.value.product_buyer_price);
 
     if (props.selected) {
         formData.append("_method", "PUT");

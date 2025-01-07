@@ -28,9 +28,9 @@ const routes: Array<RouteRecordRaw> = [
         path: "/",
         redirect: "/dashboard",
         component: () => import("@/layouts/default-layout/DefaultLayout.vue"),
-        meta: {
-            middleware: "auth",
-        },
+        // meta: {
+        //     middleware: "auth",
+        // },
         children: [
             {
                 path: "/dashboard",
@@ -300,7 +300,7 @@ const routes: Array<RouteRecordRaw> = [
                 component: () => import("@/pages/auth/sign-in/Index.vue"),
                 meta: {
                     pageTitle: "Sign In",
-                    middleware: "guest",
+                    // middleware: "guest",
                 },
             },
         ],

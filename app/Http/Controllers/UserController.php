@@ -26,6 +26,14 @@ class UserController extends Controller
         ]);
     }
 
+    public function getById($id)
+    {
+        $base = User::find($id);
+
+        return response()->json([
+            'data' => $base,
+        ], 200);
+    }
     /**
      * Display a paginated list of the resource.
      */
@@ -43,7 +51,6 @@ class UserController extends Controller
 
         return response()->json($data);
     }
-
 
     public function indexAdmin(Request $request)
     {
@@ -185,16 +192,57 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(User $user)
+    // public function destroy(User $user)
+    // {
+    //     if ($user->photo) {
+    //         Storage::disk('public')->delete($user->photo);
+    //     }
+
+    //     $user->delete();
+
+    //     return response()->json([
+    //         'success' => true
+    //     ]);
+    // }
+
+    public function destroy($id)
     {
-        if ($user->photo) {
-            Storage::disk('public')->delete($user->photo);
+        $user = User::find($id);
+        
+        if ($user) {
+            // Cek photo setelah memastikan user exists
+            if ($user->photo) {
+                Storage::disk('public')->delete($user->photo);
+            }
+            
+            $user->delete();
+            return response()->json([
+                'status' => 'true',
+                'message' => 'Data Berhasil Dihapus'
+            ]);
         }
-
-        $user->delete();
-
+        
+        // Return response jika user tidak ditemukan
         return response()->json([
-            'success' => true
-        ]);
+            'status' => 'false',
+            'message' => 'Data Tidak Ditemukan'
+        ], 404);
+    }
+    public function updateById(Request $request, $id)
+    {
+
+        $base = User::find($id);
+        if ($base) {
+            $base->update($request->all());
+
+            return response()->json([
+                'status' => 'true',
+                'message' => 'Data Berhasil Dirubah'
+            ]);
+        } else {
+            return response([
+                'message' => 'Data Gagal Dirubah'
+            ]);
+        }
     }
 }

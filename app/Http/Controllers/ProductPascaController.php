@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Database\Eloquent\Builder;
 
 class ProductPascaController extends Controller
 {
@@ -39,7 +38,6 @@ class ProductPascaController extends Controller
             "sign" => md5($this->user . $this->key . "pricelist"),
         ]);
 
-        // Debugging: Log the full response
         Log::info('Digiflazz Pasca Response', [
             'status' => $response->status(),
             'body' => $response->body(),
@@ -47,7 +45,6 @@ class ProductPascaController extends Controller
 
         $data = json_decode($response->getBody(), true);
 
-        // More debugging
         if ($data === null) {
             Log::error('JSON Decode Failed', [
                 'response_body' => $response->body(),

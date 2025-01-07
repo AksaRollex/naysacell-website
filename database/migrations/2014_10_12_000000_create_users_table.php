@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('phone')->unique();
             $table->string('photo')->nullable();
+            $table->char('otp', 6)->nullable();
             $table->string('address');
             $table->string('password');
             $table->string('product_prepaid_id')->nullable();
