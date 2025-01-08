@@ -13,6 +13,7 @@ use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\ProductPascaController;
 use App\Http\Controllers\ProductPrepaidController;
 use App\Http\Controllers\ProductProviderController;
+use App\Http\Controllers\DepositTransactionController;
 use App\Http\Controllers\TransactionController;
 
 // Authentication Route
@@ -33,6 +34,13 @@ Route::middleware(['auth', 'json'])->prefix('auth')->group(function () {
     // PESANAN
     Route::post('/submit-product', [OrdersController::class, 'submitProduct']);
     Route::post('/place-order', [OrdersController::class, 'placeOrder']);
+
+    // SALDO
+    Route::middleware(['throttle:6,1'],)->group(function () {
+        Route::post('/topup', [DepositTransactionController::class, 'topup']);
+        Route::get('/check-saldo', [DepositTransactionController::class, 'checkBalance']);
+        Route::post('/histori-deposit', [DepositTransactionController::class, 'index']);
+    });
 });
 
 Route::middleware(['auth', 'verified', 'json'])->group(function () {
