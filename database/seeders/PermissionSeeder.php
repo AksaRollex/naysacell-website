@@ -33,16 +33,19 @@ class PermissionSeeder extends Seeder
         $menuMaster = ['master', 'master-brand', 'master-operator-code',];
         $menuProduct = ['produk', 'produk-prabayar', 'produk-pascabayar'];
         $menuPPOB = ['PPOB', 'ppob-internet', 'ppob-pulsapaketdata', 'ppob-pln', 'ppob-pdam', 'ppob-bpjs', 'bpjs-dompetelektronik'];
-        $menuLaporan = ['laporan', 'laporan-grafik-penjualan', 'laporan-transaksi-prabayar', 'laporan-transaksi-pascabayar', 'laporan-semua-transaksi'];
+        $menuLaporan = ['laporan', 'laporan-grafik-penjualan', 'laporan-transaksi-prabayar', 'laporan-transaksi-pascabayar', 'laporan-semua-transaksi', 'laporan-transaksi-deposit'];
         $menuIsiSaldo = [
             'isi-saldo',
-            // 'isi-saldo-tarik-tiket',
+            'isi-saldo-topup',
+            'isi-saldo-saldo-user',
             'isi-saldo-histori'
         ];
         $menuHistori = ['histori'];
 
+        $menuPesanan = ['order'];
+
         $permissionsByRole = [
-            'admin' => ['dashboard', ...$menuWebsite, ...$menuUser, ...$api, ...$menuMaster, ...$menuProduct, ...$menuPPOB, ...$menuLaporan, ...$menuIsiSaldo],
+            'admin' => ['dashboard', ...$menuWebsite, ...$menuUser, ...$api, ...$menuMaster, ...$menuProduct, ...$menuPPOB, ...$menuLaporan, ...$menuIsiSaldo, ... $menuPesanan],
             'user' => ['dashboard', 'website', ...$menuPPOB, ...$menuIsiSaldo, ...$menuHistori],
         ];
 

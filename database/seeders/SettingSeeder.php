@@ -20,7 +20,7 @@ class SettingSeeder extends Seeder
             'app' => 'NAYSA CELL',
             'description' =>  'Aplikasi NAYSA CELL Topup PPOB',
             'logo' =>  '/media/logo.png',
-            'bg_auth' =>  '/media/background.jpg',
+            'bg_auth' =>  '/media/products_provider/background.jpg',
             'banner' =>  '/media/banner.jpg',
             'alamat' =>  'Sambiarum Lor, Surabaya',
             'telepon' =>  '085336970707',

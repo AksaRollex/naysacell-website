@@ -142,17 +142,17 @@ class UserController extends Controller
     {
         $validatedData = $request->validated();
 
-        if ($request->hasFile('photo')) {
-            if ($user->photo) {
-                Storage::disk('public')->delete($user->photo);
-            }
-            $validatedData['photo'] = $request->file('photo')->store('photo', 'public');
-        } else {
-            if ($user->photo) {
-                Storage::disk('public')->delete($user->photo);
-                $validatedData['photo'] = null;
-            }
-        }
+        // if ($request->hasFile('photo')) {
+        //     if ($user->photo) {
+        //         Storage::disk('public')->delete($user->photo);
+        //     }
+        //     $validatedData['photo'] = $request->file('photo')->store('photo', 'public');
+        // } else {
+        //     if ($user->photo) {
+        //         Storage::disk('public')->delete($user->photo);
+        //         $validatedData['photo'] = null;
+        //     }
+        // }
 
         $user->update($validatedData);
 
@@ -192,42 +192,19 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    // public function destroy(User $user)
-    // {
-    //     if ($user->photo) {
-    //         Storage::disk('public')->delete($user->photo);
-    //     }
-
-    //     $user->delete();
-
-    //     return response()->json([
-    //         'success' => true
-    //     ]);
-    // }
-
-    public function destroy($id)
+    public function destroy(User $user)
     {
-        $user = User::find($id);
-        
-        if ($user) {
-            // Cek photo setelah memastikan user exists
-            if ($user->photo) {
-                Storage::disk('public')->delete($user->photo);
-            }
-            
-            $user->delete();
-            return response()->json([
-                'status' => 'true',
-                'message' => 'Data Berhasil Dihapus'
-            ]);
+        if ($user->photo) {
+            Storage::disk('public')->delete($user->photo);
         }
-        
-        // Return response jika user tidak ditemukan
+
+        $user->delete();
+
         return response()->json([
-            'status' => 'false',
-            'message' => 'Data Tidak Ditemukan'
-        ], 404);
+            'success' => true
+        ]);
     }
+
     public function updateById(Request $request, $id)
     {
 

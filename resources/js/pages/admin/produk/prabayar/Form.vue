@@ -21,14 +21,19 @@ const emit = defineEmits(["close", "refresh"]);
 const formRef = ref();
 
 const formSchema = Yup.object().shape({
-    product_buyer_price: Yup.string().required("Harga jual harus diisi "),
+    product_name: Yup.string().required("Nama Produk harus diisi "),
+    product_desc: Yup.string().required("Deskripsi Produk harus diisi "),
+    product_price: Yup.string().required("Harga harus diisi "),
+    product_sku: Yup.string().required("Kode SKU harus diisi "),
+    product_category: Yup.string().required("Kategori Produk harus diisi "),
+    product_provider: Yup.string().required("Provider Produk harus diisi "),
 });
 
 function getEdit() {
     block(document.getElementById("form-product"));
     ApiService.get("master/product/prepaid/get-pbb", props.selected)
-        .then(({ data }) => {
-            data.value = data.data;
+        .then((response) => {
+            data.value = response.data.data;
         })
         .catch((err: any) => {
             toast.error(err.response.data.message);
@@ -43,12 +48,9 @@ function submit() {
     formData.append("product_name", data.value.product_name);
     formData.append("product_desc", data.value.product_desc);
     formData.append("product_category", data.value.product_category);
-    formData.append("product_type", data.value.product_type);
+    formData.append("product_provider", data.value.product_provider);
     formData.append("product_price", data.value.product_price);
     formData.append("product_sku", data.value.product_sku);
-    formData.append("product_stock", data.value.product_stock);    
-    // formData.append("product_seller_price")
-    // formData.append("product_buyer_price", data.value.product_buyer_price);
 
     if (props.selected) {
         formData.append("_method", "PUT");
@@ -59,7 +61,7 @@ function submit() {
         method: "post",
         url: props.selected
             ? `/master/product/prepaid/update-pbb/${props.selected}`
-            : "",
+            : "/master/product/prepaid/store-pbb",
         data: formData,
         headers: {
             "Content-Type": "multipart/form-data",
@@ -105,7 +107,7 @@ watch(
         ref="formRef"
     >
         <div class="card-header align-items-center">
-            <h2 class="mb-0">{{ selected ? "Rubah" : "Tambah" }} Harga Jual</h2>
+            <h2 class="mb-0">{{ selected ? "Rubah" : "Tambah" }} Produk</h2>
             <button
                 type="button"
                 class="btn btn-sm btn-light-danger ms-auto"
@@ -117,7 +119,51 @@ watch(
         </div>
         <div class="card-body">
             <div class="row">
-                <div class="col-md-12">
+                <div class="col-md-4">
+                    <!--begin::Input group-->
+                    <div class="fv-row mb-7">
+                        <label class="form-label fw-bold fs-6 required">
+                            Nama Produk
+                        </label>
+                        <Field
+                            class="form-control form-control-lg form-control-solid"
+                            type="text"
+                            name="product_name"
+                            autocomplete="off"
+                            v-model="data.product_name"
+                            placeholder="Masukkan Nama Produk"
+                        />
+                        <div class="fv-plugins-message-container">
+                            <div class="fv-help-block">
+                                <ErrorMessage name="product_name" />
+                            </div>
+                        </div>
+                    </div>
+                    <!--end::Input group-->
+                </div>
+                <div class="col-md-4">
+                    <!--begin::Input group-->
+                    <div class="fv-row mb-7">
+                        <label class="form-label fw-bold fs-6 required">
+                            Deskripsi Produk
+                        </label>
+                        <Field
+                            class="form-control form-control-lg form-control-solid"
+                            type="text"
+                            name="product_desc"
+                            autocomplete="off"
+                            v-model="data.product_desc"
+                            placeholder="Masukkan Deskripsi Produk"
+                        />
+                        <div class="fv-plugins-message-container">
+                            <div class="fv-help-block">
+                                <ErrorMessage name="product_desc" />
+                            </div>
+                        </div>
+                    </div>
+                    <!--end::Input group-->
+                </div>
+                <div class="col-md-4">
                     <!--begin::Input group-->
                     <div class="fv-row mb-7">
                         <label class="form-label fw-bold fs-6 required">
@@ -126,14 +172,80 @@ watch(
                         <Field
                             class="form-control form-control-lg form-control-solid"
                             type="number"
-                            name="product_buyer_price"
+                            name="product_price"
                             autocomplete="off"
-                            v-model="data.product_buyer_price"
+                            v-model="data.product_price"
                             placeholder="Masukkan Harga Jual"
                         />
                         <div class="fv-plugins-message-container">
                             <div class="fv-help-block">
-                                <ErrorMessage name="product_buyer_price" />
+                                <ErrorMessage name="product_price" />
+                            </div>
+                        </div>
+                    </div>
+                    <!--end::Input group-->
+                </div>
+                <div class="col-md-4">
+                    <!--begin::Input group-->
+                    <div class="fv-row mb-7">
+                        <label class="form-label fw-bold fs-6 required">
+                            Produk SKU
+                        </label>
+                        <Field
+                            class="form-control form-control-lg form-control-solid"
+                            type="text"
+                            name="product_sku"
+                            autocomplete="off"
+                            v-model="data.product_sku"
+                            placeholder="Masukkan Kode SKU Produk"
+                        />
+                        <div class="fv-plugins-message-container">
+                            <div class="fv-help-block">
+                                <ErrorMessage name="product_sku" />
+                            </div>
+                        </div>
+                    </div>
+                    <!--end::Input group-->
+                </div>
+                <div class="col-md-4">
+                    <!--begin::Input group-->
+                    <div class="fv-row mb-7">
+                        <label class="form-label fw-bold fs-6 required">
+                            Produk Provider
+                        </label>
+                        <Field
+                            class="form-control form-control-lg form-control-solid"
+                            type="text"
+                            name="product_provider"
+                            autocomplete="off"
+                            v-model="data.product_provider"
+                            placeholder="Masukkan Provider Produk"
+                        />
+                        <div class="fv-plugins-message-container">
+                            <div class="fv-help-block">
+                                <ErrorMessage name="product_provider" />
+                            </div>
+                        </div>
+                    </div>
+                    <!--end::Input group-->
+                </div>
+                <div class="col-md-4">
+                    <!--begin::Input group-->
+                    <div class="fv-row mb-7">
+                        <label class="form-label fw-bold fs-6 required">
+                            Produk Kategori
+                        </label>
+                        <Field
+                            class="form-control form-control-lg form-control-solid"
+                            type="text"
+                            name="product_category"
+                            autocomplete="off"
+                            v-model="data.product_category"
+                            placeholder="Masukkan Kategori Barang"
+                        />
+                        <div class="fv-plugins-message-container">
+                            <div class="fv-help-block">
+                                <ErrorMessage name="product_category" />
                             </div>
                         </div>
                     </div>
@@ -148,4 +260,3 @@ watch(
         </div>
     </VForm>
 </template>
->

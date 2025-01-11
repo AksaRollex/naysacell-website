@@ -28,36 +28,24 @@ const routes: Array<RouteRecordRaw> = [
         path: "/",
         redirect: "/dashboard",
         component: () => import("@/layouts/default-layout/DefaultLayout.vue"),
-        // meta: {
-        //     middleware: "auth",
-        // },
+        meta: {
+            middleware: "auth",
+        },
         children: [
             {
                 path: "/dashboard",
                 name: "dashboard",
                 component: () => import("@/pages/admin/Dashboard.vue"),
-                // meta: {
-                //     pageTitle: "Dashboard",
-                //     breadcrumbs: ["Dashboard"],
-                // },
             },
             {
                 path: "/profile",
                 name: "admin-profile",
                 component: () => import("@/pages/admin/profile/Index.vue"),
-                // meta: {
-                //     pageTitle: "Profile",
-                //     breadcrumbs: ["Profile"],
-                // },
             },
             {
                 path: "/admin/setting",
                 name: "admin-setting",
                 component: () => import("@/pages/admin/setting/Index.vue"),
-                // meta: {
-                //     pageTitle: "Website Setting",
-                //     breadcrumbs: ["Website", "Setting"],
-                // },
             },
 
             // USER
@@ -66,72 +54,49 @@ const routes: Array<RouteRecordRaw> = [
                 name: "mitra-hak-akses",
                 component: () =>
                     import("@/pages/admin/user/hak-akses/Index.vue"),
-                // meta: {
-                //     pageTitle: "Dafrar Role & Hak Akses",
-                //     breadcrumbs: ["Dashboard", "Role & Hak Akses"],
-                // },
             },
             {
                 path: "/user/user-admin",
                 name: "user-admin",
                 component: () =>
                     import("@/pages/admin/user/user-admin/Index.vue"),
-                // meta: {
-                //     pageTitle: "Daftar Admin",
-                //     breadcrumbs: ["Dashboard", "User Admin"],
-                // },
             },
             {
                 path: "/user/user-mitra",
                 name: "user-mitra",
                 component: () =>
                     import("@/pages/admin/user/user-mitra/Index.vue"),
-                // meta: {
-                //     pageTitle: "Daftar Mitra",
-                //     breadcrumbs: ["Dashboard", "Mitra"],
-                // },
             },
             {
                 path: "/user/user",
                 name: "user-user",
                 component: () => import("@/pages/admin/user/user/Index.vue"),
-                // meta: {
-                //     pageTitle: "Daftar User",
-                //     breadcrumbs: ["Dashboard", "User"],
-                // },
             },
             // ISI SALDO
             {
                 path: "/isi-saldo/histori",
                 name: "isi-saldo-histori",
                 component: () =>
-                    import("@/pages/admin/isi-saldo/histori/Index.vue"),
-                // meta: {
-                //     pageTitle: "Histori Isi Saldo",
-                //     breadcrumbs: ["Dashboard", "Histori Isi Saldo"],
-                // },
+                    import("@/pages/admin/laporan/isi-saldo/Index.vue"),
             },
             {
-                path: "/isi-saldo/tarik-tiket",
-                name: "isi-saldo-tarik-tiket",
+                path: "/isi-saldo/topup",
+                name: "isi-saldo-topup",
                 component: () =>
-                    import("@/pages/admin/isi-saldo/tarik-tiket/Index.vue"),
-                // meta: {
-                //     pageTitle: "Tarik Tiket",
-                //     breadcrumbs: ["Dashboard", "Tarik Tiket"],
-                // },
+                    import("@/pages/admin/isi-saldo/topup/Index.vue"),
             },
-
+            {
+                path: "/isi-saldo/saldo-user",
+                name: "isi-saldo-saldo-user",
+                component: () =>
+                    import("@/pages/admin/isi-saldo/saldo/Index.vue"),
+            },
             // LAPORAN
             {
                 path: "/laporan/grafik-penjualan",
                 name: "laporan-grafik-penjualan",
                 component: () =>
                     import("@/pages/admin/laporan/grafik-penjualan/Index.vue"),
-                // meta: {
-                //     pageTitle: "Grafik Penjualan",
-                //     breadcrumbs: ["Dashboard", "Grafik Penjualan"],
-                // },
             },
             {
                 path: "/laporan/transaksi-prabayar",
@@ -140,10 +105,6 @@ const routes: Array<RouteRecordRaw> = [
                     import(
                         "@/pages/admin/laporan/transaksi-prabayar/Index.vue"
                     ),
-                // meta: {
-                //     pageTitle: "Transaksi Prabayar",
-                //     breadcrumbs: ["Dashboard", "Transaksi Prabayar"],
-                // },
             },
             {
                 path: "/laporan/transaksi-pascabayar",
@@ -152,20 +113,18 @@ const routes: Array<RouteRecordRaw> = [
                     import(
                         "@/pages/admin/laporan/transaksi-pascabayar/Index.vue"
                     ),
-                // meta: {
-                //     pageTitle: "Transaksi Pascabayar",
-                //     breadcrumbs: ["Dashboard", "Transaksi Pascabayar"],
-                // },
+            },
+            {
+                path: "/laporan/transaksi-deposit",
+                name: "laporan-transaksi-deposit",
+                component: () =>
+                    import("@/pages/admin/laporan/transaksi-deposit/Index.vue"),
             },
             {
                 path: "/laporan/transaksi-semua",
                 name: "laporan-transaksi-semua",
                 component: () =>
                     import("@/pages/admin/laporan/semua-transaksi/Index.vue"),
-                // meta: {
-                //     pageTitle: "Semua Transaksi",
-                //     breadcrumbs: ["Dashboard", "Semua Transaksi"],
-                // },
             },
             // MASTER
             {
@@ -173,10 +132,6 @@ const routes: Array<RouteRecordRaw> = [
                 name: "master-brand",
                 component: () =>
                     import("@/pages/admin/master/master-brand/Index.vue"),
-                // meta: {
-                //     pageTitle: "Brand",
-                //     breadcrumbs: ["Dashboard", "Brand"],
-                // },
             },
             {
                 path: "/master/operator-code",
@@ -185,10 +140,6 @@ const routes: Array<RouteRecordRaw> = [
                     import(
                         "@/pages/admin/master/master-operator-code/Index.vue"
                     ),
-                // meta: {
-                //     pageTitle: "Operator Code",
-                //     breadcrumbs: ["Dashboard", "Operator Code"],
-                // },
             },
 
             // PPOB
@@ -196,89 +147,52 @@ const routes: Array<RouteRecordRaw> = [
                 path: "/ppob",
                 name: "ppob",
                 component: () => import("@/pages/admin/ppob/Index.vue"),
-                // meta: {
-                //     pageTitle: "PPOB",
-                //     breadcrumbs: ["Dashboard", "PPOB"],
-                // },
             },
             {
                 path: "/ppob/pulsapaketdata",
                 name: "ppob-pulsapaketdata",
                 component: () =>
                     import("@/pages/admin/ppob/tabs/PulsaPaketData.vue"),
-                // meta: {
-                //     pageTitle: "Pulsa & Paket Data",
-                //     breadcrumbs: ["Dashboard", "Pulsapaketdata"],
-                // },
             },
             {
                 path: "/ppob/pln",
                 name: "ppob-pln",
                 component: () => import("@/pages/admin/ppob/tabs/PLN.vue"),
-                // meta: {
-                //     pageTitle: "PLN",
-                //     breadcrumbs: ["Dashboard", "PLN"],
-                // },
             },
             {
                 path: "/ppob/pdam",
                 name: "ppob-pdam",
                 component: () => import("@/pages/admin/ppob/tabs/PDAM.vue"),
-                // meta: {
-                //     pageTitle: "PDAM",
-                //     breadcrumbs: ["Dashboard", "PDAM"],
-                // },
             },
             {
                 path: "/ppob/dompetelektronik",
                 name: "ppob-dompetelektronik",
                 component: () =>
                     import("@/pages/admin/ppob/tabs/DompetElektronik.vue"),
-                // meta: {
-                //     pageTitle: "Dompet Elektronik",
-                //     breadcrumbs: ["Dashboard", "Dompet Elektronik"],
-                // },
             },
             {
                 path: "/ppob/bpjs",
                 name: "ppob-bpjs",
                 component: () => import("@/pages/admin/ppob/tabs/BPJS.vue"),
-                // meta: {
-                //     pageTitle: "BPJS",
-                //     breadcrumbs: ["Dashboard", "BPJS"],
-                // },
             },
             {
                 path: "/ppob/internet",
                 name: "ppob-internet",
                 component: () => import("@/pages/admin/ppob/tabs/Internet.vue"),
-                // meta: {
-                //     pageTitle: "Internet",
-                //     breadcrumbs: ["Dashboard", "Internet"],
-                // },
             },
 
             // PRODUK
-
             {
                 path: "/produk/prabayar",
                 name: "produk-prabayar",
                 component: () =>
                     import("@/pages/admin/produk/prabayar/Index.vue"),
-                // meta: {
-                //     pageTitle: "Produk Prabayar",
-                //     breadcrumbs: ["Produk", "Prabayar"],
-                // },
             },
             {
                 path: "/produk/pascabayar",
                 name: "produk-pascabayar",
                 component: () =>
                     import("@/pages/admin/produk/pascabayar/Index.vue"),
-                // meta: {
-                //     pageTitle: "Produk Pascabayar",
-                //     breadcrumbs: ["Produk", "Pascabayar"],
-                // },
             },
             // HISTORI
             {
@@ -286,6 +200,12 @@ const routes: Array<RouteRecordRaw> = [
                 name: "histori",
                 component: () => import("@/pages/user/histori/Index.vue"),
             },
+            // PESANAN
+            {
+                path : "/order",
+                name : "order",
+                component : () => import("@/pages/admin/pesanan/Index.vue")
+            }
         ],
     },
 
@@ -301,6 +221,22 @@ const routes: Array<RouteRecordRaw> = [
                 meta: {
                     pageTitle: "Sign In",
                     // middleware: "guest",
+                },
+            },
+        ],
+    },
+    {
+        path: "/password-reset",
+        component: () => import("@/layouts/AuthLayout.vue"),
+        children: [
+            {
+                path: "/password-reset",
+                name: "password-reset",
+                component: () =>
+                    import("@/pages/auth/sign-in/tabs/ResetPassword.vue"),
+                meta: {
+                    pageTitle: "Reset Password",
+                    middleware: "guest",
                 },
             },
         ],

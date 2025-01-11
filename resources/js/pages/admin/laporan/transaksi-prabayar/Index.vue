@@ -10,6 +10,10 @@ const paginateRef = ref<any>(null);
 const selected = ref<string>("");
 const openForm = ref<boolean>(false);
 
+const { delete : deleteTransaction } = useDelete({
+    onSuccess : () => paginateRef.value.refetch(),
+});
+
 const columns = [
     column.accessor("no", {
         header: "#",
@@ -19,9 +23,6 @@ const columns = [
     }),
     column.accessor("transaction_number", {
         header: "No. Tujuan",
-    }),
-    column.accessor("transaction_type", {
-        header: "Tipe",
     }),
     column.accessor("transaction_date", {
         header: "Tanggal",
@@ -35,20 +36,20 @@ const columns = [
     column.accessor("transaction_total", {
         header: "Total",
     }),
-    column.accessor("uuid", {
+    column.accessor("id", {
         header: "Aksi",
         cell: (cell) =>
             h("div", { class: "d-flex gap-2" }, [
                 h(
                     "button",
                     {
-                        class: "btn btn-sm btn-icon btn-info",
-                        onClick: () => {
-                            selected.value = cell.getValue();
-                            openForm.value = true;
-                        },
+                        class: "btn btn-sm btn-icon btn-danger",
+                        onClick: () =>
+                            deleteTransaction(
+                                `/master/delete-laporan/${cell.getValue()}`
+                            ),
                     },
-                    h("i", { class: "la la-pencil fs-2" })
+                    h("i", { class: "la la-trash fs-2" })
                 ),
             ]),
     }),

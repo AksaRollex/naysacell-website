@@ -19,18 +19,21 @@ const columns = [
     column.accessor("no", {
         header: "#",
     }),
+    column.accessor("customer_name", {
+        header: "Nama Customer",
+    }),
     column.accessor("product_name", {
         header: "Nama Produk",
     }),
-    column.accessor("product_category", {
-        header: "Kategori",
-    }),
-    column.accessor("product_provider", {
-        header: "Provider",
+    column.accessor("customer_no", {
+        header: "Nomor Customer",
     }),
     column.accessor("product_price", {
         header: "Harga",
         cell: (cell) => currency(cell.getValue() ?? 0),
+    }),
+    column.accessor("order_status", {
+        header: "Status",
     }),
     column.accessor("id", {
         header: "Aksi",
@@ -52,7 +55,9 @@ const columns = [
                     {
                         class: "btn btn-sm btn-icon btn-danger",
                         onClick: () =>
-                            deleteProduct(`/master/product/prepaid/delete-pbb/${cell.getValue()}`),
+                            deleteProduct(
+                                `/master/order/delete/${cell.getValue()}`
+                            ),
                     },
                     h("i", { class: "la la-trash fs-2" })
                 ),
@@ -80,22 +85,13 @@ watch(openForm, (val) => {
 
     <div class="card">
         <div class="card-header align-items-center">
-            <h2 class="mb-0">Daftar Produk Prabayar</h2>
-            <button
-                type="button"
-                class="btn btn-sm btn-primary ms-auto"
-                v-if="!openForm"
-                @click="openForm = true"
-            >
-                Tambah
-                <i class="la la-plus"></i>
-            </button>
+            <h2 class="mb-0">Daftar Pesanan</h2>
         </div>
         <div class="card-body">
             <paginate
                 ref="paginateRef"
-                id="table-product-prepaid"
-                url="/master/product/prepaid"
+                id="table-order"
+                url="/master/order"
                 :columns="columns"
             ></paginate>
         </div>

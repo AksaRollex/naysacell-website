@@ -17,20 +17,16 @@ class TransactionController extends Controller
         $page = $request->page ? $request->page - 1 : 0;
         DB::statement('set @no=0+' . $page * $per);
 
-        // Mulai dengan satu query builder
-        $query = TransactionModel::with('user');  // Pindahkan with() ke query utama
+        $query = TransactionModel::with('user');  
 
-        // Tambahkan kondisi pencarian jika ada
         if ($request->search) {
             $query->where('transaction_status', 'LIKE', '%' . $request->search . '%');
         }
 
-        // Tambahkan filter status jika ada
         if ($request->transaction_status) {
             $query->where('transaction_status', $request->transaction_status);
         }
 
-        // Eksekusi query dengan paginate
         $data = $query->paginate($per, ['*', DB::raw('@no := @no + 1 AS no')]);
 
         return response()->json($data);
@@ -50,7 +46,6 @@ class TransactionController extends Controller
         try {
             $validated = $request->validate([
                 'order_id' => 'required|exists:orders,id',
-                // validasi field lainnya
             ]);
 
             $order = Orders::findOrFail($request->order_id);
@@ -63,16 +58,12 @@ class TransactionController extends Controller
                 'payment_status' => 'pending',
                 'amount' => $order->product_price,
                 'payment_date' => now(),
-                // field lainnya
             ]);
 
-            // Simulasi proses pembayaran
-            // Jika pembayaran berhasil
             $transaction->update([
                 'payment_status' => 'success'
             ]);
 
-            // Update status order
             $order->update([
                 'order_status' => 'processing'
             ]);

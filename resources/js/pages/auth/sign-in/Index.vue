@@ -25,13 +25,13 @@
             </div>
         </div>
 
-        <div class="text-gray-400 fw-semobold fs-1x text-center">
-            Daftar Mitra ? 
-
-            <router-link to="/auth/sign-up" class="link-primary fw-bold">
-                {{ $t('Klik Disini ') }}
+        <!--begin::Forgot Password Link-->
+        <div class="text-center mt-4">
+            <router-link to="/password-reset" class="link-primary fs-6 fw-bold">
+                Reset Password?
             </router-link>
-        </div> 
+        </div>
+        <!--end::Forgot Password Link-->
     </div>
     <!--end::Form-->
 </template>

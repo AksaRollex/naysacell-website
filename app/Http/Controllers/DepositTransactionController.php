@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\UserBalance;
 use App\Models\DepositTransaction;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 class DepositTransactionController extends Controller
 {
@@ -15,11 +15,13 @@ class DepositTransactionController extends Controller
     {
         $per = $request->per ?? 10;
         $page = $request->page ? $request->page - 1 : 0;
+        $userId = auth()->id();
 
         DB::statement('set @no=0+' . $page * $per);
-        $data = DepositTransaction::when($request->search, function (Builder $query, string $search) {
-            $query->where('user_name', 'like', "%$search%");
-        })->latest()->paginate($per, ['*', DB::raw('@no := @no + 1 AS no')]);
+        $data = DepositTransaction::where('user_id', $userId)
+            ->when($request->search, function (Builder $query, string $search) {
+                $query->where('name', 'like', "%$search%");
+            })->latest()->paginate($per, ['*', DB::raw('@no := @no + 1 AS no')]);
 
         return response()->json($data);
     }
@@ -91,5 +93,20 @@ class DepositTransactionController extends Controller
         return response()->json([
             'balance' => $balance
         ]);
+    }
+
+    public function checkBalanceWb(Request $request)
+    {
+        $per = $request->per ?? 10;
+        $page = $request->page ? $request->page - 1 : 0;
+        $userId = auth()->id();
+
+        DB::statement('set @no=0+' . $page * $per);
+        $data = DepositTransaction::where('user_id', $userId)
+            ->when($request->search, function (Builder $query, string $search) {
+                $query->where('user_name', 'like', "%$search%");
+            })->latest()->paginate($per, ['*', DB::raw('@no := @no + 1 AS no')]);
+
+        return response()->json($data);
     }
 }

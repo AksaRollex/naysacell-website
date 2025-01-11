@@ -306,28 +306,24 @@ watch(
                     </div>
                     <!--end::Input group-->
                 </div>
-                <div class="col-md-6">
-                    <!--begin::Input group-->
+                <!-- <div class="col-md-6">
                     <div class="fv-row mb-7">
                         <label class="form-label fw-bold fs-6">
                             User Photo
                         </label>
-                        <!--begin::Input-->
                         <file-upload
                             :files="photo"
                             :accepted-file-types="fileTypes"
                             required
                             v-on:updatefiles="(file) => (photo = file)"
                         ></file-upload>
-                        <!--end::Input-->
                         <div class="fv-plugins-message-container">
                             <div class="fv-help-block">
                                 <ErrorMessage name="photo" />
                             </div>
                         </div>
                     </div>
-                    <!--end::Input group-->
-                </div>
+                </div> -->
             </div>
         </div>
         <div class="card-footer d-flex">

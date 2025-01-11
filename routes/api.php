@@ -15,13 +15,14 @@ use App\Http\Controllers\ProductPrepaidController;
 use App\Http\Controllers\ProductProviderController;
 use App\Http\Controllers\DepositTransactionController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\UserBalanceController;
 
-// Authentication Route
 Route::middleware(['auth', 'json'])->prefix('auth')->group(function () {
     Route::post('login', [AuthController::class, 'login'])->withoutMiddleware('auth');
     Route::delete('logout', [AuthController::class, 'logout']);
     Route::get('me', [AuthController::class, 'me'])->withoutMiddleware('auth');
 
+    //MOBILE
     Route::prefix('user')->group(function () {
         Route::post('store', [UserController::class, 'storeUser'])->withoutMiddleware('auth');
         Route::post('update', [UserController::class, 'updateMobile'])->withoutMiddleware('auth');
@@ -38,9 +39,21 @@ Route::middleware(['auth', 'json'])->prefix('auth')->group(function () {
     // SALDO
     Route::middleware(['throttle:6,1'],)->group(function () {
         Route::post('/topup', [DepositTransactionController::class, 'topup']);
+        Route::post('/check-saldo-wb', [DepositTransactionController::class, 'checkBalanceWb']);
         Route::get('/check-saldo', [DepositTransactionController::class, 'checkBalance']);
         Route::post('/histori-deposit', [DepositTransactionController::class, 'index']);
+        Route::post('/get-deposit/{id}', [DepositTransactionController::class, 'getDataById']);
     });
+    
+    Route::post('/saldo-user', [UserBalanceController::class, 'index']);
+    
+    Route::post('/send-mail-admin', [AuthController::class, 'mailAdmin'])->withoutMiddleware('auth');
+    Route::post('verify-otp', [AuthController::class, 'verifyOTP'])->withoutMiddleware('auth');
+    Route::post('reset-password', [AuthController::class, 'resetPassword'])->withoutMiddleware('auth');
+
+    Route::post('send-user-otp', [AuthController::class, 'sendUserOTP'])->withoutMiddleware('auth');
+    Route::post('verify-user-otp', [AuthController::class, 'verifyUserOTP'])->withoutMiddleware('auth');
+    Route::post('reset-user-password', [AuthController::class, 'resetUserPassword'])->withoutMiddleware('auth');
 });
 
 Route::middleware(['auth', 'verified', 'json'])->group(function () {
@@ -64,7 +77,6 @@ Route::middleware(['auth', 'verified', 'json'])->group(function () {
             Route::post('users/user', [UserController::class, 'indexUser']);
             Route::post('users/store', [UserController::class, 'store']);
             Route::post('users/update', [UserController::class, 'update']);
-            Route::delete('users/delete/{id}', [UserController::class, 'destroy']);
             Route::apiResource('users', UserController::class)
                 ->except(['index', 'store'])->scoped(['user' => 'uuid']);
         });

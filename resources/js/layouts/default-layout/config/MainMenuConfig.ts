@@ -105,7 +105,7 @@ const MainMenuConfig: Array<MenuItem> = [
 
             // LAPORAN
             {
-                sectionTitle: "Laporan",
+                sectionTitle: "Laporan Transaksi",
                 name: "laporan",
                 keenthemesIcon: "archive",
                 route: "/laporan",
@@ -120,15 +120,25 @@ const MainMenuConfig: Array<MenuItem> = [
                         name: "laporan-transaksi-prabayar",
                         route: "/laporan/transaksi-prabayar",
                     },
+                    // {
+                    //     heading: "Transaksi Pascabayar",
+                    //     name: "laporan-transaksi-pascabayar",
+                    //     route: "/laporan/transaksi-pascabayar",
+                    // },
                     {
-                        heading: "Transaksi Pascabayar",
-                        name: "laporan-transaksi-pascabayar",
-                        route: "/laporan/transaksi-pascabayar",
+                        heading: "Transaksi Deposit",
+                        name: "laporan-transaksi-deposit",
+                        route: "/laporan/transaksi-deposit",
                     },
+                    // {
+                    //     heading: "Semua Transaksi",
+                    //     name: "laporan-semua-transaksi",
+                    //     route: "/laporan/transaksi-semua",
+                    // },
                     {
-                        heading: "Semua Transaksi",
-                        name: "laporan-semua-transaksi",
-                        route: "/laporan/transaksi-semua",
+                        heading: "Transaksi Pesanan",
+                        name: "laporan-transaksi-pesanan",
+                        route: "/laporan/transaksi-pesanan",
                     },
                 ],
             },
@@ -141,18 +151,24 @@ const MainMenuConfig: Array<MenuItem> = [
                 keenthemesIcon: "wallet",
                 sub: [
                     {
-                        heading: "Tarik Tiket",
-                        name: "isi-saldo-tarik-tiket",
-                        route: "/isi-saldo/tarik-tiket",
+                        heading: "Topup",
+                        name: "isi-saldo-topup",
+                        route: "/isi-saldo/topup",
                     },
                     {
-                        heading: "Histori Isi Saldo",
-                        name: "isi-saldo-histori",
-                        route: "/isi-saldo/histori",
+                        heading: "Saldo Pengguna",
+                        name: "isi-saldo-saldo-user",
+                        route: "/isi-saldo/saldo-user",
                     },
                 ],
             },
-
+            // PESANAN
+            {
+                heading: "Pesanan",
+                route: "/order",
+                name: "order",
+                keenthemesIcon: "handcart",
+            },
             // SETTING
             {
                 heading: "Setting",

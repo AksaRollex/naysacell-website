@@ -2,13 +2,13 @@
     <div class="container mt-4">
         <div class="row g-4">
             <!-- Pulsa & Paket Data Card -->
-            <div class="col-md-4">
+            <div class="col-md-6 col-xl-6">
                 <router-link
                     to="/ppob/pulsapaketdata"
                     class="text-decoration-none"
                 >
                     <div
-                        class="card h-100 dashboard-card border-start border-primary border-4"
+                        class="card h-100 dashboard-card shadow-sm"
                     >
                         <div class="card-body d-flex align-items-center">
                             <div
@@ -24,34 +24,14 @@
                 </router-link>
             </div>
 
-            <!-- PLN Card -->
-            <!-- <div class="col-md-4">
-                <router-link to="/ppob/pln" class="text-decoration-none">
-                    <div
-                        class="card h-100 dashboard-card border-start border-warning border-4"
-                    >
-                        <div class="card-body d-flex align-items-center">
-                            <div
-                                class="card-icon bg-warning-light p-3 rounded-3 me-3"
-                            >
-                                <i
-                                    class="bi bi-lightning-charge text-warning fs-4"
-                                ></i>
-                            </div>
-                            <h5 class="card-title text-white mb-0">PLN</h5>
-                        </div>
-                    </div>
-                </router-link>
-            </div> -->
-
             <!-- Dompet Elektronik Card -->
-            <div class="col-md-4">
+            <div class="col-md-6">
                 <router-link
                     to="/ppob/dompetelektronik"
                     class="text-decoration-none"
                 >
                     <div
-                        class="card h-100 dashboard-card border-start border-success border-4"
+                        class="card h-100 dashboard-card "
                     >
                         <div class="card-body d-flex align-items-center">
                             <div
@@ -66,46 +46,6 @@
                     </div>
                 </router-link>
             </div>
-
-            <!-- BPJS Kesehatan Card -->
-            <!-- <div class="col-md-4">
-                <router-link to="/ppob/bpjs" class="text-decoration-none">
-                    <div
-                        class="card h-100 dashboard-card border-start border-danger border-4"
-                    >
-                        <div class="card-body d-flex align-items-center">
-                            <div
-                                class="card-icon bg-danger-light p-3 rounded-3 me-3"
-                            >
-                                <i
-                                    class="bi bi-heart-pulse text-danger fs-4"
-                                ></i>
-                            </div>
-                            <h5 class="card-title text-white mb-0">
-                                BPJS Kesehatan
-                            </h5>
-                        </div>
-                    </div>
-                </router-link>
-            </div> -->
-
-            <!-- PDAM Card -->
-            <!-- <div class="col-md-4">
-                <router-link to="/ppob/pdam" class="text-decoration-none">
-                    <div
-                        class="card h-100 dashboard-card border-start border-info border-4"
-                    >
-                        <div class="card-body d-flex align-items-center">
-                            <div
-                                class="card-icon bg-info-light p-3 rounded-3 me-3"
-                            >
-                                <i class="bi bi-droplet text-info fs-4"></i>
-                            </div>
-                            <h5 class="card-title text-white mb-0">PDAM</h5>
-                        </div>
-                    </div>
-                </router-link>
-            </div> -->
         </div>
     </div>
 </template>
@@ -118,11 +58,9 @@ export default {
 
 <style scoped>
 .dashboard-card {
-    background-color: #262626;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
     cursor: pointer;
-    border: 1px solid #e0e0e0;
 }
 
 .dashboard-card:hover {

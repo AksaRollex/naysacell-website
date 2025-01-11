@@ -10,7 +10,7 @@
         >
             <!--begin::Card-->
             <div
-                class="bg-body d-flex flex-column align-items-stretch flex-center  w-md-600px w-100"
+                class="bg-body d-flex flex-column align-items-stretch flex-center h-80 w-md-500px w-100"
             >
                 <!--begin::Wrapper-->
                 <div
