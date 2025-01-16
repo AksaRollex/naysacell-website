@@ -24,6 +24,7 @@ class TransactionModel extends Model
         'transaction_message',
         'transaction_status',
         'transaction_user_id',
+        'transaction_product'
         // 'transaction_provider',
     ];
 

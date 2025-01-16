@@ -12,7 +12,7 @@ trait CodeGenerate
     public function getCode()
     {
         $q = DB::table('code_generate')->select(DB::raw('MAX(RIGHT(code,9)) as kd_max'));
-        $prx = 'INV-BL-' . date('y') . '-' . date('m') . '-';
+        $prx = 'INV-NC-' . date('y') . '-' . date('m') . '-';
         if ($q->count() > 0) {
             foreach ($q->get() as $k) {
                 $tmp = ((int)$k->kd_max) + 1;

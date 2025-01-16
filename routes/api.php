@@ -69,6 +69,7 @@ Route::middleware(['auth', 'verified', 'json'])->group(function () {
             // MOBILE
             Route::get('users/get/{id}', [UserController::class, 'getById']);
             Route::put('users/update/{id}', [UserController::class, 'updateById']);
+            Route::delete('users/delete/{id}', [UserController::class, 'destroy']);
             // WEBSITE
             Route::get('users', [UserController::class, 'get']);
             Route::post('users', [UserController::class, 'index'])->withoutMiddleware('can:master-user');

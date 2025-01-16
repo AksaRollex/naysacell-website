@@ -86,13 +86,6 @@ watch(
     }
 );
 
-const statusOptions = ref([
-    { value: "failed", text: "Gagal" },
-    { value: "pending", text: "Pending" },
-    { value: "success", text: "Berhasil" },
-    { value: "canceled", text: "Dibatalkan" },
-    { value: "processing", text: "Diproses" },
-]);
 </script>
 
 <template>
@@ -127,7 +120,13 @@ const statusOptions = ref([
                         <Select2
                             placeholder="Pilih status"
                             class="form-select-solid"
-                            :options="statusOptions"
+                            :options="[
+                                { value: 'failed', text: 'Gagal' },
+                                { value: 'pending', text: 'Pending' },
+                                { value: 'success', text: 'Berhasil' },
+                                { value: 'canceled', text: 'Dibatalkan' },
+                                { value: 'processing', text: 'Diproses' },
+                            ]"
                             name="order_status"
                             v-model="data.order_status"
                         />

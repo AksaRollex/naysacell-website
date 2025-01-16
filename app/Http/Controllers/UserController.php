@@ -192,17 +192,38 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(User $user)
+    // public function destroy(User $user)
+    // {
+    //     // if ($user->photo) {
+    //     //     Storage::disk('public')->delete($user->photo);
+    //     // }
+
+    //     $user->delete();
+
+    //     return response()->json([
+    //         'success' => true
+    //     ]);
+    // }
+
+
+    public function destroy($id)
     {
-        if ($user->photo) {
-            Storage::disk('public')->delete($user->photo);
+
+        $user = User::find($id);
+
+        if ($user) {
+            $user->delete();
+            return response()->json([
+                'status' => 'true',
+                'message' => 'Data Berhasil Dihapus'
+            ]);
         }
 
-        $user->delete();
-
+        // Return response jika user tidak ditemukan
         return response()->json([
-            'success' => true
-        ]);
+            'status' => 'false',
+            'message' => 'Data Tidak Ditemukan'
+        ], 404);
     }
 
     public function updateById(Request $request, $id)

@@ -16,7 +16,7 @@
                             >
                                 <i class="bi bi-phone text-primary fs-4"></i>
                             </div>
-                            <h5 class="card-title text-white mb-0">
+                            <h5 class="card-title  mb-0">
                                 Pulsa & Paket Data
                             </h5>
                         </div>
@@ -39,7 +39,7 @@
                             >
                                 <i class="bi bi-wallet2 text-success fs-4"></i>
                             </div>
-                            <h5 class="card-title text-white mb-0">
+                            <h5 class="card-title  mb-0">
                                 Dompet Elektronik
                             </h5>
                         </div>

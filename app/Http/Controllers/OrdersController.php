@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Orders;
 use App\Models\ProductPrepaid;
+use App\Models\TransactionModel;
 use App\Models\User;
+use App\Models\UserBalance;
+use App\Traits\CodeGenerate;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
@@ -50,6 +53,7 @@ class OrdersController extends Controller
         return response()->json($data);
     }
 
+    use CodeGenerate;
     public function submitProduct(Request $request)
     {
         try {
@@ -66,22 +70,82 @@ class OrdersController extends Controller
             Log::info('Submit Product Request:', $request->all());
 
             $product = ProductPrepaid::findOrFail($request->product_id);
-            $user = User::findOrFail($request->user_id);
 
-            Log::info('Product Data:', [
-                'product' => $product->toArray(),
-                'user' => $user->toArray()
-            ]);
+            $userBalance = UserBalance::where('user_id', $request->user_id)->first();
 
-            $order = Orders::create($validated);
+            if (!$userBalance) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'User balance not found'
+                ], 404);
+            }
 
-            Log::info('Created Order:', $order->toArray());
+            // Menghitung total harga
+            $totalPrice = $product->product_price * $request->quantity;
 
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Order created successfully',
-                'data' => $order
-            ]);
+            // Memeriksa apakah balance mencukupi
+            if ($userBalance->balance < $totalPrice) {
+                $kurangSaldo = $totalPrice - $userBalance->balance;
+
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Saldo tidak mencukupi',
+                    'details' => [
+                        'saldo_sekarang' => number_format($userBalance->balance),
+                        'total_pembelian' => number_format($totalPrice),
+                        'kekurangan_saldo' => number_format($kurangSaldo),
+                    ],
+                    'suggestion' => 'Silahkan lakukan top up saldo sebesar Rp. ' . number_format($kurangSaldo)
+                ], 400);
+            }
+            // Mulai transaction database
+            DB::beginTransaction();
+            try {
+                // Generate transaction code using trait
+                $transactionCode = $this->getCode();
+
+                // Create transaction record
+                $transaction = TransactionModel::create([
+                    'transaction_code' => $transactionCode,
+                    'transaction_date' => now()->format('Y-m-d'),
+                    'transaction_time' => now()->format('H:i:s'),
+                    'transaction_number' => $request->customer_no,
+                    'transaction_message' => "Pembelian {$request->product_name}",
+                    'transaction_status' => 'success',
+                    'transaction_product' => $request->product_name,
+                    'transaction_total' => $totalPrice,
+                    'transaction_user_id' => $request->user_id,
+                    'payment_status' => 'success',
+                    'payment_date' => now()
+                ]);
+
+
+                // Membuat order
+                $order = Orders::create($validated);
+
+                // Mengurangi balance user
+                $userBalance->balance -= $totalPrice;
+                $userBalance->save();
+
+                DB::commit();
+
+                Log::info('Created Order:', $order->toArray());
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Order created successfully',
+                    'data' => $order,
+                    'transaction' => $transaction,
+                    'balance_info' => [
+                        'saldo_awal' => number_format($userBalance->balance + $totalPrice),
+                        'total_pembelian' => number_format($totalPrice),
+                        'sisa_saldo' => number_format($userBalance->balance)
+                    ]
+                ]);
+            } catch (\Exception $e) {
+                DB::rollBack();
+                throw $e;
+            }
         } catch (ModelNotFoundException $e) {
             $message = str_contains($e->getMessage(), 'Product')
                 ? 'Product not found'

@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('transaction_number');
             $table->string('transaction_message');
             $table->string('transaction_status');
+            $table->string('transaction_product');
             $table->integer('transaction_total');
             $table->unsignedBigInteger('transaction_user_id');
             $table->enum('payment_status', ['pending', 'success', 'failed']);
