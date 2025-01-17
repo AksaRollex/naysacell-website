@@ -26,11 +26,11 @@
         </div>
 
         <!--begin::Forgot Password Link-->
-        <div class="text-center mt-4">
+        <!-- <div class="text-center mt-4">
             <router-link to="/password-reset" class="link-primary fs-6 fw-bold">
                 Reset Password?
             </router-link>
-        </div>
+        </div> -->
         <!--end::Forgot Password Link-->
     </div>
     <!--end::Form-->

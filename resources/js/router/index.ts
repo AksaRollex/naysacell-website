@@ -20,13 +20,10 @@ const routes: Array<RouteRecordRaw> = [
         path: "/welcome",
         name: "welcome",
         component: () => import("@/pages/user/Index.vue"),
-        meta: {
-            pageTitle: "Landing Page",
-        },
     },
     {
         path: "/",
-        redirect: "/dashboard",
+        redirect: "/welcome",
         component: () => import("@/layouts/default-layout/DefaultLayout.vue"),
         meta: {
             middleware: "auth",
@@ -329,10 +326,10 @@ router.beforeEach(async (to, from, next) => {
 
             next();
         } else {
-            next({ name: "sign-in" });
+            next({ name: "welcome" });
         }
     } else if (to.meta.middleware == "guest" && authStore.isAuthenticated) {
-        next({ name: "dashboard" });
+        next({ name: "welcome" });
     } else {
         next();
     }

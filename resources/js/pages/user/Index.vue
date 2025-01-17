@@ -1,6 +1,6 @@
 <template>
     <div class="w-100">
-        <!-- Header -->
+        <!-- Header remains the same -->
         <header>
             <nav
                 class="navbar navbar-dark border-bottom"
@@ -22,12 +22,12 @@
 
         <!-- Main Content -->
         <div id="main">
-            <!-- Welcome Section -->
+            <!-- Welcome Section remains the same -->
             <section
                 id="Welcome"
                 class="min-vh-100 d-flex align-items-center"
                 style="
-                    background-image: url('/media/background.jpg');
+                    background-image: url('/media/products_provider/background.jpg');
                     background-size: cover;
                     background-position: center;
                 "
@@ -46,7 +46,13 @@
                             >
                                 Selamat Datang Di NAYSA CELL
                             </h1>
-                            <h1 class="text-white lead" style="font-family: Arial, Helvetica, sans-serif; line-height: 2rem;">
+                            <h1
+                                class="text-white lead"
+                                style="
+                                    font-family: Arial, Helvetica, sans-serif;
+                                    line-height: 2rem;
+                                "
+                            >
                                 Silahkan Download Aplikasi Kami Untuk Kalian
                                 Yang Ingin Topup PPOB Dan Sebagainya
                             </h1>
@@ -55,19 +61,29 @@
                 </div>
             </section>
 
-            <!-- UI Application Section -->
-            <section id="UIApplication" class="py-20">
+            <!-- Modified UI Application Section -->
+            <!-- <section id="UIApplication" class="py-20">
                 <div class="text-center mb-5">
-                    <h1 class="text-white fw-bold">Aplikasi Kami</h1>
+                    <h1
+                        class="text-white"
+                        style="
+                        font-size: 2rem;
+                            font-weight: bold;
+                            font-family: 'Segoe UI', Tahoma, Geneva, Verdana,
+                                sans-serif;
+                        "
+                    >
+                        APLIKASI 
+                    </h1>
                 </div>
                 <div class="container">
-                    <div class="row g-4 justify-content-center">
+                    <div class="row g-4">
                         <div
-                            class="col-lg-3"
+                            class="col-6 col-lg-4"
                             v-for="(app, index) in applications"
                             :key="index"
                         >
-                            <div class="card h-100 shadow-sm mx-5">
+                            <div class="card h-100 shadow-sm mx-2 mx-md-4">
                                 <img
                                     :src="app.image"
                                     class="card-img-top"
@@ -82,11 +98,12 @@
                         </div>
                     </div>
                 </div>
-            </section>
+            </section> -->
         </div>
     </div>
     <Footer />
 </template>
+
 <script>
 import Footer from "./component/Footer.vue";
 export default {
@@ -114,6 +131,7 @@ export default {
     },
 };
 </script>
+
 <style>
 body {
     font-family: "font-sans", sans-serif;
@@ -130,32 +148,22 @@ body {
 
 #UIApplication {
     position: relative;
-    background-color: #262626;
     width: 100%;
-    height: 100vh;
-
-    @media screen {
-        @media (min-width: 768px) {
-            height: 100%;
-            width: 100%;
-            padding: 20px;
-        }
-
-        @media (max-width: 768px) {
-            height: 100%;
-            width: 100%;
-            padding: 20px;
-        }
-    }
+    min-height: 100vh;
+    overflow: hidden;
 }
 
 #UIApplication::before {
     content: "";
     position: absolute;
-    top: 20px;
+    top: 0;
     left: 0;
-    right: 0;
-    height: 40px;
-    box-shadow: 0 -30px 20px 20px #262626;
+    width: 100%;
+    height: 100%;
+    background-image: url("/media/products_provider/background.jpg");
+    background-size: cover;
+    background-position: center;
+    transform: scaleY(-1);
+    z-index: -1;
 }
 </style>

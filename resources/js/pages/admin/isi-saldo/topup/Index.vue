@@ -112,7 +112,7 @@ const handleTopup = async () => {
                 :disabled="loading"
             >
                 <span v-if="loading">Memproses...</span>
-                <span class="mb-0 text-gray-300" v-else>Top Up Sekarang</span>
+                <h7 class="mb-0" v-else>Top Up Sekarang</h7>
             </button>
         </form>
     </div>

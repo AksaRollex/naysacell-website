@@ -1,5 +1,5 @@
 <template>
-    <footer class=" py-5" style="background-color: #18181B;">
+    <footer class="py-5" style="background-color: #18181b">
         <div class="container">
             <div class="row align-items-center">
                 <div
@@ -12,10 +12,13 @@
                         style="width: 8rem; height: auto"
                     />
                     <div class="max-w-md">
-                        <p class="text-light-50 text-justify text-md-start" style="font-family : Arial, Helvetica, sans-serif">
+                        <p
+                            class="text-light-50 text-justify text-md-start"
+                            style="font-family: Arial, Helvetica, sans-serif"
+                        >
                             Top up cepat dan mudah dengan NAYSA CELL! Nikmati
-                            berbagai layanan PPOB, mulai dari pulsa, token
-                            listrik, hingga pembayaran tagihan, semua dalam satu
+                            berbagai layanan, mulai dari pulsa, paket data, uang
+                            elektrinik, hingga topup game, semua dalam satu
                             aplikasi. Hemat waktu dan transaksi aman hanya
                             dengan beberapa klik. Unduh sekarang dan nikmati
                             kemudahan bertransaksi!
@@ -26,9 +29,14 @@
                     <h3 class="text-white mb-3">
                         Download NAYSA CELL Sekarang
                     </h3>
-                    <a href="#" class="d-inline-block">
+                    <a
+                        @click="downloadApp"
+                        href="#"
+                        class="d-inline-block"
+                        style="cursor: pointer"
+                    >
                         <img
-                            src="../../../../../public/media/googleplay.png"
+                            src="../../../../../public/media/click-here.png"
                             alt="Get it on Google Play"
                             style="width: 12rem; height: auto"
                         />
@@ -38,13 +46,39 @@
         </div>
     </footer>
 </template>
+
 <script>
 export default {
     name: "Footer",
+    methods: {
+        downloadApp(e) {
+            e.preventDefault();
+            try {
+                // Gunakan browser's native download behavior
+                const downloadLink = document.createElement("a");
+                downloadLink.href = "/media/NAYSACELL.apk";
+                downloadLink.download = "NAYSACELL.apk";
+                downloadLink.click();
+
+                // Optional: Tampilkan notifikasi sukses
+                this.$toast?.success("Download dimulai...", {
+                    position: "bottom-right",
+                    timeout: 3000,
+                });
+            } catch (error) {
+                console.error("Download failed:", error);
+                // Notifikasi error
+                this.$toast?.error("Download gagal. Silakan coba lagi nanti.", {
+                    position: "bottom-right",
+                    timeout: 5000,
+                });
+            }
+        },
+    },
 };
 </script>
 
-<style>
+<style scoped>
 @media (max-width: 768px) {
     footer {
         padding: 2rem;
@@ -57,6 +91,7 @@ export default {
         padding: 0 1rem;
     }
 }
+
 #download {
     @media (max-width: 768px) {
         margin-left: 1rem;

@@ -1,21 +1,38 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import { ref, watch, onMounted } from "vue";
 import axios from "@/libs/axios";
 import { toast } from "vue3-toastify";
 
-// PPOB Form data
 const customerNo = ref("");
 const customerName = ref("");
 const searchQuery = ref("");
 const selectedProduct = ref(null);
 const quantity = ref(1);
-
-// Products state
+const currentBalance = ref(0);
 const products = ref([]);
 const loading = ref(false);
 const error = ref("");
 
-// Search products
+const fetchBalance = async () => {
+    try {
+        const response = await axios.get("/auth/check-saldo");
+        currentBalance.value = response.data.balance;
+    } catch (error) {
+        toast.error("Gagal mengambil data saldo", {
+            position: toast.POSITION.TOP_RIGHT,
+            autoClose: 3000,
+        });
+    }
+};
+
+const formatCurrency = (value) => {
+    return new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        minimumFractionDigits: 0,
+    }).format(value);
+};
+
 const searchProducts = async () => {
     try {
         loading.value = true;
@@ -39,6 +56,7 @@ const searchProducts = async () => {
 
 onMounted(() => {
     searchProducts();
+    fetchBalance();
 });
 
 watch(searchQuery, (newValue) => {
@@ -51,7 +69,7 @@ const submitOrder = async () => {
     if (!selectedProduct.value || !customerNo.value || !customerName.value) {
         toast.error("Mohon lengkapi semua field yang diperlukan", {
             autoClose: 3000,
-            position: toast.POSITION.TOP_RIGHT
+            position: toast.POSITION.TOP_RIGHT,
         });
         return;
     }
@@ -72,7 +90,6 @@ const submitOrder = async () => {
 
         const response = await axios.post("/auth/submit-product", payload);
 
-        // Handle response based on status
         if (response.data.status === "success") {
             customerNo.value = "";
             customerName.value = "";
@@ -80,41 +97,38 @@ const submitOrder = async () => {
             selectedProduct.value = null;
             quantity.value = 1;
             await searchProducts();
-            
+
             toast.success("Pesanan berhasil dikirim", {
                 autoClose: 3000,
-                position: toast.POSITION.TOP_RIGHT
+                position: toast.POSITION.TOP_RIGHT,
             });
         }
-
     } catch (err) {
-        console.log('Error response:', err.response?.data); // Tambahkan logging untuk debugging
+        console.log("Error response:", err.response?.data);
 
         const errorData = err.response?.data;
-        
+
         if (errorData?.message === "Saldo tidak mencukupi") {
-            // Format pesan error untuk saldo tidak cukup
             const errorMessage = `
                 Saldo tidak mencukupi
                 Saldo sekarang: Rp ${errorData.details.saldo_sekarang}
                 Total pembelian: Rp ${errorData.details.total_pembelian}
                 ${errorData.suggestion}
             `;
-            
+
             toast.error(errorMessage, {
                 autoClose: 5000,
-                position: toast.POSITION.TOP_RIGHT
+                position: toast.POSITION.TOP_RIGHT,
             });
         } else if (errorData?.message === "User balance not found") {
             toast.error("Data saldo tidak ditemukan", {
                 autoClose: 3000,
-                position: toast.POSITION.TOP_RIGHT
+                position: toast.POSITION.TOP_RIGHT,
             });
         } else {
-            // Handle error umum
             toast.error(errorData?.message || "Gagal mengirim pesanan", {
                 autoClose: 3000,
-                position: toast.POSITION.TOP_RIGHT
+                position: toast.POSITION.TOP_RIGHT,
             });
         }
 
@@ -131,7 +145,12 @@ const submitOrder = async () => {
         <div class="card dashboard-card shadow-sm">
             <!-- Customer Information Section -->
             <div class="customer-section">
-                <h2 class="mb-0">E-Money Order</h2>
+                <div class="row justify-content-between">
+                    <h2 class="mb-0">E-Money Order</h2>
+                    <h6 class="mb-0 mt-4">
+                        Saldo Anda {{ formatCurrency(currentBalance) }}
+                    </h6>
+                </div>
                 <div class="form-grid">
                     <div class="form-group">
                         <h5 class="form-label">Nomor Customer</h5>
@@ -170,7 +189,7 @@ const submitOrder = async () => {
             <!-- Products Grid -->
             <div class="products-section">
                 <div v-if="loading" class="loading-state">
-                    Loading products...
+                    Memuat produk ...
                 </div>
 
                 <div v-else-if="error" class="error-state">
@@ -178,7 +197,7 @@ const submitOrder = async () => {
                 </div>
 
                 <div v-else-if="products.length === 0" class="empty-state">
-                    No pulsa products found
+                    Produk Tidak Ditemukan
                 </div>
 
                 <div v-else class="products-grid">
@@ -304,7 +323,7 @@ const submitOrder = async () => {
 }
 
 .search-container {
-    max-width: 600px;
+    max-width: 100%;
     margin: 0 auto;
 }
 
@@ -342,7 +361,7 @@ const submitOrder = async () => {
 
 .product-card.selected {
     border: 1px;
-    background-color: #d7dade;
+    background-color: rgba(52, 50, 50, 0.1);
     border-radius: 1rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
@@ -435,7 +454,7 @@ const submitOrder = async () => {
     text-align: center;
     padding: 2rem;
     color: #718096;
-    background: white;
+    /* background: white; */
     border-radius: 12px;
     margin: 1rem 0;
 }

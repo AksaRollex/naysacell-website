@@ -54,7 +54,7 @@ onMounted(() => {
                     <!--end::Illustration-->
                     <!--begin::Link-->
                     <div class="mb-0">
-                        <router-link to="/sign-in" class="btn btn-sm btn-primary"
+                        <router-link to="/welcome" class="btn btn-sm btn-primary"
                             >Return Home</router-link
                         >
                     </div>

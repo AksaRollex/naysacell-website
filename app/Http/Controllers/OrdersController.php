@@ -76,7 +76,7 @@ class OrdersController extends Controller
             if (!$userBalance) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'User balance not found'
+                    'message' => 'Data Saldo Tidak Ditemukan, Silahkan Untuk Melakukan Topup !'
                 ], 404);
             }
 

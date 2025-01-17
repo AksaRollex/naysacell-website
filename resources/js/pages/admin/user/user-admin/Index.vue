@@ -98,7 +98,7 @@ watch(openForm, (val) => {
         <div class="card-body">
             <paginate
                 ref="paginateRef"
-                id="table-users"
+                id="table-admin"
                 :payload="{ role_id: 1 }"
                 url="/master/users/admin"
                 :columns="columns"

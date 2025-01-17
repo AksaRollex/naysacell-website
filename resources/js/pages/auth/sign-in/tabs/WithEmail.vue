@@ -70,13 +70,14 @@
         </div>
         <!--end::Input group-->
 
-        <!-- <div class="form-check mb-10">
+        <div class="form-check mb-4">
             <Field tabindex="3" class="form-check-input" type="checkbox" id="remember_me" name="remember_me" value="1"
                 v-model="data.remember_me" />
             <label class="form-check-label" for="remember_me">
-                {{ $t('login.remember') }}
+                <!-- {{ $t('login.remember') }} -->
+                  Ingat Saya
             </label>
-        </div> -->
+        </div>
 
         <!--begin::Actions-->
         <div class="text-center">

@@ -11,7 +11,6 @@ const MainMenuConfig: Array<MenuItem> = [
             },
         ],
     },
-
     // WEBSITE
     {
         route: "/dashboard/website",
@@ -46,7 +45,6 @@ const MainMenuConfig: Array<MenuItem> = [
                     },
                 ],
             },
-
             // // MASTER
             // {
             //     sectionTitle: "Master",
@@ -86,15 +84,6 @@ const MainMenuConfig: Array<MenuItem> = [
                     // },
                 ],
             },
-
-            // PPOB
-            {
-                heading: "PPOB",
-                name: "PPOB",
-                keenthemesIcon: "lots-shopping",
-                route: "/ppob",
-            },
-
             // HISTORI
             {
                 heading: "Histori",
@@ -102,7 +91,6 @@ const MainMenuConfig: Array<MenuItem> = [
                 keenthemesIcon: "archive",
                 route: "/histori",
             },
-
             // LAPORAN
             {
                 sectionTitle: "Laporan Transaksi",
@@ -142,10 +130,9 @@ const MainMenuConfig: Array<MenuItem> = [
                     },
                 ],
             },
-
             // ISI SALDO
             {
-                sectionTitle: "Isi Saldo",
+                sectionTitle: "Saldo",
                 route: "/isi-saldo",
                 name: "isi-saldo",
                 keenthemesIcon: "wallet",
@@ -161,6 +148,13 @@ const MainMenuConfig: Array<MenuItem> = [
                         route: "/isi-saldo/saldo-user",
                     },
                 ],
+            },
+            // PPOB
+            {
+                heading: "PPOB",
+                name: "PPOB",
+                keenthemesIcon: "lots-shopping",
+                route: "/ppob",
             },
             // PESANAN
             {

@@ -1,12 +1,10 @@
 <template>
     <main class="dashboard-container">
-        <!-- Modern Statistics Cards -->
         <div class="row g-5">
-            <div class="col-xl-3 col-md-6">
+            <div class="col-xl-4">
                 <div class="card h-100 shadow-sm hover-elevate-up">
                     <div class="card-body">
                         <div class="d-flex flex-column">
-                            <!-- Icon with Gradient Background -->
                             <div class="symbol symbol-60px mb-6">
                                 <span
                                     class="symbol-label bg-primary bg-opacity-10 rounded-3"
@@ -21,12 +19,10 @@
                                     </i>
                                 </span>
                             </div>
-
-                            <!-- Statistics -->
                             <div class="d-flex flex-column mb-2">
                                 <span
                                     class="text-gray-600 fw-semibold fs-7 mb-1"
-                                    >Saldo</span
+                                    >Saldo Anda</span
                                 >
                                 <div class="d-flex align-items-center">
                                     <span
@@ -39,11 +35,82 @@
                                     </span>
                                 </div>
                             </div>
-
-                            <!-- Progress Bar -->
-                            <!-- <div class="progress h-3px bg-light-primary">
-                  <div class="progress-bar bg-primary" role="progressbar" :style="{ width: '76%' }"></div>
-                </div> -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4">
+                <div class="card h-100 shadow-sm hover-elevate-up">
+                    <div class="card-body">
+                        <div class="d-flex flex-column">
+                            <div class="symbol symbol-60px mb-6">
+                                <span
+                                    class="symbol-label bg-warning bg-opacity-10 rounded-3"
+                                >
+                                    <i
+                                        class="ki-duotone ki-people text-warning fs-1"
+                                    >
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                        <span class="path3"></span>
+                                        <span class="path4"></span>
+                                    </i>
+                                </span>
+                            </div>
+                            <div class="d-flex flex-column mb-2">
+                                <span
+                                    class="text-gray-600 fw-semibold fs-7 mb-1"
+                                    >Pengguna</span
+                                >
+                                <div class="d-flex align-items-center">
+                                    <span
+                                        class="badge badge-light-warning fs-base"
+                                    >
+                                        <i
+                                            class="ki-duotone ki-arrow-up fs-7 text-success"
+                                        ></i>
+                                        {{ currentUser.length }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4 ">
+                <div class="card h-100 shadow-sm hover-elevate-up">
+                    <div class="card-body">
+                        <div class="d-flex flex-column">
+                            <div class="symbol symbol-60px mb-6">
+                                <span
+                                    class="symbol-label bg-success bg-opacity-10 rounded-3"
+                                >
+                                    <i
+                                        class="ki-duotone ki-purchase text-success fs-1"
+                                    >
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                        <span class="path3"></span>
+                                        <span class="path4"></span>
+                                    </i>
+                                </span>
+                            </div>
+                            <div class="d-flex flex-column mb-2">
+                                <span
+                                    class="text-gray-600 fw-semibold fs-7 mb-1"
+                                    >Pesanan</span
+                                >
+                                <div class="d-flex align-items-center">
+                                    <span
+                                        class="badge badge-light-success fs-base"
+                                    >
+                                        <i
+                                            class="ki-duotone ki-arrow-up fs-7 text-success"
+                                        ></i>
+                                        {{ currentOrder.length }}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -81,7 +148,37 @@ const formatCurrency = (value) => {
 
 onMounted(() => {
     fetchBalance();
+    fetchUser();
+    fetchOrder();
 });
+
+const currentUser = ref([]);
+const fetchUser = async () => {
+    try {
+        const response = await axios.get("/master/users");
+        currentUser.value = response.data.data;
+    } catch (error) {
+        toast.error("Gagal mengambil data user", {
+            position: toast.POSITION.TOP_RIGHT,
+            autoClose: 3000,
+        });
+        console.error("error fetching user : ", error);
+    }
+};
+
+const currentOrder = ref([]);
+const fetchOrder = async () => {
+    try {
+        const response = await axios.post("/master/order");
+        currentOrder.value = response.data.data;
+    } catch (error) {
+        toast.error("Gagal mengambil data pesanan", {
+            position: toast.POSITION.TOP_RIGHT,
+            autoClose: 3000,
+        });
+        console.error("error fetching order : ", error);
+    }
+};
 </script>
 
 <style>
