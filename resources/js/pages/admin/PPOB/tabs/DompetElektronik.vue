@@ -251,7 +251,6 @@ const submitOrder = async () => {
 <style scoped>
 .page-container {
     min-height: 100vh;
-    /* background-color: #f5f7fa; */
     border-radius: 20px;
     margin-bottom: 20px;
 }
@@ -282,9 +281,7 @@ const submitOrder = async () => {
 }
 
 .customer-section {
-    /* background: white; */
     border-radius: 12px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .form-grid {

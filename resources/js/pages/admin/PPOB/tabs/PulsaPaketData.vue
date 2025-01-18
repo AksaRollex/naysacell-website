@@ -2,6 +2,7 @@
 import { ref, watch, onMounted } from "vue";
 import axios from "@/libs/axios";
 import { toast } from "vue3-toastify";
+import { valueEquals } from "element-plus";
 
 const customerNo = ref("");
 const customerName = ref("");
@@ -39,9 +40,75 @@ const searchProducts = async () => {
         loading.value = true;
         error.value = "";
 
+        let productProvider = null;
+        // Telkomsel
+        if (
+            [
+                "0811",
+                "0812",
+                "0813",
+                "0821",
+                "0822",
+                "0823",
+                "0851",
+                "0852",
+                "0853",
+            ].some((prefix) => customerNo.value.startsWith(prefix))
+        ) {
+            productProvider = "telkomsel";
+        }
+        // Indosat
+        else if (
+            ["0814", "0815", "0816", "0855", "0856", "0857", "0858"].some(
+                (prefix) => customerNo.value.startsWith(prefix)
+            )
+        ) {
+            productProvider = "indosat";
+        }
+        // XL
+        else if (
+            ["0817", "0818", "0819", "0859", "0877", "0878"].some((prefix) =>
+                customerNo.value.startsWith(prefix)
+            )
+        ) {
+            productProvider = "xl";
+        }
+        // Axis
+        else if (
+            ["0831", "0832", "0833", "0838"].some((prefix) =>
+                customerNo.value.startsWith(prefix)
+            )
+        ) {
+            productProvider = "axis";
+        }
+        // Three
+        else if (
+            ["0895", "0896", "0897", "0898", "0899"].some((prefix) =>
+                customerNo.value.startsWith(prefix)
+            )
+        ) {
+            productProvider = "three";
+        }
+        // Smartfren
+        else if (
+            [
+                "0881",
+                "0882",
+                "0883",
+                "0884",
+                "0885",
+                "0886",
+                "0887",
+                "0888",
+                "0889",
+            ].some((prefix) => customerNo.value.startsWith(prefix))
+        ) {
+            productProvider = "smartfren";
+        }
         const response = await axios.post("/master/product/prepaid", {
             search: searchQuery.value,
             product_category: "pulsa",
+            product_provider: productProvider,
             page: 1,
             per: 10,
         });
@@ -62,6 +129,12 @@ onMounted(() => {
 
 watch(searchQuery, (newValue) => {
     if (newValue.length >= 3) {
+        searchProducts();
+    }
+});
+
+watch(customerNo, (newValue) => {
+    if (newValue) {
         searchProducts();
     }
 });
@@ -252,7 +325,6 @@ const submitOrder = async () => {
 <style scoped>
 .page-container {
     min-height: 100vh;
-    /* background-color: #f5f7fa; */
     border-radius: 20px;
     margin-bottom: 20px;
 }
@@ -283,9 +355,7 @@ const submitOrder = async () => {
 }
 
 .customer-section {
-    /* background: white; */
     border-radius: 12px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .form-grid {

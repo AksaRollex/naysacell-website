@@ -73,47 +73,73 @@ const handleTopup = async () => {
 </script>
 
 <template>
-    <div class="max-w-md mx-auto p-6 rounded-lg shadow-lg">
-        <h2 class="text-2xl font-bold mb-6">Top Up Saldo</h2>
-
-        <div class="mb-6">
-            <h6 class="text-gray-500 mb-2">Saldo Saat Ini:</h6>
-            <h3 class="font-semibold">
-                {{ formatCurrency(currentBalance) }}
-            </h3>
-        </div>
-
-        <form @submit.prevent="handleTopup" class="space-y-4">
-            <div>
-                <h6 for="amount" class="block font-medium text-gray-500 mb-2">
-                    Jumlah Top Up
-                </h6>
-                <div class="relative col-md-3">
-                    <h6 class="absolute left-3 top-2">Rp</h6>
-                    <input
-                        id="amount"
-                        v-model="amount"
-                        type="number"
-                        class="form-control form-control-solid"
-                        placeholder="Masukkan jumlah"
-                        min="1000"
-                        max="10000000"
-                        required
-                    />
+    <div class="page-container">
+        <div class="card dashboard-card shadow-sm">
+            <form @submit.prevent="handleTopup">
+                <div class="customer-section">
+                    <div class="row justify-content-between">
+                        <h2 class="mb-0">Topup</h2>
+                        <h6 class="mb-0 mt-4">
+                            Saldo Anda Saat Ini : {{ formatCurrency(currentBalance) }}
+                        </h6>
+                    </div>
+                    <div class="form-grid">
+                        <input
+                            id="amount"
+                            v-model="amount"
+                            type="number"
+                            class="form-control form-control-solid"
+                            placeholder="Masukkan Jumlah Nominal"
+                            min="1000"
+                            max="10000000"
+                            required
+                        />
+                        <h6 class="mt-4 mb-2 text-gray-500">
+                            Minimal Rp 1.000 - Maksimal Rp 10.000.000
+                        </h6>
+                    </div>
                 </div>
-                <h6 class="mt-4 mb-2 text-gray-500">
-                    Minimal Rp 1.000 - Maksimal Rp 10.000.000
-                </h6>
-            </div>
-
-            <button
-                type="submit"
-                class="btn btn-sm btn-primary ms-auto"
-                :disabled="loading"
-            >
-                <span v-if="loading">Memproses...</span>
-                <h7 class="mb-0" v-else>Top Up Sekarang</h7>
-            </button>
-        </form>
+                <button
+                    type="submit"
+                    class="btn btn-sm btn-primary mt-4 ms-auto"
+                    :disabled="loading"
+                >
+                    <span v-if="loading">Memproses...</span>
+                    <h7 class="mb-0" v-else>Top Up Sekarang</h7>
+                </button>
+            </form>
+        </div>
     </div>
 </template>
+
+<style scoped>
+.page-container {
+    min-height: 100vh;
+    border-radius: 20px;
+    margin-bottom: 20px;
+}
+
+.dashboard-card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    cursor: pointer;
+    padding: 1rem;
+}
+
+.customer-section {
+    border-radius: 12px;
+}
+
+.form-grid {
+    display: grid;
+    margin-top: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+</style>
