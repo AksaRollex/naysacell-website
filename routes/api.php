@@ -131,13 +131,17 @@ Route::middleware(['auth', 'verified', 'json'])->group(function () {
 
         // LAPORAN
         Route::middleware('can:master-laporan')->group(function () {
-            //DEPOSIT
+            // DEPOSIT
             Route::post('histori-deposit', [DepositTransactionController::class, 'index']);
             Route::get('deposit/download-excel', [DepositTransactionController::class, 'downloadExcel']);
-            //
+            // TRANSACTION
             Route::post('laporan', [TransactionController::class, 'laporan']);
             Route::get('transaction/download-excel', [TransactionController::class, 'downloadExcel']);
             Route::delete('delete-laporan/{id}', [TransactionController::class, 'destroy']);
+            // USER
+            Route::get('user/download-excel', [UserController::class, 'downloadExcel']); 
+            // PRODUCT
+            Route::get('productPrepaid/download-excel', [ProductPrepaidController::class, 'downloadExcel']);
         });
 
         // ISI SALDO

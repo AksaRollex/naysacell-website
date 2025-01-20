@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { h, ref, watch } from "vue";
-import { useDelete } from "@/libs/hooks";
+import { useDelete, useDownloadExcel } from "@/libs/hooks";
 import Form from "./Form.vue";
 import { createColumnHelper } from "@tanstack/vue-table";
 import type { User } from "@/types";
@@ -73,6 +73,8 @@ watch(openForm, (val) => {
     }
     window.scrollTo(0, 0);
 });
+
+const { download: downloadExcelReportUser } = useDownloadExcel();
 </script>
 
 <template>
@@ -86,6 +88,7 @@ watch(openForm, (val) => {
     <div class="card">
         <div class="card-header align-items-center">
             <h2 class="mb-0">Daftar Daftar User</h2>
+
             <button
                 type="button"
                 class="btn btn-sm btn-primary ms-auto"
@@ -94,6 +97,12 @@ watch(openForm, (val) => {
             >
                 Tambah
                 <i class="la la-plus"></i>
+            </button>
+            <button
+                class="btn btn-sm ms-2 btn-danger"
+                @click="downloadExcelReportUser('/master/user/download-excel')"
+            >
+                Unduh Excel
             </button>
         </div>
         <div class="card-body">

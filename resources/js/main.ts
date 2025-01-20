@@ -117,10 +117,13 @@ let cssRule =
     "display:block;width:200px;border-radius: 3px 0 0 3px;padding:3px 15px;background:#108bc3;color:#FFF;font-size: 30px;font-family:Arial, Helvetica, sans-seriffont-weight: bold;";
 let cssRule2 =
     "display:block;border-radius: 0 3px 3px 0;padding:3px 15px;background:#fff;color:#666;font-size: 30px;font-family:Arial, Helvetica, sans-serif;";
+let cssRule4 =
+    "border-radius: 0 3px 3px 0;padding:3px 15px;background:#35495e;color:#fff;font-size: 12px;font-weight: bold;";
 console.log(
-    "%cNAYSA CELL" + "%cAplikasi PPOB Terbaik",
+    "%cNAYSA CELL" +
+        "%cSilahkan Download Aplikasi Kami Untuk Yang Ingin Topup Pulsa, Paket Data, Uang Elektronik, Dan Game.",
     cssRule,
-    cssRule2
+    cssRule4
 );
 
 cssRule =

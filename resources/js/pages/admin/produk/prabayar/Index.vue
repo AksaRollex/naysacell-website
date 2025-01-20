@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { h, ref, watch } from "vue";
 import Form from "./Form.vue";
-import { useDelete } from "@/libs/hooks";
+import { useDelete, useDownloadExcel } from "@/libs/hooks";
 import { createColumnHelper } from "@tanstack/vue-table";
 import type { User } from "@/types";
 import { currency } from "@/libs/utils";
@@ -55,7 +55,9 @@ const columns = [
                     {
                         class: "btn btn-sm btn-icon btn-danger",
                         onClick: () =>
-                            deleteProduct(`/master/product/prepaid/delete-pbb/${cell.getValue()}`),
+                            deleteProduct(
+                                `/master/product/prepaid/delete-pbb/${cell.getValue()}`
+                            ),
                     },
                     h("i", { class: "la la-trash fs-2" })
                 ),
@@ -71,6 +73,8 @@ watch(openForm, (val) => {
     }
     window.scrollTo(0, 0);
 });
+
+const { download: downloadExcelReportProduct } = useDownloadExcel();
 </script>
 
 <template>
@@ -92,6 +96,12 @@ watch(openForm, (val) => {
             >
                 Tambah
                 <i class="la la-plus"></i>
+            </button>
+            <button
+                class="btn btn-sm ms-2 btn-danger"
+                @click="downloadExcelReportProduct('/master/productPrepaid/download-excel')"
+            >
+                Unduh Excel
             </button>
         </div>
         <div class="card-body">

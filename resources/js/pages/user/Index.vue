@@ -54,7 +54,7 @@
                                 "
                             >
                                 Silahkan Download Aplikasi Kami Untuk Kalian
-                                Yang Ingin Topup PPOB Dan Sebagainya
+                                Yang Ingin Topup Pulsa, Paket Data, Uang Elektronik, Dan Game.
                             </h1>
                         </div>
                     </div>
