@@ -7,5 +7,4 @@ export interface Setting {
     alamat: string;
     email: string;
     logo: Array<File | string> | string;
-    banner: Array<File | string> | string;
 }

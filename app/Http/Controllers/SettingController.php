@@ -19,14 +19,11 @@ class SettingController extends Controller
             $request->validate([
                 'app' => 'required',
                 'description' => 'required',
-                'pemerintah' => 'required',
                 'alamat' => 'required',
-                'dinas' => 'required',
                 'telepon' => 'required',
                 'email' => 'required',
                 'logo' => 'required|image|mimes:jpeg,png,jpg|max:2048',
                 'bg_auth' => 'required|image|mimes:jpeg,png,jpg|max:8192',
-                'banner' => 'required|image|mimes:jpeg,png,jpg|max:8192',
             ]);
 
             $setting = Setting::first();
@@ -38,11 +35,6 @@ class SettingController extends Controller
 
             if ($setting->bg_auth != null && $setting->bg_auth != '') {
                 $old_photo = str_replace('/storage/', '', $setting->bg_auth);
-                Storage::disk('public')->delete($old_photo);
-            }
-
-            if ($setting->banner != null && $setting->banner != '') {
-                $old_photo = str_replace('/storage/', '', $setting->banner);
                 Storage::disk('public')->delete($old_photo);
             }
 

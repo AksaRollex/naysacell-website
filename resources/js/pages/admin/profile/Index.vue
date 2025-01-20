@@ -6,7 +6,6 @@ import Swal from "sweetalert2/dist/sweetalert2.js";
 import * as Yup from "yup";
 
 interface ProfileDetails {
-    photo: string;
     name: string;
     email: string;
     phone: string;
@@ -44,7 +43,6 @@ const changePassword = Yup.object().shape({
 });
 
 const profileDetails = ref<ProfileDetails>({
-    photo: getAssetPath("media/avatars/blank.png"),
     name: "",
     email: "Smith",
     phone: "08899898734678",
@@ -155,9 +153,6 @@ const updatePassword = () => {
     }
 };
 
-const removeImage = () => {
-    profileDetails.value.photo = "/media/avatars/blank.png";
-};
 </script>
 
 <template>
@@ -192,77 +187,6 @@ const removeImage = () => {
             >
                 <!--begin::Card body-->
                 <div class="card-body border-top p-9">
-                    <!--begin::Input group-->
-                    <div class="row mb-6">
-                        <!--begin::Label-->
-                        <label class="col-lg-4 col-form-label fw-semibold fs-6"
-                            >Foto</label
-                        >
-                        <!--end::Label-->
-
-                        <!--begin::Col-->
-                        <div class="col-lg-8">
-                            <!--begin::Image input-->
-                            <div
-                                class="image-input image-input-outline"
-                                data-kt-image-input="true"
-                                :style="{
-                                    backgroundImage: `url(${getAssetPath(
-                                        '/media/avatars/blank.png'
-                                    )})`,
-                                }"
-                            >
-                                <!--begin::Preview existing avatar-->
-                                <div
-                                    class="image-input-wrapper w-125px h-125px"
-                                    :style="`background-image: url(${profileDetails.photo})`"
-                                ></div>
-                                <!--end::Preview existing avatar-->
-
-                                <!--begin::Label-->
-                                <label
-                                    class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow"
-                                    data-kt-image-input-action="change"
-                                    data-bs-toggle="tooltip"
-                                    title="Change Photo"
-                                >
-                                    <i class="bi bi-pencil-fill fs-7"></i>
-
-                                    <!--begin::Inputs-->
-                                    <input
-                                        type="file"
-                                        name="avatar"
-                                        accept=".png, .jpg, .jpeg"
-                                    />
-                                    <input type="hidden" name="avatar_remove" />
-                                    <!--end::Inputs-->
-                                </label>
-                                <!--end::Label-->
-
-                                <!--begin::Remove-->
-                                <span
-                                    class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow"
-                                    data-kt-image-input-action="remove"
-                                    data-bs-toggle="tooltip"
-                                    @click="removeImage()"
-                                    title="Remove avatar"
-                                >
-                                    <i class="bi bi-x fs-2"></i>
-                                </span>
-                                <!--end::Remove-->
-                            </div>
-                            <!--end::Image input-->
-
-                            <!--begin::Hint-->
-                            <div class="form-text">
-                                Allowed file types: png, jpg, jpeg.
-                            </div>
-                            <!--end::Hint-->
-                        </div>
-                        <!--end::Col-->
-                    </div>
-                    <!--end::Input group-->
-
                     <!--begin::Input group-->
                     <div class="row mb-6">
                         <!--begin::Label-->

@@ -161,4 +161,30 @@ class TransactionController extends Controller
         header('Content-Disposition: attachment; filename="grid-export.xlsx"');
         $writer->save("php://output");
     }
+
+    public function getChartData()
+    {
+        $data = TransactionModel::select(
+            DB::raw('DATE(created_at) as date'),
+            DB::raw('COUNT(*) as total_transactions'),
+            DB::raw('SUM(transaction_total) as total_amount')
+        )
+            ->groupBy('date')
+            ->orderBy('date', 'asc')
+            ->get();
+
+        $chartData = $data->map(function ($item) {
+            return [
+                'date' => $item->date,
+                'total_transactions' => $item->total_transactions,
+                'total_amount' => $item->total_amount,
+            ];
+        });
+
+        return response()->json([
+            'labels' => $chartData->pluck('date')->values(),
+            'transactions' => $chartData->pluck('total_transactions')->values(),
+            'amounts' => $chartData->pluck('total_amount')->values()
+        ]);
+    }
 }

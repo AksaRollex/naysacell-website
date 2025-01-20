@@ -138,8 +138,9 @@ Route::middleware(['auth', 'verified', 'json'])->group(function () {
             Route::post('laporan', [TransactionController::class, 'laporan']);
             Route::get('transaction/download-excel', [TransactionController::class, 'downloadExcel']);
             Route::delete('delete-laporan/{id}', [TransactionController::class, 'destroy']);
+            Route::get('/transaction/chart-data', [TransactionController::class, 'getChartData']);
             // USER
-            Route::get('user/download-excel', [UserController::class, 'downloadExcel']); 
+            Route::get('user/download-excel', [UserController::class, 'downloadExcel']);
             // PRODUCT
             Route::get('productPrepaid/download-excel', [ProductPrepaidController::class, 'downloadExcel']);
         });
@@ -163,6 +164,7 @@ Route::middleware(['auth', 'verified', 'json'])->group(function () {
 
 Route::prefix('setting')->group(function () {
     Route::get('', [SettingController::class, 'index']);
+    Route::post('update', [SettingController::class, 'update']);
 });
 
 Route::prefix('digiflazz')->group(function () {

@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('app');
             $table->text('description');
             $table->string('logo');
-            $table->string('banner');
             $table->string('bg_auth');
             $table->string('alamat');
             $table->string('telepon');

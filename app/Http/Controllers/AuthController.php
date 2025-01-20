@@ -44,6 +44,16 @@ class AuthController extends Controller
             ], 401);
         }
 
+        if (!auth()->user()->hasRole('admin')) {
+            // Logout jika bukan admin
+            auth()->logout();
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Anda tidak memiliki akses untuk login!'
+            ], 403);
+        }
+
         return response()->json([
             'status' => true,
             'user' => auth()->user(),
