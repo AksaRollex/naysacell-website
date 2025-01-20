@@ -21,7 +21,7 @@ return new class extends Migration
             $table->foreign('product_id')->references('id')->on('product_prepaid')->onDelete('cascade');
             $table->unsignedBigInteger('user_id');
             $table->string('customer_name');
-            $table->enum('order_status', ['pending', 'processing', 'completed', 'cancelled']);
+            $table->enum('order_status', ['pending', 'processing', 'success', 'cancelled']);
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });

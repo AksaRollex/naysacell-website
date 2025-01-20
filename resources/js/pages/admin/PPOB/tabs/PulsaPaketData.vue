@@ -311,7 +311,7 @@ const submitOrder = async () => {
                     </span>
                 </div>
                 <button
-                    class="submit-button"
+                    class="btn btn-sm btn-primary"
                     :disabled="loading || !selectedProduct"
                     @click="submitOrder"
                 >

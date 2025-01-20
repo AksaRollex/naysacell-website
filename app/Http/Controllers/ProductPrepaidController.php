@@ -57,7 +57,8 @@ class ProductPrepaidController extends Controller
             $query = ProductPrepaid::query();
 
             if ($request->search) {
-                $query->where('product_name', 'LIKE', '%' . $request->search . '%');
+                $query->where('product_name', 'LIKE', '%' . $request->search . '%')
+                    ->orWhere('product_category', 'LIKE', '%' . $request->search . '%');
             }
 
             if ($request->product_provider) {
@@ -144,4 +145,6 @@ class ProductPrepaidController extends Controller
             'message' => 'Produk Berhasil Dihapus'
         ]);
     }
+
+  
 }

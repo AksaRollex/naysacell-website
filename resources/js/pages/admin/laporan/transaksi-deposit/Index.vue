@@ -1,13 +1,11 @@
 <script setup lang="ts">
-import { h, ref, watch } from "vue";
-import { useDelete } from "@/libs/hooks";
-import Form from "./Form.vue";
+import { ref, h } from "vue";
 import { createColumnHelper } from "@tanstack/vue-table";
 import type { User } from "@/types";
+import { useDownloadExcel } from "@/libs/hooks";
 
 const column = createColumnHelper<User>();
 const paginateRef = ref<any>(null);
-const selected = ref<string>("");
 const openForm = ref<boolean>(false);
 
 const columns = [
@@ -21,37 +19,52 @@ const columns = [
         header: "Jumlah Deposit",
     }),
     column.accessor("status", {
-        header: "Status Transaksi",
+        header: "Status",
+        cell: (cell) => {
+            const status = cell.getValue();
+            let badgeClass = "";
+
+            switch (status) {
+                case "success":
+                    badgeClass = "badge-light-success";
+                    break;
+                case "pending":
+                    badgeClass = "badge-light-warning";
+                    break;
+                case "failed":
+                    badgeClass = "badge-light-danger";
+                    break;
+                default:
+                    badgeClass = "badge-light-primary";
+            }
+
+            return h("div", [
+                h("span", { class: `badge ${badgeClass}` }, status),
+            ]);
+        },
     }),
 ];
 
-const refresh = () => paginateRef.value.refetch();
+const { download : downloadExcelDeposit } = useDownloadExcel();
 
-watch(openForm, (val) => {
-    if (!val) {
-        selected.value = "";
-    }
-    window.scrollTo(0, 0);
-});
 </script>
 
 <template>
-    <Form
-        :selected="selected"
-        @close="openForm = false"
-        v-if="openForm"
-        @refresh="refresh"
-    />
-
     <div class="card">
         <div class="card-header align-items-center">
             <h2 class="mb-0">Daftar Laporan Deposit</h2>
+            <button
+                class="btn btn-sm btn-danger"
+                @click="downloadExcelDeposit('/master/deposit/download-excel')"
+            >
+                Unduh Excel
+            </button>
         </div>
         <div class="card-body">
             <paginate
                 ref="paginateRef"
-                id="table-laporan-pascabayar"
-                url="/auth/histori-deposit"
+                id="table-laporan-deposit"
+                url="/master/histori-deposit"
                 :columns="columns"
             ></paginate>
         </div>

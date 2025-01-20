@@ -6,6 +6,7 @@ import axios from "@/libs/axios";
 import { toast } from "vue3-toastify";
 import type { User } from "@/types";
 import ApiService from "@/core/services/ApiService";
+import { computed } from "vue";
 
 const data = ref({} as User);
 
@@ -95,6 +96,21 @@ watch(
             getEdit();
         }
     }
+);
+
+const provider = [
+    { id: 1, text: "Indosat" },
+    { id: 2, text: "XL" },
+    { id: 3, text: "Smartfren" },
+    { id: 4, text: "Three" },
+    { id: 5, text: "Axis" },
+];
+
+const providers = computed(() =>
+    provider.map((item: any) => ({
+        id: item.text,
+        text: item.text,
+    }))
 );
 </script>
 
@@ -207,28 +223,28 @@ watch(
                     </div>
                     <!--end::Input group-->
                 </div>
-                <div class="col-md-4">
-                    <!--begin::Input group-->
-                    <div class="fv-row mb-7">
-                        <label class="form-label fw-bold fs-6 required">
-                            Produk Provider
-                        </label>
-                        <Field
-                            class="form-control form-control-lg form-control-solid"
-                            type="text"
-                            name="product_provider"
-                            autocomplete="off"
+                <!--begin::Input group-->
+                <div class="fv-row mb-7">
+                    <label class="form-label fw-bold fs-6 required">
+                        Provider
+                    </label>
+                    <Field name="product_provider" v-slot="{ field }">
+                        <select2
+                            v-bind="field"
+                            placeholder="Pilih provider"
+                            class="form-select-solid"
+                            :options="providers"
                             v-model="data.product_provider"
-                            placeholder="Masukkan Provider Produk"
-                        />
-                        <div class="fv-plugins-message-container">
-                            <div class="fv-help-block">
-                                <ErrorMessage name="product_provider" />
-                            </div>
+                        >
+                        </select2>
+                    </Field>
+                    <div class="fv-plugins-message-container">
+                        <div class="fv-help-block">
+                            <ErrorMessage name="product_provider" />
                         </div>
                     </div>
-                    <!--end::Input group-->
                 </div>
+                <!--end::Input group-->
                 <div class="col-md-4">
                     <!--begin::Input group-->
                     <div class="fv-row mb-7">

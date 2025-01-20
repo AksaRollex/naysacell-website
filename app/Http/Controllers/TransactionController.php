@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class TransactionController extends Controller
 {
@@ -17,7 +19,7 @@ class TransactionController extends Controller
         $page = $request->page ? $request->page - 1 : 0;
         DB::statement('set @no=0+' . $page * $per);
 
-        $query = TransactionModel::with('user');  
+        $query = TransactionModel::with('user');
 
         if ($request->search) {
             $query->where('transaction_status', 'LIKE', '%' . $request->search . '%');
@@ -31,7 +33,7 @@ class TransactionController extends Controller
 
         return response()->json($data);
     }
-    
+
     public function destroy($id)
     {
         $transaction = TransactionModel::find($id);
@@ -90,5 +92,73 @@ class TransactionController extends Controller
                 'message' => 'Payment processing failed: ' . $e->getMessage()
             ], 500);
         }
+    }
+    public function downloadExcel()
+    {
+        $spreadsheet = new Spreadsheet();
+        $sheet =  $spreadsheet->getActiveSheet();
+
+        $data = TransactionModel::with(['user'])->get();
+
+        $sheet->setCellValue('A1', 'No.');
+        $sheet->setCellValue('B1', 'Nama');
+        $sheet->setCellValue('C1', 'Kode TRX');
+        $sheet->setCellValue('D1', 'Produk');
+        $sheet->setCellValue('E1', 'Nomor Tujuan');
+        $sheet->setCellValue('F1', 'Total');
+        $sheet->setCellValue('G1', 'Pesan');
+        $sheet->setCellValue('H1', 'Tanggal Pembelian');
+        $sheet->setCellValue('I1', 'Status Pembayaran');
+
+        $sheet->getStyle('A1:I1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFE1B48F');
+        $sheet->getStyle('A1:I1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:I1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A1:I1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A1:I1')->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN)->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_BLACK);
+
+        $sheet->getColumnDimension('A')->setWidth(6);
+        $sheet->getColumnDimension('B')->setWidth(25);
+        $sheet->getColumnDimension('C')->setWidth(30);
+        $sheet->getColumnDimension('D')->setWidth(35);
+        $sheet->getColumnDimension('E')->setWidth(25);
+        $sheet->getColumnDimension('F')->setWidth(25);
+        $sheet->getColumnDimension('G')->setWidth(40);
+        $sheet->getColumnDimension('H')->setWidth(25);
+        $sheet->getColumnDimension('I')->setWidth(25);
+
+
+        $row = 2;
+        foreach ($data as $i => $transaction) {
+            $sheet->setCellValue('A' . $row, $i + 1);
+            $sheet->setCellValue('B' . $row, $transaction->user->name);
+            $sheet->setCellValue('C' . $row, $transaction->transaction_code);
+            $sheet->setCellValue('D' . $row, $transaction->transaction_product);
+            $sheet->setCellValue('E' . $row, $transaction->transaction_number);
+            $sheet->setCellValue('F' . $row, 'Rp ' . number_format($transaction->transaction_total, 0, ',', '.'));
+            $sheet->setCellValue('G' . $row, $transaction->transaction_message);
+            $sheet->setCellValue('H' . $row, $transaction->created_at->format('d-m-Y'));
+            $sheet->setCellValue('I' . $row, $transaction->transaction_status);
+
+            $sheet->getStyle('A' . $row . ':I' . $row)->getBorders()->getAllBorders()
+                ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN)
+                ->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_BLACK);
+
+            $sheet->getStyle('A' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('B' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('C' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('D' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('E' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('F' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('G' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('H' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('I' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+            $row++;
+        }
+
+        $writer = new Xlsx($spreadsheet);
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment; filename="grid-export.xlsx"');
+        $writer->save("php://output");
     }
 }

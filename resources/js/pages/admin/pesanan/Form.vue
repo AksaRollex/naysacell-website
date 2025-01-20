@@ -6,7 +6,7 @@ import axios from "@/libs/axios";
 import { toast } from "vue3-toastify";
 import type { User } from "@/types";
 import ApiService from "@/core/services/ApiService";
-import Select2 from "@/components/Select2.vue";
+import { computed } from "vue";
 
 const data = ref({} as User);
 
@@ -41,7 +41,7 @@ function getEdit() {
 
 function submit() {
     const formData = new FormData();
-    formData.append("order_status", data.value.order_status);
+    formData.append("order_status", String(data.value.order_status));
 
     if (props.selected) {
         formData.append("_method", "PUT");
@@ -86,6 +86,31 @@ watch(
     }
 );
 
+const status = [
+    {
+        id: "pending",
+        text: "Pending",
+    },
+    {
+        id: "success",
+        text: "Sukses",
+    },
+    {
+        id: "cancelled",
+        text: "Dibatalkan",
+    },
+    {
+        id: "processing",
+        text: "Proses",
+    },
+];
+
+const statuses = computed(() =>
+    status.map((item: any) => ({
+        id: item.id,
+        text: item.text,
+    }))
+);
 </script>
 
 <template>
@@ -115,28 +140,24 @@ watch(
                     <!--begin::Input group-->
                     <div class="fv-row mb-7">
                         <label class="form-label fw-bold fs-6 required">
-                            Status Pesanan
+                            Status
                         </label>
-                        <Select2
-                            placeholder="Pilih status"
-                            class="form-select-solid"
-                            :options="[
-                                { value: 'failed', text: 'Gagal' },
-                                { value: 'pending', text: 'Pending' },
-                                { value: 'success', text: 'Berhasil' },
-                                { value: 'canceled', text: 'Dibatalkan' },
-                                { value: 'processing', text: 'Diproses' },
-                            ]"
-                            name="order_status"
-                            v-model="data.order_status"
-                        />
+                        <Field name="order_status" v-slot="{ field }">
+                            <select2
+                                v-bind="field"
+                                placeholder="Pilih Status"
+                                class="form-select-solid"
+                                :options="statuses"
+                                v-model="data.order_status"
+                            >
+                            </select2>
+                        </Field>
                         <div class="fv-plugins-message-container">
                             <div class="fv-help-block">
                                 <ErrorMessage name="order_status" />
                             </div>
                         </div>
                     </div>
-
                     <!--end::Input group-->
                 </div>
             </div>

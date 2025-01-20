@@ -1,17 +1,15 @@
 <script setup lang="ts">
 import { h, ref, watch } from "vue";
-import { useDelete } from "@/libs/hooks";
-import Form from "./Form.vue";
+import { useDelete, useDownloadExcel } from "@/libs/hooks";
 import { createColumnHelper } from "@tanstack/vue-table";
 import type { User } from "@/types";
+import { currency } from "@/libs/utils";
 
 const column = createColumnHelper<User>();
 const paginateRef = ref<any>(null);
-const selected = ref<string>("");
-const openForm = ref<boolean>(false);
 
-const { delete : deleteTransaction } = useDelete({
-    onSuccess : () => paginateRef.value.refetch(),
+const { delete: deleteTransaction } = useDelete({
+    onSuccess: () => paginateRef.value.refetch(),
 });
 
 const columns = [
@@ -27,14 +25,49 @@ const columns = [
     column.accessor("transaction_date", {
         header: "Tanggal",
     }),
+    column.accessor("transaction_product", {
+        header: "Produk",
+    }),
     column.accessor("transaction_message", {
         header: "Pesan",
     }),
     column.accessor("transaction_status", {
         header: "Status",
+        cell: (cell) => {
+            const transaction_status = cell.getValue();
+            let badgeClass = "";
+
+            switch (transaction_status) {
+                case "processing":
+                    badgeClass = "badge-light-primary";
+                    break;
+                case "success":
+                    badgeClass = "badge-light-success";
+                    break;
+                case "pending":
+                    badgeClass = "badge-light-warning";
+                    break;
+                case "cancelled":
+                    badgeClass = "badge-light-danger";
+                    break;
+                default:
+                    badgeClass = "badge-light-primary";
+            }
+
+            return h("div", [
+                h("span", { class: `badge ${badgeClass}` }, transaction_status),
+            ]);
+        },
     }),
     column.accessor("transaction_total", {
         header: "Total",
+        cell: (cell) =>
+            currency(cell.getValue(), {
+                style: "currency",
+                currency: "IDR",
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+            }),
     }),
     column.accessor("id", {
         header: "Aksi",
@@ -55,27 +88,19 @@ const columns = [
     }),
 ];
 
-const refresh = () => paginateRef.value.refetch();
-
-watch(openForm, (val) => {
-    if (!val) {
-        selected.value = "";
-    }
-    window.scrollTo(0, 0);
-});
+const { download: downloadExcel } = useDownloadExcel({});
 </script>
 
 <template>
-    <Form
-        :selected="selected"
-        @close="openForm = false"
-        v-if="openForm"
-        @refresh="refresh"
-    />
-
     <div class="card">
         <div class="card-header align-items-center">
             <h2 class="mb-0">Daftar Laporan Prabayar</h2>
+            <button
+                class="btn btn-sm btn-danger"
+                @click="downloadExcel('/master/transaction/download-excel')"
+            >
+                Unduh Excel
+            </button>
         </div>
         <div class="card-body">
             <paginate

@@ -39,14 +39,15 @@ Route::middleware(['auth', 'json'])->prefix('auth')->group(function () {
     // SALDO
     Route::middleware(['throttle:6,1'],)->group(function () {
         Route::post('/topup', [DepositTransactionController::class, 'topup']);
-        Route::post('/check-saldo-wb', [DepositTransactionController::class, 'checkBalanceWb']);
         Route::get('/check-saldo', [DepositTransactionController::class, 'checkBalance']);
-        Route::post('/histori-deposit', [DepositTransactionController::class, 'index']);
+
+        Route::post('/check-saldo-wb', [DepositTransactionController::class, 'checkBalanceWb']);
         Route::post('/get-deposit/{id}', [DepositTransactionController::class, 'getDataById']);
+        // can:master-deposit
     });
-    
+
     Route::post('/saldo-user', [UserBalanceController::class, 'index']);
-    
+
     Route::post('/send-mail-admin', [AuthController::class, 'mailAdmin'])->withoutMiddleware('auth');
     Route::post('verify-otp', [AuthController::class, 'verifyOTP'])->withoutMiddleware('auth');
     Route::post('reset-password', [AuthController::class, 'resetPassword'])->withoutMiddleware('auth');
@@ -130,7 +131,12 @@ Route::middleware(['auth', 'verified', 'json'])->group(function () {
 
         // LAPORAN
         Route::middleware('can:master-laporan')->group(function () {
+            //DEPOSIT
+            Route::post('histori-deposit', [DepositTransactionController::class, 'index']);
+            Route::get('deposit/download-excel', [DepositTransactionController::class, 'downloadExcel']);
+            //
             Route::post('laporan', [TransactionController::class, 'laporan']);
+            Route::get('transaction/download-excel', [TransactionController::class, 'downloadExcel']);
             Route::delete('delete-laporan/{id}', [TransactionController::class, 'destroy']);
         });
 

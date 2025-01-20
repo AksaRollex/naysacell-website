@@ -34,6 +34,31 @@ const columns = [
     }),
     column.accessor("order_status", {
         header: "Status",
+        cell: (cell) => {
+            const order_status = cell.getValue();
+            let badgeClass = "";
+
+            switch (order_status) {
+                case "processing":
+                    badgeClass = "badge-light-primary";
+                    break;
+                case "success":
+                    badgeClass = "badge-light-success";
+                    break;
+                case "pending":
+                    badgeClass = "badge-light-warning";
+                    break;
+                case "cancelled":
+                    badgeClass = "badge-light-danger";
+                    break;
+                default:
+                    badgeClass = "badge-light-primary";
+            }
+
+            return h("div", [
+                h("span", { class: `badge ${badgeClass}` }, order_status),
+            ]);
+        },
     }),
     column.accessor("id", {
         header: "Aksi",

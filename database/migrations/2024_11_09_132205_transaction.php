@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('transaction_product');
             $table->integer('transaction_total');
             $table->unsignedBigInteger('transaction_user_id');
+            // $table->enum('transaction_method', ['payment', 'transfer', 'topup', 'withdrawal']);
             $table->enum('payment_status', ['pending', 'success', 'failed']);
             $table->timestamp('payment_date')->nullable();
             // $table->string('transaction_type');
