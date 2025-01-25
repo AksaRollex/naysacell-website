@@ -158,7 +158,7 @@ class TransactionController extends Controller
 
         $writer = new Xlsx($spreadsheet);
         header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment; filename="grid-export.xlsx"');
+        header('Content-Disposition: attachment; filename="Laporan Transaksi Pesanan.xlsx"');
         $writer->save("php://output");
     }
 

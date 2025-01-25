@@ -6,19 +6,18 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\DigiflazController;
-use App\Http\Controllers\Api\TripayController;
-use App\Http\Controllers\Auth\PasswordResetController;
-use App\Http\Controllers\CodeOperatorController;
 use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\ProductPascaController;
 use App\Http\Controllers\ProductPrepaidController;
-use App\Http\Controllers\ProductProviderController;
 use App\Http\Controllers\DepositTransactionController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserBalanceController;
+use App\Http\Controllers\Api\TripayController;
+use App\Http\Controllers\CodeOperatorController;
 
 Route::middleware(['auth', 'json'])->prefix('auth')->group(function () {
-    Route::post('login', [AuthController::class, 'login'])->withoutMiddleware('auth');
+    Route::post('login', [AuthController::class, 'loginWeb'])->withoutMiddleware('auth');
+    Route::post('loginMobile', [AuthController::class, 'loginMobile'])->withoutMiddleware('auth');
     Route::delete('logout', [AuthController::class, 'logout']);
     Route::get('me', [AuthController::class, 'me'])->withoutMiddleware('auth');
 
@@ -43,14 +42,11 @@ Route::middleware(['auth', 'json'])->prefix('auth')->group(function () {
 
         Route::post('/check-saldo-wb', [DepositTransactionController::class, 'checkBalanceWb']);
         Route::post('/get-deposit/{id}', [DepositTransactionController::class, 'getDataById']);
-        // can:master-deposit
+        Route::post('histori-deposit', [DepositTransactionController::class, 'index']);
+        Route::post('histori-deposit-web', [DepositTransactionController::class, 'indexWeb']);
     });
 
     Route::post('/saldo-user', [UserBalanceController::class, 'index']);
-
-    Route::post('/send-mail-admin', [AuthController::class, 'mailAdmin'])->withoutMiddleware('auth');
-    Route::post('verify-otp', [AuthController::class, 'verifyOTP'])->withoutMiddleware('auth');
-    Route::post('reset-password', [AuthController::class, 'resetPassword'])->withoutMiddleware('auth');
 
     Route::post('send-user-otp', [AuthController::class, 'sendUserOTP'])->withoutMiddleware('auth');
     Route::post('verify-user-otp', [AuthController::class, 'verifyUserOTP'])->withoutMiddleware('auth');
@@ -92,22 +88,6 @@ Route::middleware(['auth', 'verified', 'json'])->group(function () {
                 ->except(['index', 'store']);
         });
 
-        // MASTER
-        // Route::prefix('master')->group(function () {
-        //     Route::middleware('can:master-brand-operator')->group(function () {
-        //         Route::prefix('brand')->group(function () {
-        //             Route::post('', [ProductProviderController::class, 'index']);
-        //             Route::get('get/{id}', [ProductProviderController::class, 'get']);
-        //             Route::put('update/{id}', [ProductProviderController::class, 'update']);
-        //             Route::post('store', [ProductProviderController::class, 'store']);
-        //             Route::delete('delete/{id}', [ProductProviderController::class, 'destroy']);
-        //         });
-        //         Route::prefix('operator')->group(function () {
-        //             Route::post('', [CodeOperatorController::class, 'index']);
-        //         });
-        //     });
-        // });
-
         // PRODUCT
         Route::prefix('product')->group(function () {
             Route::middleware('can:master-product')->group(function () {
@@ -118,9 +98,6 @@ Route::middleware(['auth', 'verified', 'json'])->group(function () {
                     Route::post('store-pbb', [ProductPrepaidController::class, 'storePBBPrepaid']);
                     Route::delete('delete-pbb/{id}', [ProductPrepaidController::class, 'destroyPBBPrepaid']);
                 });
-                // Route::prefix('pasca')->group(function () {
-                //     Route::post('', [ProductPascaController::class, 'indexPasca'])->withoutMiddleware('can:master-product');
-                // });
             });
         });
 
@@ -132,7 +109,6 @@ Route::middleware(['auth', 'verified', 'json'])->group(function () {
         // LAPORAN
         Route::middleware('can:master-laporan')->group(function () {
             // DEPOSIT
-            Route::post('histori-deposit', [DepositTransactionController::class, 'index']);
             Route::get('deposit/download-excel', [DepositTransactionController::class, 'downloadExcel']);
             // TRANSACTION
             Route::post('laporan', [TransactionController::class, 'laporan']);

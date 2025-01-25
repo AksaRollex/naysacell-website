@@ -264,34 +264,37 @@ class UserController extends Controller
 
         $sheet->setCellValue('A1', 'No.');
         $sheet->setCellValue('B1', 'Nama');
-        $sheet->setCellValue('C1', 'Email');
-        $sheet->setCellValue('D1', 'Nomor Telepon');
-        $sheet->setCellValue('E1', 'Alamat');
-        $sheet->setCellValue('F1', 'Dibuat Pada');
+        $sheet->setCellValue('C1', 'Role');
+        $sheet->setCellValue('D1', 'Email');
+        $sheet->setCellValue('E1', 'Nomor Telepon');
+        $sheet->setCellValue('F1', 'Alamat');
+        $sheet->setCellValue('G1', 'Dibuat Pada');
 
-        $sheet->getStyle('A1:F1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFE1B48F');
-        $sheet->getStyle('A1:F1')->getFont()->setBold(true);
-        $sheet->getStyle('A1:F1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A1:F1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
-        $sheet->getStyle('A1:F1')->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN)->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_BLACK);
+        $sheet->getStyle('A1:G1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFE1B48F');
+        $sheet->getStyle('A1:G1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:G1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A1:G1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A1:G1')->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN)->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_BLACK);
 
         $sheet->getColumnDimension('A')->setWidth(6);
         $sheet->getColumnDimension('B')->setWidth(25);
-        $sheet->getColumnDimension('C')->setWidth(30);
-        $sheet->getColumnDimension('D')->setWidth(25);
-        $sheet->getColumnDimension('E')->setWidth(45);
-        $sheet->getColumnDimension('F')->setWidth(40);
+        $sheet->getColumnDimension('C')->setWidth(25);
+        $sheet->getColumnDimension('D')->setWidth(30);
+        $sheet->getColumnDimension('E')->setWidth(25);
+        $sheet->getColumnDimension('F')->setWidth(45);
+        $sheet->getColumnDimension('G')->setWidth(40);
 
         $row = 2;
         foreach ($data as $i => $DepositTransaction) {
             $sheet->setCellValue('A' . $row, $i + 1);
             $sheet->setCellValue('B' . $row, $DepositTransaction->name);
-            $sheet->setCellValue('C' . $row, $DepositTransaction->email);
-            $sheet->setCellValue('D' . $row, $DepositTransaction->phone);
-            $sheet->setCellValue('E' . $row, $DepositTransaction->address);
-            $sheet->setCellValue('F' . $row, $DepositTransaction->created_at->format('d-m-Y'));
+            $sheet->setCellValue('C' . $row, $DepositTransaction->role->name);
+            $sheet->setCellValue('D' . $row, $DepositTransaction->email);
+            $sheet->setCellValue('E' . $row, $DepositTransaction->phone);
+            $sheet->setCellValue('F' . $row, $DepositTransaction->address);
+            $sheet->setCellValue('G' . $row, $DepositTransaction->created_at->format('d-m-Y'));
 
-            $sheet->getStyle('A' . $row . ':F' . $row)->getBorders()->getAllBorders()
+            $sheet->getStyle('A' . $row . ':G' . $row)->getBorders()->getAllBorders()
                 ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN)
                 ->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_BLACK);
 
@@ -301,13 +304,14 @@ class UserController extends Controller
             $sheet->getStyle('D' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
             $sheet->getStyle('E' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
             $sheet->getStyle('F' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('G' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
             $row++;
         }
 
         $writer = new Xlsx($spreadsheet);
         header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment; filename="grid-export.xlsx"');
+        header('Content-Disposition: attachment; filename="Laporan Daftar Pengguna.xlsx"');
         $writer->save("php://output");
     }
 }

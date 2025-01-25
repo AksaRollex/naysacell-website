@@ -24,14 +24,14 @@ return new class extends Migration
             $table->string('transaction_product');
             $table->integer('transaction_total');
             $table->unsignedBigInteger('transaction_user_id');
-            // $table->enum('transaction_method', ['payment', 'transfer', 'topup', 'withdrawal']);
             $table->enum('payment_status', ['pending', 'success', 'failed']);
             $table->timestamp('payment_date')->nullable();
+            $table->foreign('transaction_user_id')->references('id')->on('users')->onDelete('cascade');
+            // $table->enum('transaction_method', ['payment', 'transfer', 'topup', 'withdrawal']);
             // $table->string('transaction_type');
             // $table->string('transaction_sku');
             // $table->string('transaction_provider');
             $table->timestamps();
-            $table->foreign('transaction_user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

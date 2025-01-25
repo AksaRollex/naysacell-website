@@ -104,6 +104,11 @@ const provider = [
     { id: 3, text: "Smartfren" },
     { id: 4, text: "Three" },
     { id: 5, text: "Axis" },
+    { id: 6, text: "Telkomsel" },
+    { id : 7 , text : "Dana" },
+    { id : 8 , text : "Gopay" },
+    { id : 9 , text : "OVO" },
+    { id : 10 , text : "Shopeepay" },
 ];
 
 const providers = computed(() =>
@@ -187,7 +192,7 @@ const providers = computed(() =>
                         </label>
                         <Field
                             class="form-control form-control-lg form-control-solid"
-                            type="number"
+                            type=""
                             name="product_price"
                             autocomplete="off"
                             v-model="data.product_price"
@@ -224,7 +229,7 @@ const providers = computed(() =>
                     <!--end::Input group-->
                 </div>
                 <!--begin::Input group-->
-                <div class="fv-row mb-7">
+                <div class="col-md-4">
                     <label class="form-label fw-bold fs-6 required">
                         Provider
                     </label>

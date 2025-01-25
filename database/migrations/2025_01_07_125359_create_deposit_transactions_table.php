@@ -12,13 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('deposit_transactions', function (Blueprint $table) {
-            $table->id(); // Primary key with auto_increment
-            $table->unsignedBigInteger('user_id'); // Foreign key
+            $table->id();
+            $table->unsignedBigInteger('user_id'); 
             $table->string('user_name');
-            $table->decimal('amount', 10, 2); // Correct data type for monetary values
+            $table->decimal('amount', 10, 2); 
             $table->string('status');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade'); // Foreign key constraint
-            $table->timestamps(); // created_at and updated_at columns
+            $table->string('deposit_code');
+            $table->string('user_number');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade'); 
+            $table->timestamps(); 
         });
     }
 

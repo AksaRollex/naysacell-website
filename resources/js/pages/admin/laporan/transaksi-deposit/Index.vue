@@ -15,6 +15,9 @@ const columns = [
     column.accessor("user_name", {
         header: "Nama User",
     }),
+    column.accessor("user_number", {
+        header: "No. User",
+    }),
     column.accessor("amount", {
         header: "Jumlah Deposit",
     }),
@@ -64,7 +67,7 @@ const { download : downloadExcelDeposit } = useDownloadExcel();
             <paginate
                 ref="paginateRef"
                 id="table-laporan-deposit"
-                url="/master/histori-deposit"
+                url="/auth/histori-deposit-web"
                 :columns="columns"
             ></paginate>
         </div>

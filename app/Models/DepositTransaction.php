@@ -13,7 +13,9 @@ class DepositTransaction extends Model
         'user_id',
         'amount',
         'status',
-        'user_name'
+        'user_name',
+        'user_number',
+        'deposit_code'
     ];
 
     public function user()

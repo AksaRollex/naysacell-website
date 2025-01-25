@@ -22,11 +22,12 @@ class User extends Authenticatable implements JWTSubject
     protected $fillable = [
         'name',
         'email',
-        'password',
         'phone',
         'address',
-        // 'photo',
-
+        'password',
+        'otp',
+        'token_expired_at',
+        'email_verified_at'
     ];
 
     /**
@@ -98,6 +99,11 @@ class User extends Authenticatable implements JWTSubject
     public function orders()
     {
         return $this->hasMany(Orders::class, 'user_id', 'id');
+    }
+
+    public function depositTransactions()
+    {
+        return $this->hasMany(DepositTransaction::class, 'user_id', 'id');
     }
 
     public function saldoDeposit()
