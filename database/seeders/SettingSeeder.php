@@ -19,7 +19,7 @@ class SettingSeeder extends Seeder
         Setting::create([
             'app' => 'NAYSA CELL',
             'description' =>  'Aplikasi NAYSA CELL Topup PPOB',
-            'logo' =>  '/media/logo.png',
+            'logo' =>  '/media/logo-nc.png',
             'bg_auth' =>  '/media/products_provider/background.jpg',
             'alamat' =>  'Sambiarum Lor, Surabaya',
             'telepon' =>  '085336970707',

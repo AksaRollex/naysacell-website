@@ -38,23 +38,23 @@ const columns = [
     column.accessor("transaction_total", {
         header: "Total",
     }),
-    column.accessor("uuid", {
-        header: "Aksi",
-        cell: (cell) =>
-            h("div", { class: "d-flex gap-2" }, [
-                h(
-                    "button",
-                    {
-                        class: "btn btn-sm btn-icon btn-info",
-                        onClick: () => {
-                            selected.value = cell.getValue();
-                            openForm.value = true;
-                        },
-                    },
-                    h("i", { class: "la la-pencil fs-2" })
-                ),
-            ]),
-    }),
+    // column.accessor("uuid", {
+    //     header: "Aksi",
+    //     cell: (cell) =>
+    //         h("div", { class: "d-flex gap-2" }, [
+    //             h(
+    //                 "button",
+    //                 {
+    //                     class: "btn btn-sm btn-icon btn-info",
+    //                     onClick: () => {
+    //                         selected.value = cell.getValue();
+    //                         openForm.value = true;
+    //                     },
+    //                 },
+    //                 h("i", { class: "la la-pencil fs-2" })
+    //             ),
+    //         ]),
+    // }),
 ];
 
 const refresh = () => paginateRef.value.refetch();

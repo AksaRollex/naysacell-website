@@ -247,4 +247,129 @@ class AuthController extends Controller
             'message' => 'Password berhasil direset.'
         ]);
     }
+
+    public function sendUserOtpRegist(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'name' => 'required',
+            'phone' => 'required',
+            'address' => 'required',
+            'password' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()->first()
+            ], 422);
+        }
+
+        // Generate OTP code (6 digits)
+        $otpCode = sprintf("%06d", mt_rand(1, 999999));
+
+        // Save OTP to user record
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            $user = new User();
+            $user->email = $request->email;
+            $user->name = $request->name;
+            $user->phone = $request->phone;
+            $user->address = $request->address;
+            $user->password = bcrypt($request->password);
+            $user->otp = $otpCode;
+            $user->token_expired_at = now()->addMinutes(3);
+            $user->save();
+        } else {
+            // Update existing user
+            $user->name = $request->name;
+            $user->phone = $request->phone;
+            $user->address = $request->address;
+            $user->password = bcrypt($request->password);
+            $user->otp = $otpCode;
+            $user->token_expired_at = now()->addMinutes(3);
+            $user->save();
+        }
+
+        // Send email using Brevo/Sendinblue
+        $response = Http::withHeaders([
+            'api-key' => env('SENDINBLUE_API_KEY'),
+            "Content-Type" => "application/json"
+        ])->post('https://api.brevo.com/v3/smtp/email', [
+            "sender" => [
+                "name" => env('SENDINBLUE_SENDER_NAME'),
+                "email" => env('SENDINBLUE_SENDER_EMAIL'),
+            ],
+            'to' => [
+                ['email' => $request->email]
+            ],
+            "subject" => "Kode OTP Reset Password",
+            "htmlContent" => "
+            <html>
+            <body>
+                <h1>Kode OTP Reset Password</h1>
+                <p>Anda telah meminta untuk mereset password akun Anda.</p>
+                <p>Kode OTP Anda adalah:</p>
+                <h2 style='font-size: 24px; 
+                          background-color: #f0f0f0; 
+                          padding: 10px; 
+                          text-align: center; 
+                          letter-spacing: 5px;'>
+                    {$otpCode}
+                </h2>
+                <p>Kode OTP ini akan kadaluarsa dalam 15 menit.</p>
+                <p>Jangan bagikan kode ini kepada siapapun.</p>
+                <p>Jika Anda tidak meminta reset password, abaikan email ini.</p>
+            </body>
+            </html>",
+        ]);
+        return response()->json([
+            'status' => true,
+            'message' => 'Kode OTP telah dikirim ke email Anda',
+        ], 200);
+    }
+
+    public function verufyUserOtpRegist(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'otp' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()->first()
+            ], 422);
+        }
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json([
+                'status' => false,
+                'message' => 'User tidak ditemukan.'
+            ], 404);
+        }
+
+        if ($user->otp != $request->otp) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Kode OTP tidak sesuai.'
+            ], 422);
+        }
+
+        if ($user->token_expired_at < now()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Kode OTP telah kadaluarsa.'
+            ], 422);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Kode OTP berhasil diverifikasi.',
+            'user' => $user
+        ], 200);
+    }
 }

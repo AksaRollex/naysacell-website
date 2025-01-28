@@ -18,7 +18,7 @@ use App\Http\Controllers\CodeOperatorController;
 Route::middleware(['auth', 'json'])->prefix('auth')->group(function () {
     Route::post('login', [AuthController::class, 'loginWeb'])->withoutMiddleware('auth');
     Route::post('loginMobile', [AuthController::class, 'loginMobile'])->withoutMiddleware('auth');
-    Route::delete('logout', [AuthController::class, 'logout']);
+    Route::post('logout', [AuthController::class, 'logout']);
     Route::get('me', [AuthController::class, 'me'])->withoutMiddleware('auth');
 
     //MOBILE
@@ -28,7 +28,8 @@ Route::middleware(['auth', 'json'])->prefix('auth')->group(function () {
     });
 
     Route::prefix('histori')->group(function () {
-        Route::post('', [DigiflazController::class, 'histori'])->withoutMiddleware('auth');
+        Route::post('', [TransactionController::class, 'histori'])->withoutMiddleware('auth');
+        Route::post('home', [TransactionController::class, 'historiHome'])->withoutMiddleware('auth');
     });
 
     // PESANAN
@@ -48,9 +49,13 @@ Route::middleware(['auth', 'json'])->prefix('auth')->group(function () {
 
     Route::post('/saldo-user', [UserBalanceController::class, 'index']);
 
+    // FORGOT PASSWORD
     Route::post('send-user-otp', [AuthController::class, 'sendUserOTP'])->withoutMiddleware('auth');
     Route::post('verify-user-otp', [AuthController::class, 'verifyUserOTP'])->withoutMiddleware('auth');
     Route::post('reset-user-password', [AuthController::class, 'resetUserPassword'])->withoutMiddleware('auth');
+
+    Route::post('send-user-otp-regist', [AuthController::class, 'sendUserOtpRegist'])->withoutMiddleware('auth');
+    Route::post('verify-user-otp-regist', [AuthController::class, 'verifyUserOtpRegist'])->withoutMiddleware('auth');
 });
 
 Route::middleware(['auth', 'verified', 'json'])->group(function () {
@@ -145,7 +150,6 @@ Route::prefix('setting')->group(function () {
 
 Route::prefix('digiflazz')->group(function () {
     Route::post('get-product-prepaid', [ProductPrepaidController::class, 'get_product_prepaid']);
-    Route::post('get-product-pasca', [ProductPascaController::class, 'get_product_pasca']);
     Route::post('/topup', [DigiflazController::class, 'digiflazTopup']);
     Route::post('/cek-tagihan', [DigiflazController::class, 'digiflazCekTagihan']);
     Route::post('/bayar-tagihan', [DigiflazController::class, 'digiflazBayarTagihan']);

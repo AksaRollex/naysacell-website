@@ -9,7 +9,7 @@
                 <div class="container-fluid px-3">
                     <a class="navbar-brand d-flex align-items-center px-3">
                         <img
-                            src="../../../../public/media/logo.png"
+                            src="../../../../public/media/logo-nc.png"
                             alt="logo"
                             width="40"
                             height="40"

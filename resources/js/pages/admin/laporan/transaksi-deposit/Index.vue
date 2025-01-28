@@ -12,6 +12,9 @@ const columns = [
     column.accessor("no", {
         header: "#",
     }),
+    column.accessor("deposit_code", {
+        header: "Kode TRX",
+    }),
     column.accessor("user_name", {
         header: "Nama User",
     }),
@@ -48,8 +51,7 @@ const columns = [
     }),
 ];
 
-const { download : downloadExcelDeposit } = useDownloadExcel();
-
+const { download: downloadExcelDeposit } = useDownloadExcel();
 </script>
 
 <template>

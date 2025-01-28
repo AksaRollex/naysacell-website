@@ -31,6 +31,16 @@ const columns = [
     column.accessor("transaction_message", {
         header: "Pesan",
     }),
+    column.accessor("transaction_total", {
+        header: "Total",
+        cell: (cell) =>
+            currency(cell.getValue(), {
+                style: "currency",
+                currency: "IDR",
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+            }),
+    }),
     column.accessor("transaction_status", {
         header: "Status",
         cell: (cell) => {
@@ -59,33 +69,24 @@ const columns = [
             ]);
         },
     }),
-    column.accessor("transaction_total", {
-        header: "Total",
-        cell: (cell) =>
-            currency(cell.getValue(), {
-                style: "currency",
-                currency: "IDR",
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0,
-            }),
-    }),
-    column.accessor("id", {
-        header: "Aksi",
-        cell: (cell) =>
-            h("div", { class: "d-flex gap-2" }, [
-                h(
-                    "button",
-                    {
-                        class: "btn btn-sm btn-icon btn-danger",
-                        onClick: () =>
-                            deleteTransaction(
-                                `/master/delete-laporan/${cell.getValue()}`
-                            ),
-                    },
-                    h("i", { class: "la la-trash fs-2" })
-                ),
-            ]),
-    }),
+
+    // column.accessor("id", {
+    //     header: "Aksi",
+    //     cell: (cell) =>
+    //         h("div", { class: "d-flex gap-2" }, [
+    //             h(
+    //                 "button",
+    //                 {
+    //                     class: "btn btn-sm btn-icon btn-danger",
+    //                     onClick: () =>
+    //                         deleteTransaction(
+    //                             `/master/delete-laporan/${cell.getValue()}`
+    //                         ),
+    //                 },
+    //                 h("i", { class: "la la-trash fs-2" })
+    //             ),
+    //         ]),
+    // }),
 ];
 
 const { download: downloadExcel } = useDownloadExcel({});

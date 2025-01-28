@@ -34,6 +34,41 @@ class TransactionController extends Controller
         return response()->json($data);
     }
 
+
+    public function histori(Request $request)
+    {
+        if (request()->wantsJson()) {
+            $per = (($request->per) ? $request->per : 10);
+            $page = (($request->page) ? $request->page - 1 : 0);
+
+            DB::statement('set @no=0+' . $page * $per);
+            $data = TransactionModel::where(function ($q) use ($request) {
+                $q->where('transaction_status', 'LIKE', '%' . $request->search . '%');
+            })->where('transaction_status')->orWhere('transaction_user_id', auth()->user()->id)->orderBy('created_at', 'DESC')->paginate($per, ['*', DB::raw('@no := @no + 1 AS no')]);
+
+            return response()->json($data);
+        } else {
+            return abort(404);
+        }
+    }
+    public function historiHome(Request $request)
+    {
+        if ($request->wantsJson()) {
+            $per = 3; // Hanya menampilkan 3 data
+            $page = ($request->page ? $request->page - 1 : 0);
+
+            DB::statement('set @no=0+' . $page * $per);
+            $data = TransactionModel::where('transaction_user_id', auth()->user()->id)
+                ->orderBy('created_at', 'DESC')
+                ->paginate($per, ['*', DB::raw('@no := @no + 1 AS no')]);
+
+            return response()->json($data);
+        } else {
+            return abort(404);
+        }
+    }
+
+
     public function destroy($id)
     {
         $transaction = TransactionModel::find($id);

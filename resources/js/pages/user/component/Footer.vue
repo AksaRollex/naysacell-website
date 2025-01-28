@@ -6,10 +6,10 @@
                     class="col-lg-8 mb-4 mb-lg-0 d-flex flex-column flex-md-row align-items-start align-items-md-center"
                 >
                     <img
-                        src="../../../../../public/media/logo.png"
+                        src="../../../../../public/media/logo-nc.png"
                         alt="Logo"
                         class="mb-3 mb-md-0 me-md-3"
-                        style="width: 8rem; height: auto"
+                        style="width: 7rem; height: auto"
                     />
                     <div class="max-w-md">
                         <p

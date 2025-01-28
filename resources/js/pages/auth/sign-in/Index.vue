@@ -4,7 +4,7 @@
         <!--begin::Heading-->
         <div class="text-center mb-5">
             <router-link to="/">
-                <img :src="setting?.logo" :alt="setting?.app" class="w-200px" />
+                <img :src="setting?.logo" :alt="setting?.app" class="w-150px" />
             </router-link>
             <!--begin::Title-->
             <h1 class="mb-3">
