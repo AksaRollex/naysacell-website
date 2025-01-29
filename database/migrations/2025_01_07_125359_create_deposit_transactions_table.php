@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id'); 
             $table->string('user_name');
             $table->decimal('amount', 10, 2); 
-            $table->string('status');
+            $table->enum('status', ['pending', 'success', 'failed']);
             $table->string('deposit_code');
             $table->string('user_number');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade'); 

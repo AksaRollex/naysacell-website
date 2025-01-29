@@ -16,17 +16,29 @@ class DepositTransactionController extends Controller
 
     public function index(Request $request)
     {
-        $per = $request->per ?? 10;
-        $page = $request->page ? $request->page - 1 : 0;
-        $userId = auth()->id();
+        if (request()->wantsJson()) {
+            $per = $request->per ?? 10;
+            $page = ($request->page ? $request->page - 1 : 0);
 
-        DB::statement('set @no=0+' . $page * $per);
-        $data = DepositTransaction::where('user_id', $userId)
-            ->when($request->search, function (Builder $query, string $search) {
-                $query->where('name', 'like', "%$search%");
-            })->latest()->paginate($per, ['*', DB::raw('@no := @no + 1 AS no')]);
+            DB::statement('set @no=0+' . $page * $per);
 
-        return response()->json($data);
+            $query = DepositTransaction::where('user_id', auth()->user()->id);
+
+            if ($request->search) {
+                $query->where('user_name', 'LIKE', '%' . $request->search . '%');
+            }
+
+            if ($request->status) {
+                $query->where('status', $request->status);
+            }
+
+            $data = $query->orderBy('created_at', 'DESC')
+                ->paginate($per, ['*', DB::raw('@no := @no + 1 AS no')]);
+
+            return response()->json($data);
+        }
+
+        return abort(404);
     }
     public function indexWeb(Request $request)
     {
