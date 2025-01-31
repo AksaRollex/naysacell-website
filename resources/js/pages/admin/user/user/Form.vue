@@ -18,8 +18,6 @@ const props = defineProps({
 const emit = defineEmits(["close", "refresh"]);
 
 const user = ref<User>({} as User);
-const fileTypes = ref(["image/jpeg", "image/png", "image/jpg"]);
-const photo = ref<any>([]);
 const formRef = ref();
 
 const formSchema = Yup.object().shape({
@@ -31,7 +29,9 @@ const formSchema = Yup.object().shape({
     passwordConfirmation: Yup.string()
         .oneOf([Yup.ref("password")], "Konfirmasi password harus sama")
         .nullable(),
-    phone: Yup.string().required("Nomor Telepon harus diisi"),
+    phone: Yup.string()
+        .matches(/^\d{8,14}$/, "Nomor Telepon harus terdiri dari 8-14 angka")
+        .required("Nomor Telepon harus diisi"),
     role_id: Yup.string().required("Pilih role"),
     address: Yup.string().required("Alamat harus diisi"),
 });
@@ -41,9 +41,6 @@ function getEdit() {
     ApiService.get("master/users", props.selected)
         .then(({ data }) => {
             user.value = data.user;
-            photo.value = data.user.photo
-                ? ["/storage/" + data.user.photo]
-                : [];
         })
         .catch((err: any) => {
             toast.error(err.response.data.message);
@@ -68,9 +65,7 @@ function submit() {
             user.value.passwordConfirmation
         );
     }
-    if (photo.value.length) {
-        formData.append("photo", photo.value[0].file);
-    }
+
     if (props.selected) {
         formData.append("_method", "PUT");
     }
@@ -297,6 +292,9 @@ watch(
                             autocomplete="off"
                             v-model="user.phone"
                             placeholder="089"
+                            minlength="8"
+                            maxlength="14"
+                            pattern="\d*"
                         />
                         <div class="fv-plugins-message-container">
                             <div class="fv-help-block">
@@ -306,24 +304,6 @@ watch(
                     </div>
                     <!--end::Input group-->
                 </div>
-                <!-- <div class="col-md-6">
-                    <div class="fv-row mb-7">
-                        <label class="form-label fw-bold fs-6">
-                            User Photo
-                        </label>
-                        <file-upload
-                            :files="photo"
-                            :accepted-file-types="fileTypes"
-                            required
-                            v-on:updatefiles="(file) => (photo = file)"
-                        ></file-upload>
-                        <div class="fv-plugins-message-container">
-                            <div class="fv-help-block">
-                                <ErrorMessage name="photo" />
-                            </div>
-                        </div>
-                    </div>
-                </div> -->
             </div>
         </div>
         <div class="card-footer d-flex">

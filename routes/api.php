@@ -54,8 +54,15 @@ Route::middleware(['auth', 'json'])->prefix('auth')->group(function () {
     Route::post('verify-user-otp', [AuthController::class, 'verifyUserOTP'])->withoutMiddleware('auth');
     Route::post('reset-user-password', [AuthController::class, 'resetUserPassword'])->withoutMiddleware('auth');
 
+    // REGISTER
     Route::post('send-user-otp-regist', [AuthController::class, 'sendUserOtpRegist'])->withoutMiddleware('auth');
     Route::post('verify-user-otp-regist', [AuthController::class, 'verifyUserOtpRegist'])->withoutMiddleware('auth');
+
+    // MIDTRANS DEPOSIT 
+    Route::post('deposit/callback', [DepositTransactionController::class, 'handleCallback']);
+    Route::get('deposit/finish', [DepositTransactionController::class, 'finish'])->name('deposit.finish');
+    Route::get('deposit/unfinish', [DepositTransactionController::class, 'unfinish'])->name('deposit.unfinish');
+    Route::get('deposit/error', [DepositTransactionController::class, 'error'])->name('deposit.error');
 });
 
 Route::middleware(['auth', 'verified', 'json'])->group(function () {

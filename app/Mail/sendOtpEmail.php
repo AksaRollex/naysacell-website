@@ -33,7 +33,7 @@ class SendOTPMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            from: new Address(env('MAIL_FROM_ADDRESS'), 'Silajang - UPT DLH'),
+            from: new Address(env('MAIL_FROM_ADDRESS'), 'NAYSA CELL'),
             subject: 'Verifikasi Email - OTP',
         );
     }

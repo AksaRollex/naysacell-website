@@ -8,6 +8,9 @@ const amount = ref("");
 const loading = ref(false);
 const currentBalance = ref(0);
 
+// Declare midtrans snap as external
+declare const snap: any;
+
 const fetchBalance = async () => {
     try {
         const response = await axios.get("/auth/check-saldo");
@@ -22,6 +25,12 @@ const fetchBalance = async () => {
 
 onMounted(() => {
     fetchBalance();
+    // Load Midtrans Snap JS
+    const script = document.createElement("script");
+    script.src = "https://app.sandbox.midtrans.com/snap/snap.js";
+    // Ganti URL di atas dengan https://app.midtrans.com/snap/snap.js untuk production
+    script.setAttribute("data-client-key", "YOUR-CLIENT-KEY");
+    document.head.appendChild(script);
 });
 
 const validateAmount = (value: string): boolean => {
@@ -50,14 +59,39 @@ const handleTopup = async () => {
     formData.append("amount", amount.value);
 
     try {
-        await axios.post("/auth/topup", formData);
-        await fetchBalance();
+        // Request snap token dari backend
+        const response = await axios.post("/auth/topup", formData);
+        const { snap_token } = response.data;
 
-        toast.success("Top up berhasil!", {
-            position: toast.POSITION.TOP_RIGHT,
-            autoClose: 3000,
+        // Tampilkan popup pembayaran Midtrans
+        snap.pay(snap_token, {
+            onSuccess: async (result: any) => {
+                await fetchBalance();
+                toast.success("Top up berhasil!", {
+                    position: toast.POSITION.TOP_RIGHT,
+                    autoClose: 3000,
+                });
+                amount.value = "";
+            },
+            onPending: (result: any) => {
+                toast.info("Menunggu pembayaran", {
+                    position: toast.POSITION.TOP_RIGHT,
+                    autoClose: 3000,
+                });
+            },
+            onError: (result: any) => {
+                toast.error("Pembayaran gagal", {
+                    position: toast.POSITION.TOP_RIGHT,
+                    autoClose: 3000,
+                });
+            },
+            onClose: () => {
+                toast.info("Pembayaran dibatalkan", {
+                    position: toast.POSITION.TOP_RIGHT,
+                    autoClose: 3000,
+                });
+            }
         });
-        amount.value = "";
     } catch (error: any) {
         toast.error(
             error.response?.data?.message || "Terjadi kesalahan saat top up",

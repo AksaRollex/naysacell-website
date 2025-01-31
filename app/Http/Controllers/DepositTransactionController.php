@@ -8,6 +8,7 @@ use App\Traits\CodeGenerate;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
@@ -53,6 +54,28 @@ class DepositTransactionController extends Controller
         return response()->json($data);
     }
 
+    private $serverKey;
+
+    public function __construct()
+    {
+        Log::info('Checking Midtrans Configuration', [
+            'config_exists' => config()->has('midtrans'),
+            'server_key' => config('midtrans.server_key'),
+            'env_server_key' => env('MIDTRANS_SERVER_KEY')
+        ]);
+
+        $this->serverKey = config('midtrans.server_key');
+
+        if (empty($this->serverKey)) {
+            Log::error('Midtrans server key is empty');
+        }
+
+        \Midtrans\Config::$serverKey = $this->serverKey;
+        \Midtrans\Config::$isProduction = config('midtrans.is_production');
+        \Midtrans\Config::$isSanitized = true;
+        \Midtrans\Config::$is3ds = true;
+    }
+
     use CodeGenerate;
     public function topup(Request $request)
     {
@@ -62,9 +85,13 @@ class DepositTransactionController extends Controller
 
         try {
             DB::beginTransaction();
-
+            Log::info('Topup Request:', $request->all());
             $user = auth()->user();
             $depositCode = $this->getCode();
+
+            if (empty($this->serverKey)) {
+                throw new \Exception('Midtrans server key is not configured');
+            }
 
             $transaction = DepositTransaction::create([
                 'user_id' => $user->id,
@@ -75,40 +102,87 @@ class DepositTransactionController extends Controller
                 'user_number' => $user->phone
             ]);
 
-            $userBalance = UserBalance::firstOrCreate(
-                ['user_id' => $user->id],
-                [
-                    'user_name' => $user->name,
-                    'balance' => 0
+            // Persiapkan parameter untuk Midtrans
+            $params = [
+                'transaction_details' => [
+                    'order_id' => $depositCode,
+                    'gross_amount' => (int) $request->amount,
+                ],
+                'customer_details' => [
+                    'first_name' => $user->name,
+                    'email' => $user->email,
+                    'phone' => $user->phone,
+                ],
+                'callbacks' => [
+                    'finish' => route('deposit.finish'),
+                    'unfinish' => route('deposit.unfinish'),
+                    'error' => route('deposit.error'),
                 ]
-            );
+            ];
 
-            $userBalance->balance += $request->amount;
-            $userBalance->save();
-
-            $transaction->update(['status' => 'success']);
+            // Dapatkan Snap Token dari Midtrans
+            $snapToken = \Midtrans\Snap::getSnapToken($params);
 
             DB::commit();
 
             return response()->json([
-                'message' => 'Deposit berhasil',
-                'data' => [
-                    'transaction_id' => $transaction->id,
-                    'balance' => $userBalance->balance
-                ]
-            ], 200);
+                'snap_token' => $snapToken,
+                'transaction' => $transaction
+            ]);
         } catch (\Exception $e) {
             DB::rollback();
-
-            if (isset($transaction)) {
-                $transaction->update(['status' => 'failed']);
-            }
-
+            Log::error('Topup Error: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
             return response()->json([
                 'message' => 'Terjadi kesalahan saat deposit',
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function handleCallback(Request $request)
+    {
+        $serverKey = config('midtrans.server_key');
+        $hashed = hash("sha512", $request->order_id . $request->status_code . $request->gross_amount . $serverKey);
+
+        if ($hashed == $request->signature_key) {
+            $transaction = DepositTransaction::where('deposit_code', $request->order_id)->first();
+
+            if (!$transaction) {
+                return response()->json(['message' => 'Transaction not found'], 404);
+            }
+
+            if ($request->transaction_status == 'capture' || $request->transaction_status == 'settlement') {
+                DB::beginTransaction();
+                try {
+                    // Update status transaksi
+                    $transaction->update(['status' => 'success']);
+
+                    // Update saldo user
+                    $userBalance = UserBalance::firstOrCreate(
+                        ['user_id' => $transaction->user_id],
+                        [
+                            'user_name' => $transaction->user_name,
+                            'balance' => 0
+                        ]
+                    );
+
+                    $userBalance->balance += $transaction->amount;
+                    $userBalance->save();
+
+                    DB::commit();
+                    return response()->json(['message' => 'Transaction successful']);
+                } catch (\Exception $e) {
+                    DB::rollback();
+                    return response()->json(['message' => 'Error processing transaction'], 500);
+                }
+            } elseif ($request->transaction_status == 'cancel' || $request->transaction_status == 'deny' || $request->transaction_status == 'expire') {
+                $transaction->update(['status' => 'failed']);
+                return response()->json(['message' => 'Transaction failed']);
+            }
+        }
+
+        return response()->json(['message' => 'Invalid signature'], 403);
     }
 
 

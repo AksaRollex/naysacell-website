@@ -21,11 +21,25 @@ const emit = defineEmits(["close", "refresh"]);
 
 const formRef = ref();
 
+const numericPattern = /^[0-9]+$/;
+const alphanumericPattern = /^[a-zA-Z0-9]+$/;
+
 const formSchema = Yup.object().shape({
-    product_name: Yup.string().required("Nama Produk harus diisi "),
-    product_desc: Yup.string().required("Deskripsi Produk harus diisi "),
-    product_price: Yup.string().required("Harga harus diisi "),
-    product_sku: Yup.string().required("Kode SKU harus diisi "),
+    product_name: Yup.string()
+        .required("Nama Produk harus diisi ")
+        .matches(
+            alphanumericPattern,
+            "Nama Produk hanya boleh berisi huruf dan angka"
+        ),
+    product_desc: Yup.string()
+        .required("Deskripsi Produk harus diisi ")
+        .matches(alphanumericPattern, "Deskripsi produk hanya boleh berisi huruf dan angka"),
+    product_price: Yup.string()
+        .required("Harga harus diisi")
+        .matches(numericPattern, "Harga hanya boleh berisi angka"),
+    product_sku: Yup.string()
+        .required("Kode SKU harus diisi")
+        .matches(alphanumericPattern, "SKU hanya boleh berisi huruf dan angka"),
     product_category: Yup.string().required("Kategori Produk harus diisi "),
     product_provider: Yup.string().required("Provider Produk harus diisi "),
 });
@@ -105,18 +119,79 @@ const provider = [
     { id: 4, text: "Three" },
     { id: 5, text: "Axis" },
     { id: 6, text: "Telkomsel" },
-    { id : 7 , text : "Dana" },
-    { id : 8 , text : "Gopay" },
-    { id : 9 , text : "OVO" },
-    { id : 10 , text : "Shopeepay" },
+    { id: 7, text: "Dana" },
+    { id: 8, text: "Gopay" },
+    { id: 9, text: "OVO" },
+    { id: 10, text: "Shopeepay" },
 ];
 
-const providers = computed(() =>
-    provider.map((item: any) => ({
-        id: item.text,
-        text: item.text,
-    }))
+const category = [
+    {
+        id: "Pulsa",
+        text: "Pulsa",
+    },
+    {
+        id: "E-Money",
+        text: "E-Money",
+    },
+    {
+        id: "Data",
+        text: "Data",
+    },
+];
+
+// Computed property untuk provider yang telah difilter
+const filteredProviders = computed(() => {
+    const eMoneyProviders = ["Dana", "Gopay", "OVO", "Shopeepay"];
+
+    if (data.value.product_category === "E-Money") {
+        return provider
+            .filter((p) => eMoneyProviders.includes(p.text))
+            .map((item) => ({
+                id: item.text,
+                text: item.text,
+            }));
+    } else {
+        return provider
+            .filter((p) => !eMoneyProviders.includes(p.text))
+            .map((item) => ({
+                id: item.text,
+                text: item.text,
+            }));
+    }
+});
+
+// Watch untuk me-reset provider ketika kategori berubah
+watch(
+    () => data.value.product_category,
+    (newCategory) => {
+        // Reset provider selection when category changes
+        data.value.product_provider = "";
+    }
 );
+
+const handlePriceInput = (e: Event) => {
+    const input = e.target as HTMLInputElement;
+    input.value = input.value.replace(/[^0-9]/g, "");
+    data.value.product_price = input.value;
+};
+const handleNameInput = (e: Event) => {
+    const input = e.target as HTMLInputElement;
+    input.value = input.value.replace(/[^a-zA-Z0-9]/g, "");
+    data.value.product_name = input.value;
+};
+
+const handleDescInput = (e: Event) => {
+    const input = e.target as HTMLInputElement;
+    input.value = input.value.replace(/[^a-zA-Z0-9]/g, "");
+    data.value.product_desc = input.value;
+};
+
+const handleSkuInput = (e: Event) => {
+    const input = e.target as HTMLInputElement;
+    input.value = input.value.replace(/[^a-zA-Z0-9]/g, "");
+    data.value.product_sku = input.value;
+};
 </script>
 
 <template>
@@ -141,7 +216,6 @@ const providers = computed(() =>
         <div class="card-body">
             <div class="row">
                 <div class="col-md-4">
-                    <!--begin::Input group-->
                     <div class="fv-row mb-7">
                         <label class="form-label fw-bold fs-6 required">
                             Nama Produk
@@ -151,6 +225,7 @@ const providers = computed(() =>
                             type="text"
                             name="product_name"
                             autocomplete="off"
+                            @input="handleNameInput"
                             v-model="data.product_name"
                             placeholder="Masukkan Nama Produk"
                         />
@@ -160,10 +235,8 @@ const providers = computed(() =>
                             </div>
                         </div>
                     </div>
-                    <!--end::Input group-->
                 </div>
                 <div class="col-md-4">
-                    <!--begin::Input group-->
                     <div class="fv-row mb-7">
                         <label class="form-label fw-bold fs-6 required">
                             Deskripsi Produk
@@ -172,6 +245,7 @@ const providers = computed(() =>
                             class="form-control form-control-lg form-control-solid"
                             type="text"
                             name="product_desc"
+                            @input="handleDescInput"
                             autocomplete="off"
                             v-model="data.product_desc"
                             placeholder="Masukkan Deskripsi Produk"
@@ -182,19 +256,18 @@ const providers = computed(() =>
                             </div>
                         </div>
                     </div>
-                    <!--end::Input group-->
                 </div>
                 <div class="col-md-4">
-                    <!--begin::Input group-->
                     <div class="fv-row mb-7">
                         <label class="form-label fw-bold fs-6 required">
                             Harga Jual
                         </label>
                         <Field
                             class="form-control form-control-lg form-control-solid"
-                            type=""
+                            type="text"
                             name="product_price"
                             autocomplete="off"
+                            @input="handlePriceInput"
                             v-model="data.product_price"
                             placeholder="Masukkan Harga Jual"
                         />
@@ -204,10 +277,8 @@ const providers = computed(() =>
                             </div>
                         </div>
                     </div>
-                    <!--end::Input group-->
                 </div>
                 <div class="col-md-4">
-                    <!--begin::Input group-->
                     <div class="fv-row mb-7">
                         <label class="form-label fw-bold fs-6 required">
                             Produk SKU
@@ -216,6 +287,7 @@ const providers = computed(() =>
                             class="form-control form-control-lg form-control-solid"
                             type="text"
                             name="product_sku"
+                            @input="handleSkuInput"
                             autocomplete="off"
                             v-model="data.product_sku"
                             placeholder="Masukkan Kode SKU Produk"
@@ -226,9 +298,27 @@ const providers = computed(() =>
                             </div>
                         </div>
                     </div>
-                    <!--end::Input group-->
                 </div>
-                <!--begin::Input group-->
+                <div class="col-md-4">
+                    <label class="form-label fw-bold fs-6 required">
+                        Kategori
+                    </label>
+                    <Field name="product_category" v-slot="{ field }">
+                        <select2
+                            v-bind="field"
+                            placeholder="Pilih Kategori"
+                            class="form-select-solid"
+                            :options="category"
+                            v-model="data.product_category"
+                        >
+                        </select2>
+                    </Field>
+                    <div class="fv-plugins-message-container">
+                        <div class="fv-help-block">
+                            <ErrorMessage name="product_category" />
+                        </div>
+                    </div>
+                </div>
                 <div class="col-md-4">
                     <label class="form-label fw-bold fs-6 required">
                         Provider
@@ -236,9 +326,9 @@ const providers = computed(() =>
                     <Field name="product_provider" v-slot="{ field }">
                         <select2
                             v-bind="field"
-                            placeholder="Pilih provider"
+                            placeholder="Pilih Provider"
                             class="form-select-solid"
-                            :options="providers"
+                            :options="filteredProviders"
                             v-model="data.product_provider"
                         >
                         </select2>
@@ -248,29 +338,6 @@ const providers = computed(() =>
                             <ErrorMessage name="product_provider" />
                         </div>
                     </div>
-                </div>
-                <!--end::Input group-->
-                <div class="col-md-4">
-                    <!--begin::Input group-->
-                    <div class="fv-row mb-7">
-                        <label class="form-label fw-bold fs-6 required">
-                            Produk Kategori
-                        </label>
-                        <Field
-                            class="form-control form-control-lg form-control-solid"
-                            type="text"
-                            name="product_category"
-                            autocomplete="off"
-                            v-model="data.product_category"
-                            placeholder="Masukkan Kategori Barang"
-                        />
-                        <div class="fv-plugins-message-container">
-                            <div class="fv-help-block">
-                                <ErrorMessage name="product_category" />
-                            </div>
-                        </div>
-                    </div>
-                    <!--end::Input group-->
                 </div>
             </div>
         </div>
