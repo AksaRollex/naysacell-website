@@ -138,6 +138,34 @@ const submitOrder = async () => {
         loading.value = false;
     }
 };
+
+const handleCustomerNoInput = (e: Event) => {
+    const input = e.target as HTMLInputElement;
+    // Only allow numbers, remove any other characters
+    input.value = input.value.replace(/[^0-9]/g, "");
+    // Limit to a reasonable phone number length (15 digits)
+    if (input.value.length > 14) {
+        input.value = input.value.slice(0, 14);
+    }
+    customerNo.value = input.value;
+};
+
+const handleCustomerNameInput = (e: Event) => {
+    const input = e.target as HTMLInputElement;
+    // Only allow letters, numbers and single spaces
+    let sanitizedValue = input.value
+        .replace(/[^a-zA-Z0-9\s]/g, "") // Remove special characters
+        .replace(/\s+/g, " ") // Replace multiple spaces with single space
+        .replace(/^\s+/, ""); // Remove leading spaces
+
+    // Limit to a reasonable name length (50 characters)
+    if (sanitizedValue.length > 50) {
+        sanitizedValue = sanitizedValue.slice(0, 50);
+    }
+
+    input.value = sanitizedValue;
+    customerName.value = sanitizedValue;
+};
 </script>
 
 <template>
@@ -156,6 +184,7 @@ const submitOrder = async () => {
                         <h5 class="form-label">Nomor Customer</h5>
                         <input
                             type="text"
+                            @input="handleCustomerNoInput"
                             v-model="customerNo"
                             placeholder="Masukkan Nomor Tujuan"
                             class="form-control form-control-solid"
@@ -166,6 +195,7 @@ const submitOrder = async () => {
                         <h5 class="form-label">Nama Customer</h5>
                         <input
                             type="text"
+                            @input="handleCustomerNameInput"
                             v-model="customerName"
                             placeholder="Masukkan Nomor Customer"
                             class="form-control form-control-solid"
@@ -237,11 +267,19 @@ const submitOrder = async () => {
                     </span>
                 </div>
                 <button
-                    class="submit-button"
+                    class="btn btn-sm btn-primary"
                     :disabled="loading || !selectedProduct"
                     @click="submitOrder"
                 >
-                    {{ loading ? "Processing..." : "Submit Order" }}
+                    <span
+                        v-if="loading"
+                        class="spinner-border spinner-border-sm"
+                        role="status"
+                        aria-hidden="true"
+                    ></span>
+
+                    <!-- Show text "Submit Order" when loading is false -->
+                    <span v-else>Submit Order</span>
                 </button>
             </div>
         </div>
@@ -425,16 +463,6 @@ const submitOrder = async () => {
     color: #4299e1;
 }
 
-.submit-button {
-    padding: 0.75rem 2rem;
-    background-color: #4299e1;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
 
 .submit-button:hover:not(:disabled) {
     background-color: #3182ce;
@@ -450,14 +478,14 @@ const submitOrder = async () => {
 .empty-state {
     text-align: center;
     padding: 2rem;
-    color: #718096;
-    /* background: white; */
+    color: #e53e3e;
+    background-color: rgba(52, 50, 50, 0.1);
     border-radius: 12px;
     margin: 1rem 0;
 }
 
 .error-state {
     color: #e53e3e;
-    background: #fff5f5;
+    background-color: rgba(52, 50, 50, 0.1);
 }
 </style>

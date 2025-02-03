@@ -129,12 +129,55 @@ class ProductPrepaidController extends Controller
     }
     public function storePBBPrepaid(Request $request)
     {
-        $base = ProductPrepaid::create($request->all());
+        try {
+            $validated = $request->validate([
+                'product_name' => 'required',
+                'product_desc' => 'required',
+                'product_price' => 'required|numeric',
+                'product_category' => 'required',
+                'product_provider' => 'required',
+            ]);
 
-        return response()->json([
-            'status' => 'true',
-            'message' => 'Produk Berhasil Ditambahkan'
-        ]);
+            // Generate SKU
+            $providerPrefix = [
+                'Telkomsel' => 'TEL',
+                'Indosat' => 'IND',
+                'XL' => 'XL',
+                'Smartfren' => 'SMF',
+                'Three' => 'TRI',
+                'Axis' => 'AXS',
+                'Dana' => 'DNA',
+                'Gopay' => 'GPY',
+                'OVO' => 'OVO',
+                'Shopeepay' => 'SPY',
+            ][$request->product_provider] ?? '';
+
+            $categoryPrefix = [
+                'Pulsa' => 'P',
+                'Data' => 'D',
+                'E-Money' => 'E',
+            ][$request->product_category] ?? '';
+
+            $validated['product_sku'] = $providerPrefix . $categoryPrefix . $request->product_price;
+
+            if (ProductPrepaid::where('product_sku', $validated['product_sku'])->exists()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Produk dengan kombinasi Provider, Kategori, dan Harga yang sama sudah ada'
+                ], 422);
+            }
+
+            $base = ProductPrepaid::create($validated);
+            return response()->json([
+                'status' => true,
+                'message' => 'Produk Berhasil Ditambahkan'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Gagal menambahkan produk: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function destroyPBBPrepaid($id)

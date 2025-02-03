@@ -45,7 +45,7 @@ export default {
         console.log('Raw response:', response.data);
         
         if (!response.data || !response.data.labels || !response.data.labels.length) {
-          this.loadingMessage = 'No data available';
+          this.loadingMessage = 'Data tidak ditemukan !';
           return;
         }
         

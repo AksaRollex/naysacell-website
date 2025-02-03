@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { h, ref, watch } from "vue";
+import { h, ref } from "vue";
 import { useDelete, useDownloadExcel } from "@/libs/hooks";
 import { createColumnHelper } from "@tanstack/vue-table";
 import type { User } from "@/types";
@@ -46,22 +46,28 @@ const columns = [
         cell: (cell) => {
             const transaction_status = cell.getValue();
             let badgeClass = "";
+            let displayStatus = "";
 
             switch (transaction_status) {
                 case "processing":
-                    badgeClass = "badge-light-primary";
+                    badgeClass = "badge-light-warning";
+                    displayStatus = "Proses";
                     break;
                 case "success":
                     badgeClass = "badge-light-success";
+                    displayStatus = "Berhasil";
                     break;
                 case "pending":
-                    badgeClass = "badge-light-warning";
+                    badgeClass = "badge-light-primary";
+                    displayStatus = "Menunggu";
                     break;
                 case "cancelled":
                     badgeClass = "badge-light-danger";
+                    displayStatus = "Dibatalkan";
                     break;
                 default:
                     badgeClass = "badge-light-primary";
+                    displayStatus = "Menunggu";
             }
 
             return h("div", [
@@ -70,23 +76,23 @@ const columns = [
         },
     }),
 
-    // column.accessor("id", {
-    //     header: "Aksi",
-    //     cell: (cell) =>
-    //         h("div", { class: "d-flex gap-2" }, [
-    //             h(
-    //                 "button",
-    //                 {
-    //                     class: "btn btn-sm btn-icon btn-danger",
-    //                     onClick: () =>
-    //                         deleteTransaction(
-    //                             `/master/delete-laporan/${cell.getValue()}`
-    //                         ),
-    //                 },
-    //                 h("i", { class: "la la-trash fs-2" })
-    //             ),
-    //         ]),
-    // }),
+    column.accessor("id", {
+        header: "Aksi",
+        cell: (cell) =>
+            h("div", { class: "d-flex gap-2" }, [
+                h(
+                    "button",
+                    {
+                        class: "btn btn-sm btn-icon btn-danger",
+                        onClick: () =>
+                            deleteTransaction(
+                                `/master/delete-laporan/${cell.getValue()}`
+                            ),
+                    },
+                    h("i", { class: "la la-trash fs-2" })
+                ),
+            ]),
+    }),
 ];
 
 const { download: downloadExcel } = useDownloadExcel({});

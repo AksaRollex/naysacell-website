@@ -37,26 +37,33 @@ const columns = [
         cell: (cell) => {
             const order_status = cell.getValue();
             let badgeClass = "";
+            let displayStatus = "";
 
             switch (order_status) {
                 case "processing":
-                    badgeClass = "badge-light-primary";
+                    badgeClass = "badge-light-warning";
+                    displayStatus = "Proses";
                     break;
                 case "success":
                     badgeClass = "badge-light-success";
+                    displayStatus = "Berhasil";
                     break;
                 case "pending":
-                    badgeClass = "badge-light-warning";
+                    badgeClass = "badge-light-primary";
+                    displayStatus = "Menunggu";
                     break;
                 case "cancelled":
                     badgeClass = "badge-light-danger";
+                    displayStatus = "Dibatalkan";
                     break;
                 default:
                     badgeClass = "badge-light-primary";
+                    displayStatus = "Menunggu";
+                    break;
             }
 
             return h("div", [
-                h("span", { class: `badge ${badgeClass}` }, order_status),
+                h("span", { class: `badge ${badgeClass}` }, displayStatus),
             ]);
         },
     }),

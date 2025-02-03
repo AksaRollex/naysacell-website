@@ -21,7 +21,6 @@ Route::middleware(['auth', 'json'])->prefix('auth')->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('me', [AuthController::class, 'me'])->withoutMiddleware('auth');
 
-    //MOBILE
     Route::prefix('user')->group(function () {
         Route::post('store', [UserController::class, 'storeUser'])->withoutMiddleware('auth');
         Route::post('update', [UserController::class, 'updateMobile'])->withoutMiddleware('auth');
@@ -32,11 +31,9 @@ Route::middleware(['auth', 'json'])->prefix('auth')->group(function () {
         Route::post('home', [TransactionController::class, 'historiHome'])->withoutMiddleware('auth');
     });
 
-    // PESANAN
     Route::post('/submit-product', [OrdersController::class, 'submitProduct']);
     Route::post('/place-order', [OrdersController::class, 'placeOrder']);
 
-    // SALDO
     Route::middleware(['throttle:6,1'],)->group(function () {
         Route::post('/topup', [DepositTransactionController::class, 'topup']);
         Route::get('/check-saldo', [DepositTransactionController::class, 'checkBalance']);
@@ -48,18 +45,18 @@ Route::middleware(['auth', 'json'])->prefix('auth')->group(function () {
     });
 
     Route::post('/saldo-user', [UserBalanceController::class, 'index']);
+    Route::get('/edit-saldo/{id}', [UserBalanceController::class, 'get']);
+    Route::put('/update-saldo/{id}', [UserBalanceController::class, 'update']);
 
-    // FORGOT PASSWORD
     Route::post('send-user-otp', [AuthController::class, 'sendUserOTP'])->withoutMiddleware('auth');
     Route::post('verify-user-otp', [AuthController::class, 'verifyUserOTP'])->withoutMiddleware('auth');
     Route::post('reset-user-password', [AuthController::class, 'resetUserPassword'])->withoutMiddleware('auth');
 
-    // REGISTER
     Route::post('send-user-otp-regist', [AuthController::class, 'sendUserOtpRegist'])->withoutMiddleware('auth');
     Route::post('verify-user-otp-regist', [AuthController::class, 'verifyUserOtpRegist'])->withoutMiddleware('auth');
 
-    // MIDTRANS DEPOSIT 
-    Route::post('deposit/callback', [DepositTransactionController::class, 'handleCallback']);
+    Route::post('midtrans/callback', [DepositTransactionController::class, 'handleCallback'])->name('midtrans.callback');
+
     Route::get('deposit/finish', [DepositTransactionController::class, 'finish'])->name('deposit.finish');
     Route::get('deposit/unfinish', [DepositTransactionController::class, 'unfinish'])->name('deposit.unfinish');
     Route::get('deposit/error', [DepositTransactionController::class, 'error'])->name('deposit.error');
@@ -73,13 +70,10 @@ Route::middleware(['auth', 'verified', 'json'])->group(function () {
 
     Route::prefix('master')->group(function () {
 
-        // USER
         Route::middleware('can:master-user')->group(function () {
-            // MOBILE
             Route::get('users/get/{id}', [UserController::class, 'getById']);
             Route::put('users/update/{id}', [UserController::class, 'updateById']);
             Route::delete('users/delete/{id}', [UserController::class, 'destroy']);
-            // WEBSITE
             Route::get('users', [UserController::class, 'get']);
             Route::post('users', [UserController::class, 'index'])->withoutMiddleware('can:master-user');
             Route::post('users/admin', [UserController::class, 'indexAdmin']);
@@ -91,7 +85,6 @@ Route::middleware(['auth', 'verified', 'json'])->group(function () {
                 ->except(['index', 'store'])->scoped(['user' => 'uuid']);
         });
 
-        // ROLE
         Route::middleware('can:master-role')->group(function () {
             Route::get('roles', [RoleController::class, 'get'])->withoutMiddleware('can:master-role');
             Route::post('roles', [RoleController::class, 'index']);
@@ -100,7 +93,6 @@ Route::middleware(['auth', 'verified', 'json'])->group(function () {
                 ->except(['index', 'store']);
         });
 
-        // PRODUCT
         Route::prefix('product')->group(function () {
             Route::middleware('can:master-product')->group(function () {
                 Route::prefix('prepaid')->group(function () {
@@ -113,32 +105,25 @@ Route::middleware(['auth', 'verified', 'json'])->group(function () {
             });
         });
 
-        // PPOB
         Route::prefix('ppob')->group(function () {
             Route::middleware('can:master-ppob')->group(function () {});
         });
 
-        // LAPORAN
         Route::middleware('can:master-laporan')->group(function () {
-            // DEPOSIT
             Route::get('deposit/download-excel', [DepositTransactionController::class, 'downloadExcel']);
-            // TRANSACTION
+            Route::delete('delete-laporan-deposit/{id}', [DepositTransactionController::class, 'destroy']);
             Route::post('laporan', [TransactionController::class, 'laporan']);
             Route::get('transaction/download-excel', [TransactionController::class, 'downloadExcel']);
             Route::delete('delete-laporan/{id}', [TransactionController::class, 'destroy']);
             Route::get('/transaction/chart-data', [TransactionController::class, 'getChartData']);
-            // USER
             Route::get('user/download-excel', [UserController::class, 'downloadExcel']);
-            // PRODUCT
             Route::get('productPrepaid/download-excel', [ProductPrepaidController::class, 'downloadExcel']);
         });
 
-        // ISI SALDO
         Route::middleware('can:master-isi-saldo')->group(function () {
             Route::post('isi-saldo', [DigiflazController::class, 'isiSaldo']);
         });
 
-        // PESANAN
         Route::prefix('order')->group(function () {
             Route::middleware('can:master-order')->group(function () {
                 Route::post('', [OrdersController::class, 'index']);

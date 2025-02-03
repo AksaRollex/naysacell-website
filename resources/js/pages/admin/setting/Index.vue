@@ -16,6 +16,7 @@
                             type="text"
                             name="app"
                             autocomplete="off"
+                            @input="handleNameInput"
                             v-model="formData.app"
                         />
                         <div class="fv-plugins-message-container">
@@ -74,9 +75,11 @@
                         <Field
                             class="form-control form-control-lg form-control-solid"
                             type="text"
-                            name="telepon"
-                            autocomplete="off"
+                            @input="handlePhoneInput"
                             v-model="formData.telepon"
+                            name="telepon"
+                            maxlength="14"
+                            autocomplete="off"
                         />
                         <div class="fv-plugins-message-container">
                             <div class="fv-help-block">
@@ -165,6 +168,7 @@ import { toast } from "vue3-toastify";
 import { useSetting } from "@/services";
 import type { Setting } from "@/types";
 
+const numericPattern = /^[0-9]+$/;
 export default defineComponent({
     props: {
         selected: {
@@ -172,6 +176,7 @@ export default defineComponent({
             default: null,
         },
     },
+
     setup() {
         const setting = useSetting();
         const formData = ref<Setting>({ ...setting.data?.value });
@@ -185,12 +190,53 @@ export default defineComponent({
         });
 
         const formSchema = Yup.object().shape({
-            app: Yup.string().required("Nama aplikasi wajib diisi"),
+            app: Yup.string()
+                .required("Nama aplikasi wajib diisi")
+                .matches(
+                    /^[a-zA-Z0-9\s]+$/,
+                    "Nama aplikasi hanya boleh berisi huruf, angka dan spasi"
+                ),
             description: Yup.string().required("Deskripsi wajib diisi"),
             alamat: Yup.string().required("Alamat wajib diisi"),
-            email: Yup.string().required("Email wajib diisi"),
-            telepon: Yup.string().required("Telepon wajib diisi"),
+            email: Yup.string()
+                .required("Email wajib diisi")
+                .email("Email harus valid"),
+            telepon: Yup.string()
+                .required("Telepon wajib diisi")
+                .matches(numericPattern, "telepon hanya boleh berisi angka")
+                .max(14, "No telepon maksimal 14 digit"),
         });
+
+        // Ensure that formData.telepon is part of the reactive data
+        const handlePhoneInput = (e: Event) => {
+            const input = e.target as HTMLInputElement;
+            const cursorPosition = input.selectionStart;
+
+            // Remove non-numeric characters
+            let phoneNumber = input.value.replace(/[^0-9]/g, "");
+
+            // Limit to 14 digits
+            if (phoneNumber.length > 14) {
+                phoneNumber = phoneNumber.substring(0, 14);
+            }
+
+            // Update both the form data and input value
+            formData.value.telepon = phoneNumber;
+            input.value = phoneNumber;
+
+            // Restore cursor position
+            const newPosition = Math.min(
+                cursorPosition || 0,
+                phoneNumber.length
+            );
+            input.setSelectionRange(newPosition, newPosition);
+        };
+
+        const handleNameInput = (e: Event) => {
+            const input = e.target as HTMLInputElement;
+            // Hanya izinkan huruf, angka, dan spasi
+            input.value = input.value.replace(/[^a-zA-Z0-9 ]/g, "");
+        };
 
         return {
             setting,
@@ -198,12 +244,12 @@ export default defineComponent({
             formSchema,
             fileTypes,
             files,
+            handlePhoneInput,
+            handleNameInput,
         };
     },
 
-
     methods: {
-        
         submit() {
             const data = new FormData(this.$el);
 

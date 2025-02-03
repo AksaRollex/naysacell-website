@@ -18,11 +18,14 @@ const props = defineProps({
 const emit = defineEmits(["close", "refresh"]);
 
 const user = ref<User>({} as User);
-const photo = ref<any>([]);
 const formRef = ref();
+const numericPattern = /^[0-9]+$/;
+const namePattern = /^[a-zA-Z0-9 ]+$/;
 
 const formSchema = Yup.object().shape({
-    name: Yup.string().required("Nama harus diisi"),
+    name: Yup.string()
+        .required("Nama harus diisi")
+        .matches(namePattern, "Nama hanya boleh berisi huruf, angka dan spasi"),
     email: Yup.string()
         .email("Email harus valid")
         .required("Email harus diisi"),
@@ -31,8 +34,11 @@ const formSchema = Yup.object().shape({
         .oneOf([Yup.ref("password")], "Konfirmasi password harus sama")
         .nullable(),
     phone: Yup.string()
-        .matches(/^\d{8,14}$/, "Nomor Telepon harus terdiri dari 8-14 angka") // Menambahkan validasi regex
-        .required("Nomor Telepon harus diisi"),
+        .matches(numericPattern, "telepon hanya boleh berisi angka")
+        .matches(/^08\d{8,12}$/, "Nomor telepon harus dimulai dengan 08")
+        .required("Nomor Telepon harus diisi")
+        .min(10, "No telepon minimal 10 digit")
+        .max(14, "No telepon maksimal 14 digit"),
     role_id: Yup.string().required("Pilih role"),
     address: Yup.string().required("Alamat harus diisi"),
 });
@@ -118,6 +124,37 @@ watch(
         }
     }
 );
+
+const handlePhoneInput = (e: Event) => {
+    const input = e.target as HTMLInputElement;
+    let phone = input.value.replace(/[^0-9]/g, "");
+
+    if (phone === "") {
+        phone = "08";
+    }
+
+    if (phone.length < 2) {
+        phone = "08";
+    } else if (!phone.startsWith("0")) {
+        phone = "08";
+    } else if (phone.startsWith("0") && phone[1] !== "8") {
+        phone = "08" + phone.slice(2);
+    }
+    if (phone.length > 14) {
+        phone = phone.substring(0, 14);
+    }
+
+    user.value.phone = phone;
+    input.value = phone;
+
+    const newPosition = Math.min(input.selectionStart || 0, phone.length);
+    input.setSelectionRange(newPosition, newPosition);
+};
+
+const handleNameInput = (e: Event) => {
+    const input = e.target as HTMLInputElement;
+    input.value = input.value.replace(/[^a-zA-Z0-9 ]/g, "");
+};
 </script>
 
 <template>
@@ -142,7 +179,6 @@ watch(
         <div class="card-body">
             <div class="row">
                 <div class="col-md-6">
-                    <!--begin::Input group-->
                     <div class="fv-row mb-7">
                         <label class="form-label fw-bold fs-6 required">
                             Nama
@@ -153,6 +189,7 @@ watch(
                             name="name"
                             autocomplete="off"
                             v-model="user.name"
+                            @input="handleNameInput"
                             placeholder="Masukkan Nama"
                         />
                         <div class="fv-plugins-message-container">
@@ -161,10 +198,8 @@ watch(
                             </div>
                         </div>
                     </div>
-                    <!--end::Input group-->
                 </div>
                 <div class="col-md-6">
-                    <!--begin::Input group-->
                     <div class="fv-row mb-7">
                         <label class="form-label fw-bold fs-6 required">
                             Email
@@ -183,10 +218,8 @@ watch(
                             </div>
                         </div>
                     </div>
-                    <!--end::Input group-->
                 </div>
                 <div class="col-md-6">
-                    <!--begin::Input group-->
                     <div class="fv-row mb-7">
                         <label class="form-label fw-bold fs-6 required">
                             Alamat
@@ -205,11 +238,9 @@ watch(
                             </div>
                         </div>
                     </div>
-                    <!--end::Input group-->
                 </div>
 
                 <div class="col-md-6">
-                    <!--begin::Input group-->
                     <div class="fv-row mb-7">
                         <label class="form-label fw-bold fs-6">
                             Password
@@ -228,10 +259,8 @@ watch(
                             </div>
                         </div>
                     </div>
-                    <!--end::Input group-->
                 </div>
                 <div class="col-md-6">
-                    <!--begin::Input group-->
                     <div class="fv-row mb-7">
                         <label class="form-label fw-bold fs-6">
                             Konfirmasi Password
@@ -250,10 +279,8 @@ watch(
                             </div>
                         </div>
                     </div>
-                    <!--end::Input group-->
                 </div>
                 <div class="col-md-6">
-                    <!--begin::Input group-->
                     <div class="fv-row mb-7">
                         <label class="form-label fw-bold fs-6 required">
                             Role
@@ -278,10 +305,8 @@ watch(
                             </div>
                         </div>
                     </div>
-                    <!--end::Input group-->
                 </div>
                 <div class="col-md-6">
-                    <!--begin::Input group-->
                     <div class="fv-row mb-7">
                         <label class="form-label fw-bold fs-6 required">
                             Nomor Telepon
@@ -289,13 +314,13 @@ watch(
                         <Field
                             class="form-control form-control-lg form-control-solid"
                             type="text"
+                            @input="handlePhoneInput"
                             name="phone"
                             autocomplete="off"
                             v-model="user.phone"
                             placeholder="089"
                             minlength="8"
                             maxlength="14"
-                            pattern="\d*"
                         />
                         <div class="fv-plugins-message-container">
                             <div class="fv-help-block">
@@ -303,7 +328,6 @@ watch(
                             </div>
                         </div>
                     </div>
-                    <!--end::Input group-->
                 </div>
             </div>
         </div>

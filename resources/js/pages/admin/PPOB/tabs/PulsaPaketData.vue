@@ -41,70 +41,66 @@ const searchProducts = async () => {
         error.value = "";
 
         let productProvider = null;
+        const validPrefix = [
+            // Telkomsel
+            ["0811", "0812", "0813", "0821", "0822", "0823", "0851", "0852", "0853"],
+            // Indosat
+            ["0814", "0815", "0816", "0855", "0856", "0857", "0858"],
+            // XL
+            ["0817", "0818", "0819", "0859", "0877", "0878"],
+            // Axis
+            ["0831", "0832", "0833", "0838"],
+            // Three
+            ["0895", "0896", "0897", "0898", "0899"],
+            // Smartfren
+            ["0881", "0882", "0883", "0884", "0885", "0886", "0887", "0888", "0889"]
+        ].flat();
+
+        // Check if the number starts with any valid prefix
+        const hasValidPrefix = validPrefix.some(prefix => customerNo.value.startsWith(prefix));
+        
+        if (!hasValidPrefix && customerNo.value.length >= 4) {
+            products.value = [];
+            return;
+        }
+
         // Telkomsel
-        if (
-            [
-                "0811",
-                "0812",
-                "0813",
-                "0821",
-                "0822",
-                "0823",
-                "0851",
-                "0852",
-                "0853",
-            ].some((prefix) => customerNo.value.startsWith(prefix))
+        if (["0811", "0812", "0813", "0821", "0822", "0823", "0851", "0852", "0853"]
+            .some((prefix) => customerNo.value.startsWith(prefix))
         ) {
             productProvider = "telkomsel";
         }
         // Indosat
-        else if (
-            ["0814", "0815", "0816", "0855", "0856", "0857", "0858"].some(
-                (prefix) => customerNo.value.startsWith(prefix)
-            )
+        else if (["0814", "0815", "0816", "0855", "0856", "0857", "0858"]
+            .some((prefix) => customerNo.value.startsWith(prefix))
         ) {
             productProvider = "indosat";
         }
         // XL
-        else if (
-            ["0817", "0818", "0819", "0859", "0877", "0878"].some((prefix) =>
-                customerNo.value.startsWith(prefix)
-            )
+        else if (["0817", "0818", "0819", "0859", "0877", "0878"]
+            .some((prefix) => customerNo.value.startsWith(prefix))
         ) {
             productProvider = "xl";
         }
         // Axis
-        else if (
-            ["0831", "0832", "0833", "0838"].some((prefix) =>
-                customerNo.value.startsWith(prefix)
-            )
+        else if (["0831", "0832", "0833", "0838"]
+            .some((prefix) => customerNo.value.startsWith(prefix))
         ) {
             productProvider = "axis";
         }
         // Three
-        else if (
-            ["0895", "0896", "0897", "0898", "0899"].some((prefix) =>
-                customerNo.value.startsWith(prefix)
-            )
+        else if (["0895", "0896", "0897", "0898", "0899"]
+            .some((prefix) => customerNo.value.startsWith(prefix))
         ) {
             productProvider = "three";
         }
         // Smartfren
-        else if (
-            [
-                "0881",
-                "0882",
-                "0883",
-                "0884",
-                "0885",
-                "0886",
-                "0887",
-                "0888",
-                "0889",
-            ].some((prefix) => customerNo.value.startsWith(prefix))
+        else if (["0881", "0882", "0883", "0884", "0885", "0886", "0887", "0888", "0889"]
+            .some((prefix) => customerNo.value.startsWith(prefix))
         ) {
             productProvider = "smartfren";
         }
+
         const response = await axios.post("/master/product/prepaid", {
             search: searchQuery.value,
             product_category: "pulsa",
@@ -195,10 +191,13 @@ const submitOrder = async () => {
                 position: toast.POSITION.TOP_RIGHT,
             });
         } else if (errorData?.message === "User balance not found") {
-            toast.error("Data saldo tidak ditemukan", {
-                autoClose: 3000,
-                position: toast.POSITION.TOP_RIGHT,
-            });
+            toast.error(
+                "Kamu belum memiliki saldo, silahkan untuk isi saldo terlebih dahulu",
+                {
+                    autoClose: 3000,
+                    position: toast.POSITION.TOP_RIGHT,
+                }
+            );
         } else {
             toast.error(errorData?.message || "Gagal mengirim pesanan", {
                 autoClose: 3000,
@@ -211,6 +210,34 @@ const submitOrder = async () => {
     } finally {
         loading.value = false;
     }
+};
+
+const handleCustomerNoInput = (e: Event) => {
+    const input = e.target as HTMLInputElement;
+    // Only allow numbers, remove any other characters
+    input.value = input.value.replace(/[^0-9]/g, "");
+    // Limit to a reasonable phone number length (15 digits)
+    if (input.value.length > 14) {
+        input.value = input.value.slice(0, 14);
+    }
+    customerNo.value = input.value;
+};
+
+const handleCustomerNameInput = (e: Event) => {
+    const input = e.target as HTMLInputElement;
+    // Only allow letters, numbers and single spaces
+    let sanitizedValue = input.value
+        .replace(/[^a-zA-Z0-9\s]/g, "") // Remove special characters
+        .replace(/\s+/g, " ") // Replace multiple spaces with single space
+        .replace(/^\s+/, ""); // Remove leading spaces
+
+    // Limit to a reasonable name length (50 characters)
+    if (sanitizedValue.length > 50) {
+        sanitizedValue = sanitizedValue.slice(0, 50);
+    }
+
+    input.value = sanitizedValue;
+    customerName.value = sanitizedValue;
 };
 </script>
 
@@ -231,6 +258,7 @@ const submitOrder = async () => {
                         <input
                             type="text"
                             v-model="customerNo"
+                            @input="handleCustomerNoInput"
                             placeholder="Masukkan Nomor Tujuan"
                             class="form-control form-control-solid"
                         />
@@ -240,6 +268,7 @@ const submitOrder = async () => {
                         <h5 class="form-label">Nama Customer</h5>
                         <input
                             type="text"
+                            @input="handleCustomerNameInput"
                             v-model="customerName"
                             placeholder="Masukkan Nomor Customer"
                             class="form-control form-control-solid"
@@ -315,7 +344,16 @@ const submitOrder = async () => {
                     :disabled="loading || !selectedProduct"
                     @click="submitOrder"
                 >
-                    {{ loading ? "Processing..." : "Submit Order" }}
+                    <!-- Show spinner when loading is true -->
+                    <span
+                        v-if="loading"
+                        class="spinner-border spinner-border-sm"
+                        role="status"
+                        aria-hidden="true"
+                    ></span>
+
+                    <!-- Show text "Submit Order" when loading is false -->
+                    <span v-else>Submit Order</span>
                 </button>
             </div>
         </div>
@@ -524,14 +562,14 @@ const submitOrder = async () => {
 .empty-state {
     text-align: center;
     padding: 2rem;
-    color: #718096;
-    /* background: white; */
+    color: #e53e3e;
+    background-color: rgba(52, 50, 50, 0.1);
     border-radius: 12px;
     margin: 1rem 0;
 }
 
 .error-state {
     color: #e53e3e;
-    background: #fff5f5;
+    background-color: rgba(52, 50, 50, 0.1);
 }
 </style>

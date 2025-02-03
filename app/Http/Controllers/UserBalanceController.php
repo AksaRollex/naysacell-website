@@ -21,4 +21,22 @@ class UserBalanceController extends Controller
 
         return response()->json($data);
     }
+
+    public function get($id)
+    {
+        return response()->json([
+            'success' => true,
+            'data' => UserBalance::find($id)
+        ]);
+    }
+
+    public function update($id, Request $request)
+    {
+        $base = UserBalance::find($id);
+        $base->update($request->all());
+        return response()->json([
+            'success' => true,
+            'data' => UserBalance::find($id)
+        ]);
+    }
 }

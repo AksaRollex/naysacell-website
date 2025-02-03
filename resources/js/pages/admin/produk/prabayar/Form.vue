@@ -22,7 +22,7 @@ const emit = defineEmits(["close", "refresh"]);
 const formRef = ref();
 
 const numericPattern = /^[0-9]+$/;
-const alphanumericPattern = /^[a-zA-Z0-9]+$/;
+const alphanumericPattern = /^[a-zA-Z0-9\s]+$/;
 
 const formSchema = Yup.object().shape({
     product_name: Yup.string()
@@ -33,13 +33,13 @@ const formSchema = Yup.object().shape({
         ),
     product_desc: Yup.string()
         .required("Deskripsi Produk harus diisi ")
-        .matches(alphanumericPattern, "Deskripsi produk hanya boleh berisi huruf dan angka"),
+        .matches(
+            alphanumericPattern,
+            "Deskripsi produk hanya boleh berisi huruf dan angka"
+        ),
     product_price: Yup.string()
         .required("Harga harus diisi")
         .matches(numericPattern, "Harga hanya boleh berisi angka"),
-    product_sku: Yup.string()
-        .required("Kode SKU harus diisi")
-        .matches(alphanumericPattern, "SKU hanya boleh berisi huruf dan angka"),
     product_category: Yup.string().required("Kategori Produk harus diisi "),
     product_provider: Yup.string().required("Provider Produk harus diisi "),
 });
@@ -48,7 +48,11 @@ function getEdit() {
     block(document.getElementById("form-product"));
     ApiService.get("master/product/prepaid/get-pbb", props.selected)
         .then((response) => {
+            console.log(response.data.data);
             data.value = response.data.data;
+            Object.keys(response.data.data).forEach((key) => {
+                formRef.value?.setFieldValue(key, response.data.data[key]);
+            });
         })
         .catch((err: any) => {
             toast.error(err.response.data.message);
@@ -65,7 +69,6 @@ function submit() {
     formData.append("product_category", data.value.product_category);
     formData.append("product_provider", data.value.product_provider);
     formData.append("product_price", data.value.product_price);
-    formData.append("product_sku", data.value.product_sku);
 
     if (props.selected) {
         formData.append("_method", "PUT");
@@ -82,15 +85,23 @@ function submit() {
             "Content-Type": "multipart/form-data",
         },
     })
-        .then(() => {
-            emit("close");
-            emit("refresh");
-            toast.success("Data berhasil disimpan");
-            formRef.value.resetForm();
+        .then((response) => {
+            if (response.data.status) {
+                emit("close");
+                emit("refresh");
+                toast.success(response.data.message);
+                formRef.value.resetForm();
+            }
         })
         .catch((err: any) => {
-            formRef.value.setErrors(err.response.data.errors);
-            toast.error(err.response.data.message);
+            if (err.response?.status === 422) {
+                toast.error(err.response.data.message);
+            } else {
+                toast.error(err.response?.data?.message || "Terjadi kesalahan");
+            }
+            if (err.response?.data?.errors) {
+                formRef.value.setErrors(err.response.data.errors);
+            }
         })
         .finally(() => {
             unblock(document.getElementById("form-data"));
@@ -113,16 +124,16 @@ watch(
 );
 
 const provider = [
-    { id: 1, text: "Indosat" },
-    { id: 2, text: "XL" },
-    { id: 3, text: "Smartfren" },
-    { id: 4, text: "Three" },
-    { id: 5, text: "Axis" },
-    { id: 6, text: "Telkomsel" },
-    { id: 7, text: "Dana" },
-    { id: 8, text: "Gopay" },
-    { id: 9, text: "OVO" },
-    { id: 10, text: "Shopeepay" },
+    { id: "Indosat", text: "Indosat" },
+    { id: "XL", text: "XL" },
+    { id: "Smartfren", text: "Smartfren" },
+    { id: "Three", text: "Three" },
+    { id: "Axis", text: "Axis" },
+    { id: "Telkomsel", text: "Telkomsel" },
+    { id: "Dana", text: "Dana" },
+    { id: "Gopay", text: "Gopay" },
+    { id: "OVO", text: "OVO" },
+    { id: "Shopeepay", text: "Shopeepay" },
 ];
 
 const category = [
@@ -140,9 +151,15 @@ const category = [
     },
 ];
 
-// Computed property untuk provider yang telah difilter
 const filteredProviders = computed(() => {
     const eMoneyProviders = ["Dana", "Gopay", "OVO", "Shopeepay"];
+
+    if (!data.value.product_category) {
+        return provider.map((item) => ({
+            id: item.text,
+            text: item.text,
+        }));
+    }
 
     if (data.value.product_category === "E-Money") {
         return provider
@@ -161,12 +178,21 @@ const filteredProviders = computed(() => {
     }
 });
 
-// Watch untuk me-reset provider ketika kategori berubah
 watch(
     () => data.value.product_category,
-    (newCategory) => {
-        // Reset provider selection when category changes
-        data.value.product_provider = "";
+    (newCategory, oldCategory) => {
+        // Hanya reset jika ini bukan initial load dan kategori benar-benar berubah
+        if (oldCategory && newCategory !== oldCategory) {
+            data.value.product_provider = "";
+        }
+    }
+);
+
+// Tambahkan watcher untuk memantau perubahan provider
+watch(
+    () => data.value.product_provider,
+    (newVal) => {
+        console.log("Provider changed:", newVal);
     }
 );
 
@@ -175,22 +201,21 @@ const handlePriceInput = (e: Event) => {
     input.value = input.value.replace(/[^0-9]/g, "");
     data.value.product_price = input.value;
 };
+
 const handleNameInput = (e: Event) => {
     const input = e.target as HTMLInputElement;
-    input.value = input.value.replace(/[^a-zA-Z0-9]/g, "");
+    input.value = input.value
+        .replace(/[^a-zA-Z0-9\s]/g, "")
+        .replace(/\s+/g, " ");
     data.value.product_name = input.value;
 };
 
 const handleDescInput = (e: Event) => {
     const input = e.target as HTMLInputElement;
-    input.value = input.value.replace(/[^a-zA-Z0-9]/g, "");
+    input.value = input.value
+        .replace(/[^a-zA-Z0-9\s]/g, "")
+        .replace(/\s+/g, " ");
     data.value.product_desc = input.value;
-};
-
-const handleSkuInput = (e: Event) => {
-    const input = e.target as HTMLInputElement;
-    input.value = input.value.replace(/[^a-zA-Z0-9]/g, "");
-    data.value.product_sku = input.value;
 };
 </script>
 
@@ -199,6 +224,7 @@ const handleSkuInput = (e: Event) => {
         class="form card mb-10"
         @submit="submit"
         :validation-schema="formSchema"
+        :initial-values="data.value"
         id="form-data"
         ref="formRef"
     >
@@ -274,27 +300,6 @@ const handleSkuInput = (e: Event) => {
                         <div class="fv-plugins-message-container">
                             <div class="fv-help-block">
                                 <ErrorMessage name="product_price" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="fv-row mb-7">
-                        <label class="form-label fw-bold fs-6 required">
-                            Produk SKU
-                        </label>
-                        <Field
-                            class="form-control form-control-lg form-control-solid"
-                            type="text"
-                            name="product_sku"
-                            @input="handleSkuInput"
-                            autocomplete="off"
-                            v-model="data.product_sku"
-                            placeholder="Masukkan Kode SKU Produk"
-                        />
-                        <div class="fv-plugins-message-container">
-                            <div class="fv-help-block">
-                                <ErrorMessage name="product_sku" />
                             </div>
                         </div>
                     </div>

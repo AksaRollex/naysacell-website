@@ -20,13 +20,6 @@ return new class extends Migration
             $table->string('product_price');
             $table->string('product_sku');
             $table->unique('product_sku');
-            // $table->integer('product_stock');
-            // $table->string('product_type');
-            // $table->string('product_unlimited_stock', 5);
-            // $table->string('product_multi', 5);
-            // $table->integer('product_seller_price');
-            // $table->integer('product_buyer_price');
-            // $table->string('product_seller');
             $table->timestamps();
         });
     }
