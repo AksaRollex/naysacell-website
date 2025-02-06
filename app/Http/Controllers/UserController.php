@@ -9,7 +9,7 @@ use App\Models\Role;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
@@ -88,14 +88,29 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request)
     {
+        // Validasi data yang diterima
         $validatedData = $request->validated();
 
-        // if ($request->hasFile('photo')) {
-        //     $validatedData['photo'] = $request->file('photo')->store('photo', 'public');
-        // }
+        // Cek apakah email sudah ada
+        if (User::where('email', $validatedData['email'])->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email telah digunakan'
+            ], 400);
+        }
 
+        // Cek apakah nomor telepon sudah ada
+        if (User::where('phone', $validatedData['phone'])->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Nomor telepon telah digunakan'
+            ], 400);
+        }
+
+        // Buat pengguna baru
         $user = User::create($validatedData);
 
+        // Menetapkan peran untuk pengguna
         $role = Role::findById($validatedData['role_id']);
         $user->assignRole($role);
 
@@ -104,6 +119,7 @@ class UserController extends Controller
             'user' => $user
         ]);
     }
+
 
     public function storeUser(Request $request)
     {
@@ -144,8 +160,6 @@ class UserController extends Controller
         ]);
     }
 
-
-
     /**
      * Update the specified resource in storage.
      */
@@ -153,18 +167,6 @@ class UserController extends Controller
     public function update(UpdateUserRequest $request, User $user)
     {
         $validatedData = $request->validated();
-
-        // if ($request->hasFile('photo')) {
-        //     if ($user->photo) {
-        //         Storage::disk('public')->delete($user->photo);
-        //     }
-        //     $validatedData['photo'] = $request->file('photo')->store('photo', 'public');
-        // } else {
-        //     if ($user->photo) {
-        //         Storage::disk('public')->delete($user->photo);
-        //         $validatedData['photo'] = null;
-        //     }
-        // }
 
         $user->update($validatedData);
 
@@ -175,6 +177,51 @@ class UserController extends Controller
             'success' => true,
             'user' => $user
         ]);
+    }
+
+
+    public function updatePassword(Request $request, $id)
+    {
+        $request->validate([
+            'password' => [
+                'required',
+                'min:8',
+                'regex:/^[0-9]+$/',
+            ],
+            'password_confirmation' => 'required|same:password',
+        ], [
+            'password.required' => 'Password harus diisi',
+            'password.min' => 'Password minimal 8 karakter',
+            'password.regex' => 'Password hanya boleh angka',
+            'password_confirmation.required' => 'Konfirmasi password harus diisi',
+            'password_confirmation.same' => 'Password tidak sama',
+        ]);
+
+        $user = User::findOrFail($id);
+
+        try {
+            $updated = $user->update([
+                'password' => Hash::make($request->password)
+            ]);
+
+            if ($updated) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Password berhasil diperbarui',
+                    'data' => $user
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal memperbarui password'
+                ], 400);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat memperbarui password'
+            ], 500);
+        }
     }
 
     public function updateMobile(Request $request)
@@ -200,23 +247,6 @@ class UserController extends Controller
             'data' => $request->user()
         ]);
     }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    // public function destroy(User $user)
-    // {
-    //     // if ($user->photo) {
-    //     //     Storage::disk('public')->delete($user->photo);
-    //     // }
-
-    //     $user->delete();
-
-    //     return response()->json([
-    //         'success' => true
-    //     ]);
-    // }
-
 
     public function destroy($id)
     {

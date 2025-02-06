@@ -23,8 +23,9 @@ class TransactionModel extends Model
         'transaction_total',
         'transaction_message',
         'transaction_status',
+        'order_status',
         'transaction_user_id',
-        'transaction_product'
+        'transaction_product',
         // 'transaction_provider',
     ];
 

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users');
             $table->decimal('amount', 12, 2);
-            $table->string('status');
+            $table->enum('status', ['pending', 'success', 'failed', 'process', 'cancelled']);
             $table->string('user_name');
             $table->string('deposit_code')->unique();
             $table->string('user_number');

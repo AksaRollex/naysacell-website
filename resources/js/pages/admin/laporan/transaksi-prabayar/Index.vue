@@ -71,7 +71,7 @@ const columns = [
             }
 
             return h("div", [
-                h("span", { class: `badge ${badgeClass}` }, transaction_status),
+                h("span", { class: `badge ${badgeClass}` }, displayStatus),
             ]);
         },
     }),

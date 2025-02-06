@@ -19,15 +19,33 @@ class OrdersController extends Controller
 
     public function index(Request $request)
     {
-        $per = $request->per ?? 10;
-        $page = $request->page ? $request->page - 1 : 0;
+        if ($request->wantsJson()) {
+            $per = $request->per ?? 10;
+            $page = $request->page ? $request->page - 1 : 0;
 
-        DB::statement('set @no=0+' . $page * $per);
-        $data = Orders::when($request->search, function (Builder $query, string $search) {
-            $query->where('customer_no', 'like', "%$search%");
-        })->latest()->paginate($per, ['*', DB::raw('@no := @no + 1 AS no')]);
+            DB::statement('SET @no := ' . $page * $per);
 
-        return response()->json($data);
+            $query = Orders::query();
+
+            if ($request->search) {
+                $query->where(function ($q) use ($request) {
+                    $q->where('customer_no', 'LIKE', '%' . $request->search . '%')
+                        ->orWhere('customer_name', 'LIKE', '%' . $request->search . '%');
+                });
+            }
+
+            if ($request->order_status) {
+                $query->where('order_status', $request->order_status);
+            }
+
+            $data = $query->select('*', DB::raw('@no := @no + 1 AS no'))
+                ->orderBy('created_at', 'DESC')
+                ->paginate($per);
+
+            return response()->json($data);
+        }
+
+        return abort(404);
     }
 
     public function get($id)
@@ -112,11 +130,10 @@ class OrdersController extends Controller
                     'transaction_number' => $request->customer_no,
                     'transaction_message' => "Pembelian {$request->product_name}",
                     'transaction_status' => 'success',
+                    'order_status' => 'pending',
                     'transaction_product' => $request->product_name,
                     'transaction_total' => $totalPrice,
                     'transaction_user_id' => $request->user_id,
-                    'payment_status' => 'success',
-                    'payment_date' => now()
                 ]);
 
 

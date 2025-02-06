@@ -12,8 +12,6 @@ use App\Http\Controllers\ProductPrepaidController;
 use App\Http\Controllers\DepositTransactionController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserBalanceController;
-use App\Http\Controllers\Api\TripayController;
-use App\Http\Controllers\CodeOperatorController;
 
 Route::middleware(['auth', 'json'])->prefix('auth')->group(function () {
     Route::post('login', [AuthController::class, 'loginWeb'])->withoutMiddleware('auth');
@@ -44,6 +42,7 @@ Route::middleware(['auth', 'json'])->prefix('auth')->group(function () {
         Route::post('histori-deposit-web', [DepositTransactionController::class, 'indexWeb']);
     });
 
+    //master
     Route::post('/saldo-user', [UserBalanceController::class, 'index']);
     Route::get('/edit-saldo/{id}', [UserBalanceController::class, 'get']);
     Route::put('/update-saldo/{id}', [UserBalanceController::class, 'update']);
@@ -53,6 +52,7 @@ Route::middleware(['auth', 'json'])->prefix('auth')->group(function () {
     Route::post('reset-user-password', [AuthController::class, 'resetUserPassword'])->withoutMiddleware('auth');
 
     Route::post('send-user-otp-regist', [AuthController::class, 'sendUserOtpRegist'])->withoutMiddleware('auth');
+    Route::post('resend-user-otp-regist', [AuthController::class, 'resendUserOtpRegist'])->withoutMiddleware('auth');
     Route::post('verify-user-otp-regist', [AuthController::class, 'verifyUserOtpRegist'])->withoutMiddleware('auth');
 
     Route::post('midtrans/callback', [DepositTransactionController::class, 'handleCallback'])->name('midtrans.callback');
@@ -81,6 +81,7 @@ Route::middleware(['auth', 'verified', 'json'])->group(function () {
             Route::post('users/user', [UserController::class, 'indexUser']);
             Route::post('users/store', [UserController::class, 'store']);
             Route::post('users/update', [UserController::class, 'update']);
+            Route::put('users/update-password/{id}', [UserController::class, 'updatePassword']);
             Route::apiResource('users', UserController::class)
                 ->except(['index', 'store'])->scoped(['user' => 'uuid']);
         });
@@ -110,13 +111,14 @@ Route::middleware(['auth', 'verified', 'json'])->group(function () {
         });
 
         Route::middleware('can:master-laporan')->group(function () {
-            Route::get('deposit/download-excel', [DepositTransactionController::class, 'downloadExcel']);
             Route::delete('delete-laporan-deposit/{id}', [DepositTransactionController::class, 'destroy']);
             Route::post('laporan', [TransactionController::class, 'laporan']);
-            Route::get('transaction/download-excel', [TransactionController::class, 'downloadExcel']);
             Route::delete('delete-laporan/{id}', [TransactionController::class, 'destroy']);
             Route::get('/transaction/chart-data', [TransactionController::class, 'getChartData']);
+            
             Route::get('user/download-excel', [UserController::class, 'downloadExcel']);
+            Route::get('deposit/download-excel', [DepositTransactionController::class, 'downloadExcel']);
+            Route::get('transaction/download-excel', [TransactionController::class, 'downloadExcel']);
             Route::get('productPrepaid/download-excel', [ProductPrepaidController::class, 'downloadExcel']);
         });
 
@@ -146,26 +148,3 @@ Route::prefix('digiflazz')->group(function () {
     Route::post('/cek-tagihan', [DigiflazController::class, 'digiflazCekTagihan']);
     Route::post('/bayar-tagihan', [DigiflazController::class, 'digiflazBayarTagihan']);
 });
-
-// Route::prefix('tripay')->group(function () {
-//     //CEK
-//     Route::get('cek-server', [TripayController::class, 'cek_server']);
-//     Route::get('cek-saldo', [TripayController::class, 'cek_saldo']);
-//     //PRABAYAR
-//     Route::get('get-kategori-prabayar', [TripayController::class, 'get_kategori_prabayar']);
-//     Route::get('get-operator-prabayar', [TripayController::class, 'get_operator_prabayar']);
-//     Route::get('get-produk-prabayar', [TripayController::class, 'get_produk_prabayar']);
-//     Route::post('get-detail-produk-prabayar', [TripayController::class, 'get_detail_produk_prabayar']);
-//     //PASCABAYAR
-//     Route::get('get-kategori-pascabayar', [TripayController::class, 'get_kategori_pascabayar']);
-//     Route::get('get-operator-pascabayar', [TripayController::class, 'get_operator_pascabayar']);
-//     Route::get('get-produk-pascabayar', [TripayController::class, 'get_produk_pascabayar']);
-//     Route::post('get-detail-produk-pascabayar', [TripayController::class, 'get_detail_produk_pascabayar']);
-//     //TRANSAKSI
-//     Route::post('request-transaksi-prabayar', [TripayController::class, 'request_transaksi_prabayar']);
-//     Route::post('cek-tagihan-pascabayar', [TripayController::class, 'cek_tagihan_pascabayar']);
-//     Route::post('bayar-tagihan-pascabayar', [TripayController::class, 'bayar_tagihan_pascabayar']);
-//     Route::get('riwayat-transaksi', [TripayController::class, 'riwayat_transaksi']);
-//     Route::post('detail-riwayat-transaksi', [TripayController::class, 'detail_riwayat_transaksi']);
-//     Route::post('riwayat-transaksi-bydate', [TripayController::class, 'riwayat_transaksi_bydate']);
-// });

@@ -20,17 +20,12 @@ return new class extends Migration
             $table->time('transaction_time');
             $table->string('transaction_number');
             $table->string('transaction_message');
-            $table->string('transaction_status');
+            $table->enum('transaction_status', ['pending', 'success', 'failed', 'process', 'cancelled']);
+            $table->enum('order_status', ['pending', 'processing', 'success', 'cancelled']);
             $table->string('transaction_product');
             $table->integer('transaction_total');
             $table->unsignedBigInteger('transaction_user_id');
-            $table->enum('payment_status', ['pending', 'success', 'failed']);
-            $table->timestamp('payment_date')->nullable();
             $table->foreign('transaction_user_id')->references('id')->on('users')->onDelete('cascade');
-            // $table->enum('transaction_method', ['payment', 'transfer', 'topup', 'withdrawal']);
-            // $table->string('transaction_type');
-            // $table->string('transaction_sku');
-            // $table->string('transaction_provider');
             $table->timestamps();
         });
     }

@@ -78,28 +78,6 @@ class ProductPrepaidController extends Controller
         return abort(404);
     }
 
-    // public function indexPrepaid(Request $request)
-    // {
-    //     $per = $request->per ?? 10;
-    //     $page = $request->page ? $request->page - 1 : 0;
-
-    //     DB::statement('set @no=0+' . $page * $per);
-
-    //     $data = ProductPrepaid::when($request->product_category, function ($q) use ($request) {
-    //         $q->where('product_category', $request->product_category);
-    //     })->when($request->product_provider, function ($q) use ($request) {
-    //         $q->where('product_provider', $request->product_provider);
-    //     })
-    //         ->when($request->search, function (Builder $query, string $search) {
-    //             $query->where('product_name', 'like', "%$search%");
-    //         })
-    //         ->latest()
-    //         ->paginate($per, ['*', DB::raw('@no := @no + 1 AS no')]);
-
-    //     return response()->json($data);
-    // }
-
-
     public function getPBBPrepaid($id)
     {
         $base = ProductPrepaid::find($id);
@@ -117,13 +95,13 @@ class ProductPrepaidController extends Controller
 
             return response()->json([
                 'status' => true,
-                'message' => 'Produk Berhasil Dirubah',
+                'message' => 'Produk Berhasil Diperbarui',
                 'data' => $base
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
-                'message' => 'Produk Gagal Dirubah: ' . $e->getMessage()
+                'message' => 'Produk Gagal Diperbarui: ' . $e->getMessage()
             ], 500);
         }
     }
