@@ -6,30 +6,25 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('product_id');
-            $table->string('product_name');
-            $table->string('product_price');
             $table->string('customer_no');
-            $table->integer('quantity');
-            $table->foreign('product_id')->references('id')->on('product_prepaid')->onDelete('cascade');
+            // $table->string('customer_name');
+            // $table->string('product_name');
+            // $table->decimal('product_price', 10, 2);
+            $table->integer('quantity')->default(1);
+            $table->unsignedBigInteger('product_id');
             $table->unsignedBigInteger('user_id');
-            $table->string('customer_name');
-            $table->enum('order_status', ['pending', 'processing', 'success', 'cancelled']);
+            $table->unsignedBigInteger('transaction_id')->nullable();
+            $table->foreign('product_id')->references('id')->on('product_prepaid')->onDelete('cascade');
+            $table->foreign('transaction_id')->references('id')->on('transaction')->onDelete('cascade');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('orders');

@@ -9,9 +9,9 @@ const axios = Axios.create({
         (data) => {
             const store = useTahunStore();
             if (data instanceof FormData) {
-                if (formDataToObject(data).tahun) return data;
+                // if (formDataToObject(data).tahun) return data;
 
-                data.append("tahun", store.tahun);
+                // data.append("tahun", store.tahun);
                 return data;
             } else {
                 if (data?.tahun) return data;

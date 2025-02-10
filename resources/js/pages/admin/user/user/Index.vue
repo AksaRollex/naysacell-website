@@ -2,6 +2,7 @@
 import { h, ref, watch } from "vue";
 import { useDelete, useDownloadExcel } from "@/libs/hooks";
 import Form from "./Form.vue";
+import FormPassUser from "./FormPassUser.vue";
 import { createColumnHelper } from "@tanstack/vue-table";
 import type { User } from "@/types";
 
@@ -9,6 +10,7 @@ const column = createColumnHelper<User>();
 const paginateRef = ref<any>(null);
 const selected = ref<string>("");
 const openForm = ref<boolean>(false);
+const openFormPass = ref<boolean>(false);
 
 const { delete: deleteUser } = useDelete({
     onSuccess: () => paginateRef.value.refetch(),
@@ -52,6 +54,7 @@ const columns = [
                     },
                     h("i", { class: "la la-pencil fs-2" })
                 ),
+
                 h(
                     "button",
                     {
@@ -73,6 +76,12 @@ watch(openForm, (val) => {
     }
     window.scrollTo(0, 0);
 });
+watch(openFormPass, (val) => {
+    if (!val) {
+        selected.value = "";
+    }
+    window.scrollTo(0, 0);
+});
 
 const { download: downloadExcelReportUser } = useDownloadExcel();
 </script>
@@ -84,7 +93,12 @@ const { download: downloadExcelReportUser } = useDownloadExcel();
         v-if="openForm"
         @refresh="refresh"
     />
-
+    <FormPassUser
+        :selected="selected"
+        @close="openFormPass = false"
+        v-if="openFormPass"
+        @refresh="refresh"
+    />
     <div class="card">
         <div class="card-header align-items-center">
             <h2 class="mb-0">Daftar Daftar User</h2>

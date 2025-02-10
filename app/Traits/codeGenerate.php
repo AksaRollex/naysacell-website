@@ -11,24 +11,23 @@ trait CodeGenerate
 
     public function getCode()
     {
-        $q = DB::table('code_generate')->select(DB::raw('MAX(RIGHT(code,9)) as kd_max'));
-        $prx = 'INV-NC-' . date('y') . '-' . date('m') . '-';
-        if ($q->count() > 0) {
-            foreach ($q->get() as $k) {
-                $tmp = ((int)$k->kd_max) + 1;
-                $kd = $prx . sprintf("%09s", $tmp);
-            }
-        } else {
-            $kd = $prx . "000000001";
-        };
+        return DB::transaction(function () {
+            $prx = 'INV-NC-' . date('y') . '-' . date('m') . '-';
 
-        DB::table('code_generate')->insert([
-            'code'          => $kd,
-            'date_generate' => Carbon::now()->format('Y-m-d'),
-            'created_at'    => Carbon::now(),
-            'updated_at'    => Carbon::now()
-        ]);
+            do {
+                $newNumber = random_int(100000000, 999999999);
+                $newCode = $prx . $newNumber;
+                $exists = DB::table('code_generate')->where('code', $newCode)->exists();
+            } while ($exists);
 
-        return $kd;
+            DB::table('code_generate')->insert([
+                'code' => $newCode,
+                'date_generate' => now()->format('Y-m-d'),
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+
+            return $newCode;
+        });
     }
 }

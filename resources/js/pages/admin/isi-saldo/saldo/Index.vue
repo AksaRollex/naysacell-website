@@ -14,7 +14,7 @@ const columns = [
     column.accessor("no", {
         header: "#",
     }),
-    column.accessor("user_name", {
+    column.accessor("user.name", {
         header: "Nama User",
     }),
     column.accessor("balance", {

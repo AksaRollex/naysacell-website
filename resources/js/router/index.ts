@@ -199,10 +199,10 @@ const routes: Array<RouteRecordRaw> = [
             },
             // PESANAN
             {
-                path : "/order",
-                name : "order",
-                component : () => import("@/pages/admin/pesanan/Index.vue")
-            }
+                path: "/order",
+                name: "order",
+                component: () => import("@/pages/admin/pesanan/Index.vue"),
+            },
         ],
     },
 

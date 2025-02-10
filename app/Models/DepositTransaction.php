@@ -11,8 +11,6 @@ class DepositTransaction extends Model
 
     protected $fillable = [
         'user_id',
-        'user_name',
-        'user_number',
         'amount',
         'status',
         'deposit_code',

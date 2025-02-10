@@ -5,18 +5,20 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\DigiflazController;
 use App\Http\Controllers\OrdersController;
-use App\Http\Controllers\ProductPascaController;
 use App\Http\Controllers\ProductPrepaidController;
 use App\Http\Controllers\DepositTransactionController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserBalanceController;
 
+Route::post('midtrans-callback', [DepositTransactionController::class, 'handleCallback']);
+
 Route::middleware(['auth', 'json'])->prefix('auth')->group(function () {
+    Route::post('form-password', [UserController::class, 'updatePasswordWebsite'])->withoutMiddleware('auth');
+
     Route::post('login', [AuthController::class, 'loginWeb'])->withoutMiddleware('auth');
     Route::post('loginMobile', [AuthController::class, 'loginMobile'])->withoutMiddleware('auth');
-    Route::post('logout', [AuthController::class, 'logout']);
+    Route::post('logout', [AuthController::class, 'logout'])->withoutMiddleware('auth');
     Route::get('me', [AuthController::class, 'me'])->withoutMiddleware('auth');
 
     Route::prefix('user')->group(function () {
@@ -42,20 +44,17 @@ Route::middleware(['auth', 'json'])->prefix('auth')->group(function () {
         Route::post('histori-deposit-web', [DepositTransactionController::class, 'indexWeb']);
     });
 
-    //master
     Route::post('/saldo-user', [UserBalanceController::class, 'index']);
     Route::get('/edit-saldo/{id}', [UserBalanceController::class, 'get']);
     Route::put('/update-saldo/{id}', [UserBalanceController::class, 'update']);
 
-    Route::post('send-user-otp', [AuthController::class, 'sendUserOTP'])->withoutMiddleware('auth');
-    Route::post('verify-user-otp', [AuthController::class, 'verifyUserOTP'])->withoutMiddleware('auth');
-    Route::post('reset-user-password', [AuthController::class, 'resetUserPassword'])->withoutMiddleware('auth');
+    Route::post('send-user-otp', [AuthController::class, 'sendUserOTP'])->withoutMiddleware('auth'); // send otp forgot password
+    Route::post('verify-user-otp', [AuthController::class, 'verifyUserOTP'])->withoutMiddleware('auth'); // verifikasi otp forgot password
+    Route::post('reset-user-password', [AuthController::class, 'resetUserPassword'])->withoutMiddleware('auth'); // reset password forgot password
 
-    Route::post('send-user-otp-regist', [AuthController::class, 'sendUserOtpRegist'])->withoutMiddleware('auth');
-    Route::post('resend-user-otp-regist', [AuthController::class, 'resendUserOtpRegist'])->withoutMiddleware('auth');
-    Route::post('verify-user-otp-regist', [AuthController::class, 'verifyUserOtpRegist'])->withoutMiddleware('auth');
-
-    Route::post('midtrans/callback', [DepositTransactionController::class, 'handleCallback'])->name('midtrans.callback');
+    Route::post('send-user-otp-regist', [AuthController::class, 'sendUserOtpRegist'])->withoutMiddleware('auth'); // send otp regist
+    Route::post('resend-user-otp-regist', [AuthController::class, 'resendUserOtpRegist'])->withoutMiddleware('auth'); // resend otp regist
+    Route::post('verify-user-otp-regist', [AuthController::class, 'verifyUserOtpRegist'])->withoutMiddleware('auth'); // verifikasi otp regist untuk validasi akun
 
     Route::get('deposit/finish', [DepositTransactionController::class, 'finish'])->name('deposit.finish');
     Route::get('deposit/unfinish', [DepositTransactionController::class, 'unfinish'])->name('deposit.unfinish');
@@ -63,13 +62,11 @@ Route::middleware(['auth', 'json'])->prefix('auth')->group(function () {
 });
 
 Route::middleware(['auth', 'verified', 'json'])->group(function () {
-
     Route::prefix('setting')->middleware('can:setting')->group(function () {
         Route::post('', [SettingController::class, 'update']);
     });
 
     Route::prefix('master')->group(function () {
-
         Route::middleware('can:master-user')->group(function () {
             Route::get('users/get/{id}', [UserController::class, 'getById']);
             Route::put('users/update/{id}', [UserController::class, 'updateById']);
@@ -81,9 +78,12 @@ Route::middleware(['auth', 'verified', 'json'])->group(function () {
             Route::post('users/user', [UserController::class, 'indexUser']);
             Route::post('users/store', [UserController::class, 'store']);
             Route::post('users/update', [UserController::class, 'update']);
-            Route::put('users/update-password/{id}', [UserController::class, 'updatePassword']);
+            Route::post('usersPass', [UserController::class, 'updatePasswordWebsite']);
+            Route::put('users/update-password', [UserController::class, 'updatePassword']);
             Route::apiResource('users', UserController::class)
                 ->except(['index', 'store'])->scoped(['user' => 'uuid']);
+            Route::apiResource('usersPass', UserController::class)
+                ->except(['updatePasswordWebsite', 'store'])->scoped(['user' => 'uuid']);
         });
 
         Route::middleware('can:master-role')->group(function () {
@@ -106,24 +106,16 @@ Route::middleware(['auth', 'verified', 'json'])->group(function () {
             });
         });
 
-        Route::prefix('ppob')->group(function () {
-            Route::middleware('can:master-ppob')->group(function () {});
-        });
-
         Route::middleware('can:master-laporan')->group(function () {
             Route::delete('delete-laporan-deposit/{id}', [DepositTransactionController::class, 'destroy']);
             Route::post('laporan', [TransactionController::class, 'laporan']);
             Route::delete('delete-laporan/{id}', [TransactionController::class, 'destroy']);
             Route::get('/transaction/chart-data', [TransactionController::class, 'getChartData']);
-            
+
             Route::get('user/download-excel', [UserController::class, 'downloadExcel']);
             Route::get('deposit/download-excel', [DepositTransactionController::class, 'downloadExcel']);
             Route::get('transaction/download-excel', [TransactionController::class, 'downloadExcel']);
             Route::get('productPrepaid/download-excel', [ProductPrepaidController::class, 'downloadExcel']);
-        });
-
-        Route::middleware('can:master-isi-saldo')->group(function () {
-            Route::post('isi-saldo', [DigiflazController::class, 'isiSaldo']);
         });
 
         Route::prefix('order')->group(function () {
@@ -132,6 +124,7 @@ Route::middleware(['auth', 'verified', 'json'])->group(function () {
                 Route::get('get/{id}', [OrdersController::class, 'get']);
                 Route::put('update/{id}', [OrdersController::class, 'update']);
                 Route::delete('delete/{id}', [OrdersController::class, 'destroy']);
+                Route::put('update-status/{id}', [OrdersController::class, 'updateStatus']);
             });
         });
     });
@@ -140,11 +133,4 @@ Route::middleware(['auth', 'verified', 'json'])->group(function () {
 Route::prefix('setting')->group(function () {
     Route::get('', [SettingController::class, 'index']);
     Route::post('update', [SettingController::class, 'update']);
-});
-
-Route::prefix('digiflazz')->group(function () {
-    Route::post('get-product-prepaid', [ProductPrepaidController::class, 'get_product_prepaid']);
-    Route::post('/topup', [DigiflazController::class, 'digiflazTopup']);
-    Route::post('/cek-tagihan', [DigiflazController::class, 'digiflazCekTagihan']);
-    Route::post('/bayar-tagihan', [DigiflazController::class, 'digiflazBayarTagihan']);
 });

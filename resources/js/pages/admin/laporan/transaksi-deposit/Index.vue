@@ -22,14 +22,14 @@ const columns = [
     column.accessor("no", {
         header: "#",
     }),
+    column.accessor("user.name", {
+        header: "Nama User",
+    }),
     column.accessor("deposit_code", {
         header: "Kode TRX",
     }),
-    column.accessor("user_name", {
-        header: "Nama User",
-    }),
-    column.accessor("user_number", {
-        header: "No. User",
+    column.accessor("user.phone", {
+        header: "Nomor",
     }),
     column.accessor("amount", {
         header: "Jumlah Deposit",
@@ -37,6 +37,12 @@ const columns = [
             const amount = cell.getValue();
             return h("div", formatIDR(amount));
         },
+    }),
+    column.accessor("payment_type", {
+        header : "Metode Pembayaran",
+    }),
+    column.accessor("paid_at", {
+        header : "Tanggal Pembayaran",
     }),
     column.accessor("status", {
         header: "Status",

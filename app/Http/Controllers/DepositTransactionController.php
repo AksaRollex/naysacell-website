@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\UserBalance;
 use App\Models\DepositTransaction;
-use App\Models\ProductPrepaid;
 use App\Traits\CodeGenerate;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
@@ -16,40 +15,44 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 class DepositTransactionController extends Controller
 {
 
+
     public function index(Request $request)
     {
-        if (request()->wantsJson()) {
-            $per = $request->per ?? 10;
-            $page = ($request->page ? $request->page - 1 : 0);
+        $per = $request->per ?? 10;
+        $page = $request->page ? $request->page - 1 : 0;
 
-            DB::statement('set @no=0+' . $page * $per);
+        DB::statement('set @no=0+' . $page * $per);
 
-            $query = DepositTransaction::where('user_id', auth()->user()->id);
+        $data = DepositTransaction::with(['user' => function ($query) use ($request) {
+                if ($request->user_id) {
+                    $query->where('id', $request->user_id);
+                }
+            }])
+            ->when($request->search, function ($query, $search) {
+                $query->whereHas('user', function ($q) use ($search) {
+                    $q->where('name', 'like', "%$search%")
+                        ->orWhere('phone', 'like', "%$search%");
+                });
+            })
+            ->when($request->status, function ($query, $status) {
+                $query->where('status', $status);
+            })
+            ->latest()
+            ->paginate($per, ['*', DB::raw('@no := @no + 1 AS no')]);
 
-            if ($request->search) {
-                $query->where('user_name', 'LIKE', '%' . $request->search . '%');
-            }
-
-            if ($request->status) {
-                $query->where('status', $request->status);
-            }
-
-            $data = $query->orderBy('created_at', 'DESC')
-                ->paginate($per, ['*', DB::raw('@no := @no + 1 AS no')]);
-
-            return response()->json($data);
-        }
-
-        return abort(404);
+        return response()->json($data);
     }
+
     public function indexWeb(Request $request)
     {
         $per = $request->per ?? 10;
         $page = $request->page ? $request->page - 1 : 0;
 
         DB::statement('set @no=0+' . $page * $per);
-        $data = DepositTransaction::when($request->search, function (Builder $query, string $search) {
-            $query->where('name', 'like', "%$search%");
+        $data = DepositTransaction::with('user')->when($request->search, function (Builder $query, string $search) {
+            $query->whereHas('user', function ($q) use ($search) {
+                $q->where('name', 'like', "%$search%");
+            });
         })->latest()->paginate($per, ['*', DB::raw('@no := @no + 1 AS no')]);
 
         return response()->json($data);
@@ -66,6 +69,7 @@ class DepositTransactionController extends Controller
         ]);
 
         $this->serverKey = config('midtrans.server_key');
+
 
         if (empty($this->serverKey)) {
             Log::error('Midtrans server key is empty');
@@ -84,105 +88,131 @@ class DepositTransactionController extends Controller
             'amount' => 'required|numeric|min:1000|max:10000000'
         ]);
 
-        try {
-            DB::beginTransaction();
-            Log::info('Topup Request:', $request->all());
+        $maxAttempts = 3;
+        $attempt = 0;
+        while ($attempt < $maxAttempts)
 
-            $user = auth()->user();
-            $depositCode = $this->getCode();
+            try {
+                Log::info('Topup Request:', $request->all());
+                DB::beginTransaction();
 
-            if (empty($this->serverKey)) {
-                throw new \Exception('Midtrans server key is not configured');
+                $user = auth()->user();
+                $depositCode = $this->getCode();
+
+                if (empty($this->serverKey)) {
+                    throw new \Exception('Midtrans server key is not configured');
+                }
+
+                $transaction = DepositTransaction::create([
+                    'user_id' => $user->id,
+                    'amount' => $request->amount,
+                    'status' => 'pending',
+                    'deposit_code' => $depositCode,
+                    'payment_type' => null,
+                    'paid_at' => null
+                ]);
+
+                $params = [
+                    'transaction_details' => [
+                        'order_id' => $depositCode,
+                        'gross_amount' => (int) $request->amount,
+                    ],
+                    'customer_details' => [
+                        'first_name' => $user->name,
+                        'email' => $user->email,
+                        'phone' => $user->phone ?? '',
+                        'billing_address' => [
+                            'address' => $user->address ?? '',
+                        ]
+                    ],
+                    'item_details' => [
+                        [
+                            "id" => "TOPUP-WALLET",
+                            "price" => (int)$request->amount,
+                            "quantity" => 1,
+                            "name" => "Top Up Saldo",
+                            "category" => "Wallet",
+                            "merchant_name" => config('app.name')
+                        ]
+                    ],
+                    'callbacks' => [
+                        'finish' => route('deposit.finish'),
+                        'unfinish' => route('deposit.unfinish'),
+                        'error' => route('deposit.error'),
+                    ],
+                    'enable_payments' => config('midtrans.enabled_payments', []),
+                    'expiry' => [
+                        'start_time' => date('Y-m-d H:i:s O'),
+                        'unit' => 'minutes',
+                        'duration' => 30
+                    ]
+                ];
+
+                \Midtrans\Config::$isProduction = config('midtrans.is_production', false);
+
+                $snapToken = \Midtrans\Snap::getSnapToken($params);
+
+                $transaction->update(['snap_token' => $snapToken]);
+
+                DB::commit();
+
+                return response()->json([
+                    'success' => true,
+                    'snap_token' => $snapToken,
+                    'transaction' => $transaction
+                ]);
+            } catch (\Exception $e) {
+                DB::rollback();
+                Log::error('Topup Error: ' . $e->getMessage());
+                Log::error($e->getTraceAsString());
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Terjadi kesalahan saat topup saldo',
+                    'error' => $e->getMessage()
+                ], 500);
             }
-
-            // Create transaction with nullable payment fields
-            $transaction = DepositTransaction::create([
-                'user_id' => $user->id,
-                'amount' => $request->amount,
-                'status' => 'pending',
-                'user_name' => $user->name,
-                'deposit_code' => $depositCode,
-                'user_number' => $user->phone,
-                'payment_type' => null, // Akan diupdate saat callback
-                'paid_at' => null // Akan diupdate saat callback
-            ]);
-
-            // Persiapkan parameter untuk Midtrans
-            $params = [
-                'transaction_details' => [
-                    'order_id' => $depositCode,
-                    'gross_amount' => (int) $request->amount,
-                ],
-                'customer_details' => [
-                    'first_name' => $user->name,
-                    'email' => $user->email,
-                    'phone' => $user->phone ?? '',
-                    'billing_address' => [
-                        'address' => $user->address ?? '',
-                    ]
-                ],
-                'item_details' => [
-                    [
-                        "id" => "TOPUP-WALLET",
-                        "price" => (int)$request->amount,
-                        "quantity" => 1,
-                        "name" => "Top Up Saldo",
-                        "category" => "Wallet",
-                        "merchant_name" => config('app.name')
-                    ]
-                ],
-                'callbacks' => [
-                    'finish' => route('deposit.finish'),
-                    'unfinish' => route('deposit.unfinish'),
-                    'error' => route('deposit.error'),
-                ],
-                'enable_payments' => config('midtrans.enabled_payments', []),
-                'expiry' => [
-                    'start_time' => date('Y-m-d H:i:s O'),
-                    'unit' => 'minutes',
-                    'duration' => 60  // 1 jam expired
-                ]
-            ];
-
-            // Set mode Midtrans (sandbox/production)
-            \Midtrans\Config::$isProduction = config('midtrans.is_production', false);
-
-            // Dapatkan Snap Token dari Midtrans
-            $snapToken = \Midtrans\Snap::getSnapToken($params);
-
-            // Update transaction dengan snap token
-            $transaction->update(['snap_token' => $snapToken]);
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'snap_token' => $snapToken,
-                'transaction' => $transaction
-            ]);
-        } catch (\Exception $e) {
-            DB::rollback();
-            Log::error('Topup Error: ' . $e->getMessage());
-            Log::error($e->getTraceAsString());
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan saat topup saldo',
-                'error' => $e->getMessage()
-            ], 500);
-        }
     }
+
 
     public function handleCallback(Request $request)
     {
-        Log::info('Midtrans Callback:', $request->all());
+        Log::debug('Raw callback received', [
+            'payload' => $request->all(),
+            'headers' => $request->headers->all()
+        ]);
+
+        // Log saat callback diterima
+        Log::info('Midtrans Callback Received:', [
+            'order_id' => $request->order_id,
+            'transaction_status' => $request->transaction_status,
+            'payment_type' => $request->payment_type,
+            'gross_amount' => $request->gross_amount
+        ]);
+
+        // Log semua data callback yang masuk
+        Log::info('Midtrans Callback Data Received:', [
+            'order_id' => $request->order_id,
+            'status_code' => $request->status_code,
+            'transaction_status' => $request->transaction_status,
+            'payment_type' => $request->payment_type,
+            'signature_key' => $request->signature_key
+        ]);
+
 
         try {
             $serverKey = config('midtrans.server_key');
             $hashed = hash("sha512", $request->order_id . $request->status_code . $request->gross_amount . $serverKey);
 
+            // Log verifikasi signature
+            Log::info('Signature Verification:', [
+                'received_signature' => $request->signature_key,
+                'calculated_signature' => $hashed,
+                'is_valid' => ($hashed == $request->signature_key)
+            ]);
+
             if ($hashed != $request->signature_key) {
-                Log::warning('Invalid signature:', [
+                Log::warning('Invalid signature', [
                     'received' => $request->signature_key,
                     'calculated' => $hashed
                 ]);
@@ -190,65 +220,99 @@ class DepositTransactionController extends Controller
             }
 
             $transaction = DepositTransaction::where('deposit_code', $request->order_id)
-                ->lockForUpdate()  // Tambahkan lock untuk menghindari race condition
+                ->lockForUpdate()
                 ->first();
+
+            // Log hasil pencarian transaksi
+            Log::info('Transaction lookup:', [
+                'order_id' => $request->order_id,
+                'found' => !is_null($transaction),
+                'status' => $transaction?->status ?? 'not_found'
+            ]);
 
             if (!$transaction) {
                 Log::error('Transaction not found:', ['order_id' => $request->order_id]);
                 return response()->json(['message' => 'Transaction not found'], 404);
             }
 
-            // Cek apakah transaksi sudah diproses sebelumnya
-            if ($transaction->status === 'success' && $transaction->paid_at !== null) {
-                Log::info('Transaction already processed:', ['order_id' => $request->order_id]);
-                return response()->json(['message' => 'Transaction already processed']);
-            }
+            if ($transaction->status === 'pending' && in_array($request->transaction_status, ['capture', 'settlement'])) {
+                // Log sebelum mulai proses update
+                Log::info('Starting payment processing:', [
+                    'transaction_id' => $transaction->id,
+                    'amount' => $transaction->amount,
+                    'user_id' => $transaction->user_id
+                ]);
 
-            switch ($request->transaction_status) {
-                case 'capture':
-                case 'settlement':
-                    DB::beginTransaction();
-                    try {
-                        // Update transaction first
-                        $transaction->update([
-                            'status' => 'success',
-                            'payment_type' => $request->payment_type,
-                            'paid_at' => now()
+                DB::beginTransaction();
+                try {
+                    // Log update status transaksi
+                    Log::info('Updating transaction status', [
+                        'transaction_id' => $transaction->id,
+                        'old_status' => $transaction->status,
+                        'new_status' => 'success'
+                    ]);
+
+                    $transaction->update([
+                        'status' => 'success',
+                        'payment_type' => $request->payment_type,
+                        'paid_at' => now()
+                    ]);
+
+                    $userBalance = UserBalance::where('user_id', $transaction->user_id)
+                        ->lockForUpdate()
+                        ->first();
+
+                    // Log informasi balance sebelum update
+                    Log::info('User balance before update:', [
+                        'user_id' => $transaction->user_id,
+                        'current_balance' => $userBalance?->balance ?? 0
+                    ]);
+
+                    if (!$userBalance) {
+                        Log::info('Creating new user balance record', [
+                            'user_id' => $transaction->user_id
                         ]);
 
-                        // Then update balance
-                        $userBalance = UserBalance::lockForUpdate()->firstOrCreate(
-                            ['user_id' => $transaction->user_id],
-                            ['user_name' => $transaction->user_name, 'balance' => 0]
-                        );
-
-                        $userBalance->balance += $transaction->amount;
-                        $userBalance->save();
-
-                        DB::commit();
-
-                        Log::info('Transaction processed successfully:', [
-                            'order_id' => $request->order_id,
+                        $userBalance = UserBalance::create([
                             'user_id' => $transaction->user_id,
-                            'amount' => $transaction->amount
+                            'balance' => 0
                         ]);
-
-                        return response()->json(['message' => 'Transaction successful']);
-                    } catch (\Exception $e) {
-                        DB::rollback();
-                        Log::error('Failed to process transaction:', [
-                            'order_id' => $request->order_id,
-                            'error' => $e->getMessage(),
-                            'trace' => $e->getTraceAsString()
-                        ]);
-                        return response()->json(['message' => 'Error processing transaction'], 500);
                     }
-                    break;
 
-                    // ... rest of the cases
+                    $userBalance->balance += $transaction->amount;
+                    $userBalance->save();
+
+                    // Log informasi balance setelah update
+                    Log::info('User balance after update:', [
+                        'user_id' => $transaction->user_id,
+                        'new_balance' => $userBalance->balance,
+                        'added_amount' => $transaction->amount
+                    ]);
+
+                    DB::commit();
+                    Log::info('Payment processed successfully', [
+                        'transaction_id' => $transaction->id
+                    ]);
+
+                    return response()->json(['message' => 'Payment processed successfully']);
+                } catch (\Exception $e) {
+                    DB::rollback();
+                    Log::error('Failed to process payment:', [
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString(),
+                        'transaction_id' => $transaction->id
+                    ]);
+                    throw $e;
+                }
+            } else {
+                // Log jika status tidak sesuai
+                Log::info('Payment status not processable:', [
+                    'current_status' => $transaction->status,
+                    'midtrans_status' => $request->transaction_status
+                ]);
             }
 
-            return response()->json(['message' => 'Status updated']);
+            return response()->json(['message' => 'Payment status updated']);
         } catch (\Exception $e) {
             Log::error('Callback processing error:', [
                 'error' => $e->getMessage(),
@@ -295,57 +359,67 @@ class DepositTransactionController extends Controller
     }
     public function downloadExcel()
     {
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
 
-        $data = DepositTransaction::with(['user'])->get();
+        try {
 
-        $sheet->setCellValue('A1', 'No.');
-        $sheet->setCellValue('B1', 'Nama');
-        $sheet->setCellValue('C1', 'Nomor Telepon');
-        $sheet->setCellValue('D1', 'Nominal Deposit');
-        $sheet->setCellValue('E1', 'Status');
-        $sheet->setCellValue('F1', 'Tanggal Deposit');
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
 
-        $sheet->getStyle('A1:F1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFE1B48F');
-        $sheet->getStyle('A1:F1')->getFont()->setBold(true);
-        $sheet->getStyle('A1:F1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A1:F1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
-        $sheet->getStyle('A1:F1')->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN)->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_BLACK);
+            $data = DepositTransaction::with(['user'])->get();
 
-        $sheet->getColumnDimension('A')->setWidth(6);
-        $sheet->getColumnDimension('B')->setWidth(25);
-        $sheet->getColumnDimension('C')->setWidth(30);
-        $sheet->getColumnDimension('D')->setWidth(30);
-        $sheet->getColumnDimension('E')->setWidth(25);
-        $sheet->getColumnDimension('F')->setWidth(25);
+            $sheet->setCellValue('A1', 'No.');
+            $sheet->setCellValue('B1', 'Nama');
+            $sheet->setCellValue('C1', 'Nomor Telepon');
+            $sheet->setCellValue('D1', 'Nominal Deposit');
+            $sheet->setCellValue('E1', 'Status');
+            $sheet->setCellValue('F1', 'Tanggal Pembayaran');
+            $sheet->setCellValue('G1', 'Tanggal Deposit');
 
-        $row = 2;
-        foreach ($data as $i => $DepositTransaction) {
-            $sheet->setCellValue('A' . $row, $i + 1);
-            $sheet->setCellValue('B' . $row, $DepositTransaction->user->name);
-            $sheet->setCellValue('C' . $row, $DepositTransaction->user_number);
-            $sheet->setCellValue('D' . $row, 'Rp ' . number_format($DepositTransaction->amount, 0, ',', '.'));
-            $sheet->setCellValue('E' . $row, $DepositTransaction->status);
-            $sheet->setCellValue('F' . $row, $DepositTransaction->created_at->format('d-m-Y'));
+            $sheet->getStyle('A1:G1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFE1B48F');
+            $sheet->getStyle('A1:G1')->getFont()->setBold(true);
+            $sheet->getStyle('A1:G1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('A1:G1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+            $sheet->getStyle('A1:G1')->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN)->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_BLACK);
 
-            $sheet->getStyle('A' . $row . ':F' . $row)->getBorders()->getAllBorders()
-                ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN)
-                ->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_BLACK);
+            $sheet->getColumnDimension('A')->setWidth(6);
+            $sheet->getColumnDimension('B')->setWidth(25);
+            $sheet->getColumnDimension('C')->setWidth(30);
+            $sheet->getColumnDimension('D')->setWidth(30);
+            $sheet->getColumnDimension('E')->setWidth(25);
+            $sheet->getColumnDimension('F')->setWidth(25);
+            $sheet->getColumnDimension('G')->setWidth(25);
 
-            $sheet->getStyle('A' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle('B' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle('C' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle('D' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle('E' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle('F' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $row = 2;
+            foreach ($data as $i => $DepositTransaction) {
+                $sheet->setCellValue('A' . $row, $i + 1);
+                $sheet->setCellValue('B' . $row, $DepositTransaction->user->name);
+                $sheet->setCellValue('C' . $row, $DepositTransaction->user->phone);
+                $sheet->setCellValue('D' . $row, 'Rp ' . number_format($DepositTransaction->amount, 0, ',', '.'));
+                $sheet->setCellValue('E' . $row, $DepositTransaction->status);
+                $sheet->setCellValue('F' . $row, $DepositTransaction->paid_at);
+                $sheet->setCellValue('G' . $row, $DepositTransaction->created_at->format('d-m-Y'));
 
-            $row++;
+                $sheet->getStyle('A' . $row . ':G' . $row)->getBorders()->getAllBorders()
+                    ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN)
+                    ->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_BLACK);
+
+                $sheet->getStyle('A' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('B' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('C' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('D' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('E' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('F' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('G' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+                $row++;
+            }
+
+            $writer = new Xlsx($spreadsheet);
+            header('Content-Type: application/vnd.ms-excel');
+            header('Content-Disposition: attachment; filename="Laporan Deposit Pengguna.xlsx"');
+            $writer->save("php://output");
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-
-        $writer = new Xlsx($spreadsheet);
-        header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment; filename="Laporan Deposit Pengguna.xlsx"');
-        $writer->save("php://output");
     }
 }

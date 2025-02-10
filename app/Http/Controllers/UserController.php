@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserPasswordRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\Role;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
@@ -83,9 +85,6 @@ class UserController extends Controller
         return response()->json($data);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreUserRequest $request)
     {
         // Validasi data yang diterima
@@ -149,9 +148,6 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(User $user)
     {
         $user['role_id'] = $user?->role?->id;
@@ -159,10 +155,6 @@ class UserController extends Controller
             'user' => $user
         ]);
     }
-
-    /**
-     * Update the specified resource in storage.
-     */
 
     public function update(UpdateUserRequest $request, User $user)
     {
@@ -177,6 +169,38 @@ class UserController extends Controller
             'success' => true,
             'user' => $user
         ]);
+    }
+
+    public function updatePasswordWebsite(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'uuid' => 'required|exists:users,uuid',
+            'password' => 'required|min:8|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()->first(),
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $user = User::where('uuid', $request->uuid)->firstOrFail();
+            $user->password = Hash::make($request->password);
+            $user->save();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Password berhasil diperbarui',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => ' Password gagal diperbarui' . $e->getMessage()
+            ], 500);
+        }
     }
 
 
@@ -198,6 +222,16 @@ class UserController extends Controller
         ]);
 
         $user = User::findOrFail($id);
+
+
+        try {
+            $user = User::findOrFail($id);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found with ID: ' . $id
+            ], 404);
+        }
 
         try {
             $updated = $user->update([
@@ -230,14 +264,9 @@ class UserController extends Controller
             'name' => 'required',
             'phone' => 'required',
             'address' => 'required',
-            'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
         ]);
 
-        $data = $request->only('name', 'phone', 'address', 'photo');
-
-        if ($request->hasFile('photo')) {
-            $data['photo'] = '/storage/' . $request->file('photo')->store('user', 'public');
-        }
+        $data = $request->only('name', 'phone', 'address');
 
         $user = $request->user();
         $user->update($data);

@@ -22,7 +22,10 @@ class TransactionController extends Controller
         $query = TransactionModel::with('user');
 
         if ($request->search) {
-            $query->where('transaction_status', 'LIKE', '%' . $request->search . '%');
+            $query->whereHas('user', function ($q) use ($request) {
+                $q->where('name', 'LIKE', '%' . $request->search . '%')
+                    ->orWhere('phone', 'LIKE', '%' . $request->search . '%');
+            });
         }
 
         if ($request->transaction_status) {
@@ -207,27 +210,40 @@ class TransactionController extends Controller
 
     public function getChartData()
     {
-        $data = TransactionModel::select(
-            DB::raw('DATE(created_at) as date'),
-            DB::raw('COUNT(*) as total_transactions'),
-            DB::raw('SUM(transaction_total) as total_amount')
-        )
-            ->groupBy('date')
-            ->orderBy('date', 'asc')
-            ->get();
+        try {
+            $data = TransactionModel::select(
+                DB::raw('DATE(created_at) as date'),
+                DB::raw('COUNT(*) as total_transactions'),
+                DB::raw('SUM(transaction_total) as total_amount')
+            )
+                ->groupBy('date')
+                ->orderBy('date', 'asc')
+                ->get();
 
-        $chartData = $data->map(function ($item) {
-            return [
-                'date' => $item->date,
-                'total_transactions' => $item->total_transactions,
-                'total_amount' => $item->total_amount,
-            ];
-        });
+            if ($data->isEmpty()) {
+                return response()->json([
+                    'labels' => [],
+                    'transactions' => [],
+                    'amounts' => []
+                ]);
+            }
 
-        return response()->json([
-            'labels' => $chartData->pluck('date')->values(),
-            'transactions' => $chartData->pluck('total_transactions')->values(),
-            'amounts' => $chartData->pluck('total_amount')->values()
-        ]);
+            $chartData = $data->map(function ($item) {
+                return [
+                    'date' => $item->date,
+                    'total_transactions' => (int)$item->total_transactions,
+                    'total_amount' => (float)$item->total_amount,
+                ];
+            });
+
+            return response()->json([
+                'labels' => $chartData->pluck('date')->values(),
+                'transactions' => $chartData->pluck('total_transactions')->values(),
+                'amounts' => $chartData->pluck('total_amount')->values()
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Chart data error: ' . $e->getMessage());
+            return response()->json(['message' => 'Gagal mengambil data grafik'], 500);
+        }
     }
 }

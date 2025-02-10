@@ -19,35 +19,106 @@ class OrdersController extends Controller
 
     public function index(Request $request)
     {
-        if ($request->wantsJson()) {
-            $per = $request->per ?? 10;
-            $page = $request->page ? $request->page - 1 : 0;
+        $per = $request->per ?? 10;
+        $page = $request->page ? $request->page - 1 : 0;
 
-            DB::statement('SET @no := ' . $page * $per);
+        DB::statement('set @no=0+' . $page * $per);
 
-            $query = Orders::query();
-
-            if ($request->search) {
-                $query->where(function ($q) use ($request) {
-                    $q->where('customer_no', 'LIKE', '%' . $request->search . '%')
-                        ->orWhere('customer_name', 'LIKE', '%' . $request->search . '%');
+        $data = Orders::with(['TransactionModel' => function ($query) use ($request) {
+            if ($request->transaction_id) {
+                $query->where('id', $request->transaction_id); // Filter berdasarkan transaction_id
+            }
+        }])
+            ->with(['user' => function ($query) use ($request) {
+                if ($request->user_id) {
+                    $query->where('id', $request->user_id);
+                }
+            }])
+            ->with(['product' => function ($query) use ($request) {
+                if ($request->product_id) {
+                    $query->where('id', $request->product_id);
+                }
+            }])
+            ->when($request->search, function ($query, $search) {
+                $query->whereHas('user', function ($q) use ($search) {
+                    $q->where('name', 'like', "%$search%")
+                        ->orWhere('phone', 'like', "%$search%");
                 });
-            }
+            })
+            ->when($request->order_status, function ($query, $order_status) {
+                $query->where('order_status', $order_status);
+            })
+            ->latest()
+            ->paginate($per, ['*', DB::raw('@no := @no + 1 AS no')]);
 
-            if ($request->order_status) {
-                $query->where('order_status', $request->order_status);
-            }
-
-            $data = $query->select('*', DB::raw('@no := @no + 1 AS no'))
-                ->orderBy('created_at', 'DESC')
-                ->paginate($per);
-
-            return response()->json($data);
-        }
-
-        return abort(404);
+        return response()->json($data);
     }
 
+
+
+    public function updateStatus(Request $request, $id)
+    {
+        try {
+            $validated = $request->validate([
+                'order_status' => 'required|string|in:pending,processing,success,cancelled'
+            ]);
+
+            DB::beginTransaction();
+            try {
+                // Update status di tabel orders
+                $order = Orders::findOrFail($id);
+                $order->order_status = $validated['order_status'];
+                $order->save();
+
+                // Cari transaksi terkait dan update statusnya
+                $transaction = TransactionModel::where(function ($query) use ($order) {
+                    $query->where('transaction_code', $order->transaction_code)
+                        ->orWhere('id', $order->transaction_id);
+                })->first();
+
+                if ($transaction) {
+                    // Update status di tabel transaction
+                    $transaction->order_status = $validated['order_status'];
+
+                    // Update transaction_status sesuai order_status
+                    switch ($validated['order_status']) {
+                        case 'success':
+                            $transaction->transaction_status = 'success';
+                            break;
+                        case 'cancelled':
+                            $transaction->transaction_status = 'failed';
+                            break;
+                        case 'processing':
+                            $transaction->transaction_status = 'pending';
+                            break;
+                        default:
+                            $transaction->transaction_status = 'pending';
+                    }
+
+                    $transaction->save();
+                }
+
+                DB::commit();
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Status order berhasil diperbarui',
+                    'data' => [
+                        'order' => $order,
+                        'transaction' => $transaction
+                    ]
+                ]);
+            } catch (\Exception $e) {
+                DB::rollBack();
+                throw $e;
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
     public function get($id)
     {
         $data = Orders::find($id);
@@ -59,9 +130,26 @@ class OrdersController extends Controller
 
     public function update($id, Request $request)
     {
-        $data = Orders::find($id);
-        $data->update($request->all());
-        return response()->json($data);
+        $data = TransactionModel::find($id);
+
+        $validatedData = $request->validate([
+            'order_status' => 'required|string|in:Pending,Processing,success,Cancelled',
+        ]);
+
+        if ($data) {
+            $data->order_status = $validatedData['order_status'];
+            $data->save();
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Status pesanan berhasil diperbarui.',
+                'data' => $data
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Pesanan tidak ditemukan.'
+            ], 404);
+        }
     }
 
     public function destroy($id)
@@ -75,16 +163,6 @@ class OrdersController extends Controller
     public function submitProduct(Request $request)
     {
         try {
-            $validated = $request->validate([
-                'product_id' => 'required|integer|exists:product_prepaid,id',
-                'product_name' => 'required|string',
-                'product_price' => 'required|numeric',
-                'quantity' => 'required|integer|min:1',
-                'customer_no' => 'required|string',
-                'customer_name' => 'required|string',
-                'user_id' => 'required|exists:users,id'
-            ]);
-
             Log::info('Submit Product Request:', $request->all());
 
             $product = ProductPrepaid::findOrFail($request->product_id);
@@ -98,10 +176,8 @@ class OrdersController extends Controller
                 ], 404);
             }
 
-            // Menghitung total harga
             $totalPrice = $product->product_price * $request->quantity;
 
-            // Memeriksa apakah balance mencukupi
             if ($userBalance->balance < $totalPrice) {
                 $kurangSaldo = $totalPrice - $userBalance->balance;
 
@@ -116,13 +192,11 @@ class OrdersController extends Controller
                     'suggestion' => 'Silahkan lakukan top up saldo sebesar Rp. ' . number_format($kurangSaldo)
                 ], 400);
             }
-            // Mulai transaction database
+
             DB::beginTransaction();
             try {
-                // Generate transaction code using trait
                 $transactionCode = $this->getCode();
 
-                // Create transaction record
                 $transaction = TransactionModel::create([
                     'transaction_code' => $transactionCode,
                     'transaction_date' => now()->format('Y-m-d'),
@@ -136,11 +210,14 @@ class OrdersController extends Controller
                     'transaction_user_id' => $request->user_id,
                 ]);
 
+                $order = Orders::create([
+                    'product_id' => $request->product_id,
+                    'transaction_id' => $transaction->id,
+                    'quantity' => $request->quantity,
+                    'customer_no' => $request->customer_no,
+                    'user_id' => $request->user_id,
+                ]);
 
-                // Membuat order
-                $order = Orders::create($validated);
-
-                // Mengurangi balance user
                 $userBalance->balance -= $totalPrice;
                 $userBalance->save();
 

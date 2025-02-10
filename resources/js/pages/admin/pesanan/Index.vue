@@ -19,20 +19,20 @@ const columns = [
     column.accessor("no", {
         header: "#",
     }),
-    column.accessor("customer_name", {
+    column.accessor("user.name", {
         header: "Nama Customer",
     }),
-    column.accessor("product_name", {
+    column.accessor("product.product_name", {
         header: "Nama Produk",
     }),
     column.accessor("customer_no", {
         header: "Nomor Customer",
     }),
-    column.accessor("product_price", {
+    column.accessor("product.product_price", {
         header: "Harga",
         cell: (cell) => currency(cell.getValue() ?? 0),
     }),
-    column.accessor("order_status", {
+    column.accessor("transaction_model.order_status", {
         header: "Status",
         cell: (cell) => {
             const order_status = cell.getValue();

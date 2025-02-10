@@ -43,7 +43,17 @@ const searchProducts = async () => {
         let productProvider = null;
         const validPrefix = [
             // Telkomsel
-            ["0811", "0812", "0813", "0821", "0822", "0823", "0851", "0852", "0853"],
+            [
+                "0811",
+                "0812",
+                "0813",
+                "0821",
+                "0822",
+                "0823",
+                "0851",
+                "0852",
+                "0853",
+            ],
             // Indosat
             ["0814", "0815", "0816", "0855", "0856", "0857", "0858"],
             // XL
@@ -53,50 +63,90 @@ const searchProducts = async () => {
             // Three
             ["0895", "0896", "0897", "0898", "0899"],
             // Smartfren
-            ["0881", "0882", "0883", "0884", "0885", "0886", "0887", "0888", "0889"]
+            [
+                "0881",
+                "0882",
+                "0883",
+                "0884",
+                "0885",
+                "0886",
+                "0887",
+                "0888",
+                "0889",
+            ],
         ].flat();
 
         // Check if the number starts with any valid prefix
-        const hasValidPrefix = validPrefix.some(prefix => customerNo.value.startsWith(prefix));
-        
+        const hasValidPrefix = validPrefix.some((prefix) =>
+            customerNo.value.startsWith(prefix)
+        );
+
         if (!hasValidPrefix && customerNo.value.length >= 4) {
             products.value = [];
             return;
         }
 
         // Telkomsel
-        if (["0811", "0812", "0813", "0821", "0822", "0823", "0851", "0852", "0853"]
-            .some((prefix) => customerNo.value.startsWith(prefix))
+        if (
+            [
+                "0811",
+                "0812",
+                "0813",
+                "0821",
+                "0822",
+                "0823",
+                "0851",
+                "0852",
+                "0853",
+            ].some((prefix) => customerNo.value.startsWith(prefix))
         ) {
             productProvider = "telkomsel";
         }
         // Indosat
-        else if (["0814", "0815", "0816", "0855", "0856", "0857", "0858"]
-            .some((prefix) => customerNo.value.startsWith(prefix))
+        else if (
+            ["0814", "0815", "0816", "0855", "0856", "0857", "0858"].some(
+                (prefix) => customerNo.value.startsWith(prefix)
+            )
         ) {
             productProvider = "indosat";
         }
         // XL
-        else if (["0817", "0818", "0819", "0859", "0877", "0878"]
-            .some((prefix) => customerNo.value.startsWith(prefix))
+        else if (
+            ["0817", "0818", "0819", "0859", "0877", "0878"].some((prefix) =>
+                customerNo.value.startsWith(prefix)
+            )
         ) {
             productProvider = "xl";
         }
         // Axis
-        else if (["0831", "0832", "0833", "0838"]
-            .some((prefix) => customerNo.value.startsWith(prefix))
+        else if (
+            ["0831", "0832", "0833", "0838"].some((prefix) =>
+                customerNo.value.startsWith(prefix)
+            )
         ) {
             productProvider = "axis";
         }
         // Three
-        else if (["0895", "0896", "0897", "0898", "0899"]
-            .some((prefix) => customerNo.value.startsWith(prefix))
+        else if (
+            ["0895", "0896", "0897", "0898", "0899"].some((prefix) =>
+                customerNo.value.startsWith(prefix)
+            )
         ) {
             productProvider = "three";
         }
         // Smartfren
-        else if (["0881", "0882", "0883", "0884", "0885", "0886", "0887", "0888", "0889"]
-            .some((prefix) => customerNo.value.startsWith(prefix))
+        else if (
+            [
+                "0881",
+                "0882",
+                "0883",
+                "0884",
+                "0885",
+                "0886",
+                "0887",
+                "0888",
+                "0889",
+            ].some((prefix) => customerNo.value.startsWith(prefix))
         ) {
             productProvider = "smartfren";
         }
@@ -292,7 +342,12 @@ const handleCustomerNameInput = (e: Event) => {
             <!-- Products Grid -->
             <div class="products-section">
                 <div v-if="loading" class="loading-state">
-                    Memuat produk ...
+                    <span
+                        v-if="loading"
+                        class="spinner-border spinner-border-sm"
+                        role="status"
+                        aria-hidden="true"
+                    ></span>
                 </div>
 
                 <div v-else-if="error" class="error-state">

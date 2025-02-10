@@ -121,7 +121,7 @@ const handleBalanceInput = (e: Event) => {
         </div>
         <div class="card-body">
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-12">
                     <div class="fv-row mb-7">
                         <label class="form-label fw-bold fs-6 required">
                             Jumlah Saldo

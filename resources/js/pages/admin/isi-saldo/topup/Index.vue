@@ -6,7 +6,6 @@ import "vue3-toastify/dist/index.css";
 import { Form as VForm, Field } from "vee-validate";
 import * as Yup from "yup";
 
-// Tambahkan di bagian atas file
 interface MidtransResult {
     status_code: string;
     status_message: string;
@@ -42,7 +41,6 @@ const amount = ref("");
 const loading = ref(false);
 const currentBalance = ref(0);
 
-// Declare midtrans snap as external
 declare const snap: any;
 
 const handlePhoneInput = (e: Event) => {
@@ -62,11 +60,9 @@ const fetchBalance = async () => {
     }
 };
 
-// Ubah bagian onMounted
 onMounted(() => {
     fetchBalance();
 
-    // Load Midtrans Snap JS dengan Promise
     const loadMidtransScript = new Promise((resolve, reject) => {
         const script = document.createElement("script");
         script.src = "https://app.sandbox.midtrans.com/snap/snap.js";
@@ -127,12 +123,34 @@ const handleTopup = async () => {
             try {
                 snap.pay(snap_token, {
                     onSuccess: async (result: MidtransResult) => {
+                        let retryCount = 0;
+                        const maxRetries = 5;
+                        const retryInterval = 3000; // 3 detik
                         console.log("Payment success with details:", {
                             status: result.transaction_status,
                             orderId: result.order_id,
                             paymentType: result.payment_type,
                             time: new Date().toISOString(),
                         });
+
+                        const checkBalance = async () => {
+                            try {
+                                await fetchBalance();
+                                toast.success("Top up berhasil!");
+                            } catch (error) {
+                                if (retryCount < maxRetries) {
+                                    retryCount++;
+                                    await new Promise((resolve) =>
+                                        setTimeout(resolve, retryInterval)
+                                    );
+                                    await checkBalance();
+                                } else {
+                                    toast.warning(
+                                        "Pembayaran berhasil, tapi saldo belum terupdate. Silahkan hubungi admin."
+                                    );
+                                }
+                            }
+                        };
 
                         // Tambahkan delay sebelum mengecek saldo
                         await new Promise((resolve) =>
@@ -241,32 +259,34 @@ const handleTopup = async () => {
                         <div class="form-group">
                             <h5 class="form-label">Nominal</h5>
                             <div
-                                class="d-flex align-items-center"
+                                class="d-flex align-items-center col-md-12"
                                 style="flex-direction: row"
                             >
                                 <Field
                                     name="amount"
                                     v-model="amount"
                                     type="text"
-                                    class="form-control form-control-solid w-25"
+                                    class="form-control form-control-solid"
                                     placeholder="Masukkan Jumlah Nominal"
                                     @input="handlePhoneInput"
                                 />
-                                <h6 class="mt-4 mb-2 text-gray-500 ms-3">
-                                    Minimal Rp 1.000 - Maksimal Rp 10.000.000
-                                </h6>
                             </div>
+                            <h6 class="mt-4 text-gray-500">
+                                Minimal Rp 1.000 - Maksimal Rp 10.000.000
+                            </h6>
                         </div>
-                        <ErrorMessage
-                            name="amount"
-                            class="text-danger"
-                            style="font-size: 13px"
-                        />
+                        <div class="mb-3">
+                            <ErrorMessage
+                                name="amount"
+                                class="text-danger"
+                                style="font-size: 13px"
+                            />
+                        </div>
                     </div>
                 </div>
                 <button
                     type="submit"
-                    class="btn btn-sm btn-primary mt-4 w-25 text-center"
+                    class="btn btn-sm btn-primary col-md-12 text-center"
                     :disabled="loading"
                     style="text-align: left; display: inline-block"
                 >

@@ -15,8 +15,10 @@ class UserBalanceController extends Controller
         $page = $request->page ? $request->page - 1 : 0;
 
         DB::statement('set @no=0+' . $page * $per);
-        $data = UserBalance::when($request->search, function (Builder $query, string $search) {
-            $query->where('user_name', 'like', "%$search%");
+        $data = UserBalance::with('user')->when($request->search, function (Builder $query, string $search) {
+            $query->whereHas('user', function ($q) use ($search) {
+                $q->where('name', 'like', "%$search%");
+            });
         })->latest()->paginate($per, ['*', DB::raw('@no := @no + 1 AS no')]);
 
         return response()->json($data);

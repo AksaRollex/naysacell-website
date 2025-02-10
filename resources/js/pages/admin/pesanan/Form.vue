@@ -4,11 +4,12 @@ import { onMounted, ref, watch } from "vue";
 import * as Yup from "yup";
 import axios from "@/libs/axios";
 import { toast } from "vue3-toastify";
-import type { User } from "@/types";
-import ApiService from "@/core/services/ApiService";
 import { computed } from "vue";
+import ApiService from "@/core/services/ApiService";
 
-const data = ref({} as User);
+const data = ref({
+    order_status: "", // Pastikan order_status adalah field yang benar
+});
 
 const props = defineProps({
     selected: {
@@ -22,13 +23,14 @@ const emit = defineEmits(["close", "refresh"]);
 const formRef = ref();
 
 const formSchema = Yup.object().shape({
-    order_status: Yup.string().required("Status Pesanan harus diisi "),
+    order_status: Yup.string().required("Status Pesanan harus diisi"),
 });
 
 function getEdit() {
     block(document.getElementById("form-product"));
     ApiService.get("master/order/get", props.selected)
         .then((response) => {
+            // Pastikan order_status sesuai dengan field yang ada di dalam response
             data.value = response.data.data;
         })
         .catch((err: any) => {
@@ -41,7 +43,7 @@ function getEdit() {
 
 function submit() {
     const formData = new FormData();
-    formData.append("order_status", String(data.value.order_status));
+    formData.append("order_status", String(data.value.order_status)); // Mengirimkan order_status ke backend
 
     if (props.selected) {
         formData.append("_method", "PUT");
@@ -88,7 +90,7 @@ watch(
 
 const status = [
     {
-        id: "pending",
+        id: "Pending",
         text: "Pending",
     },
     {
@@ -96,11 +98,11 @@ const status = [
         text: "Sukses",
     },
     {
-        id: "cancelled",
+        id: "Cancelled",
         text: "Dibatalkan",
     },
     {
-        id: "processing",
+        id: "Processing",
         text: "Proses",
     },
 ];

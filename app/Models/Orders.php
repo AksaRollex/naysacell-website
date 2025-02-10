@@ -12,18 +12,16 @@ class Orders extends Model
     protected $table = 'orders';
     protected $fillable = [
         'product_id',
-        'product_name',
-        'product_price',
         'quantity',
         'customer_no',
         'user_id',
+        'transaction_id',
         'customer_name',
-        'order_status'
     ];
 
-    public function transactions()
+    public function TransactionModel()
     {
-        return $this->hasMany(TransactionModel::class);
+        return $this->belongsTo(TransactionModel::class, 'transaction_id');
     }
 
     public function product()

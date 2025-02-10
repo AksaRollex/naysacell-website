@@ -26,34 +26,8 @@ class TransactionModel extends Model
         'order_status',
         'transaction_user_id',
         'transaction_product',
-        // 'transaction_provider',
     ];
 
-
-    public function insert_transaction_data($data, $type, $provider)
-    {
-
-        $harga = 0;
-        if ($type == 'Prepaid') {
-            $harga = isset($data['price']) ? $data['price'] : 0;
-        } else {
-            $harga = isset($data['selling_price']) ? $data['selling_price'] : 0;
-        }
-
-        return self::create([
-            'transaction_code' => $data['ref_id'],
-            'transaction_date' => Carbon::now()->format('Y-m-d'),
-            'transaction_time' => Carbon::now(),
-            'transaction_type' => $type,
-            'transaction_number' => $data['customer_no'],
-            'transaction_sku' => $data['buyer_sku_code'],
-            'transaction_total' => $harga,
-            'transaction_message' => $data['message'],
-            'transaction_status' => $data['status'],
-            'transaction_user_id' => 2
-            // 'transaction_provider' => $provider,
-        ]);
-    }
 
     public function user()
     {
@@ -62,6 +36,8 @@ class TransactionModel extends Model
 
     public function order()
     {
-        return $this->belongsTo(Order::class);
+        return $this->hasOne(Order::class);
     }
+
+
 }
