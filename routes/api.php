@@ -14,11 +14,10 @@ use App\Http\Controllers\UserBalanceController;
 Route::post('midtrans-callback', [DepositTransactionController::class, 'handleCallback']);
 
 Route::middleware(['auth', 'json'])->prefix('auth')->group(function () {
+    Route::delete('logout', [AuthController::class, 'logout']);
     Route::post('form-password', [UserController::class, 'updatePasswordWebsite'])->withoutMiddleware('auth');
-
     Route::post('login', [AuthController::class, 'loginWeb'])->withoutMiddleware('auth');
     Route::post('loginMobile', [AuthController::class, 'loginMobile'])->withoutMiddleware('auth');
-    Route::post('logout', [AuthController::class, 'logout'])->withoutMiddleware('auth');
     Route::get('me', [AuthController::class, 'me'])->withoutMiddleware('auth');
 
     Route::prefix('user')->group(function () {

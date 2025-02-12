@@ -10,10 +10,6 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->string('customer_no');
-            // $table->string('customer_name');
-            // $table->string('product_name');
-            // $table->decimal('product_price', 10, 2);
             $table->integer('quantity')->default(1);
             $table->unsignedBigInteger('product_id');
             $table->unsignedBigInteger('user_id');

@@ -1,6 +1,6 @@
 <template>
     <VForm class="form w-100" @submit="submit" :validation-schema="login">
-        <!--begin::Input group-->
+        
         <div class="fv-row mb-10">
             <!--begin::Label-->
             <label class="form-label fs-6 fw-bold text-dark">{{ $t('login.telepon') }}</label>
@@ -16,9 +16,9 @@
                 </div>
             </div>
         </div>
-        <!--end::Input group-->
+        
 
-        <!--begin::Input group-->
+        
         <Field tabindex="1" class="form-control form-control-lg form-control-solid" type="hidden" name="otp"
             autocomplete="off" v-model="data.otp" />
         <div v-if="/^08[0-9]\d{8,11}$/.test(data.identifier)" class="fv-row mb-5">
@@ -42,7 +42,7 @@
                 {{ $t('login.otp_resend') }} <span class="fw-bold">{{ otpInterval }}</span> {{ $t('login.otp_detik') }}
             </div>
         </div>
-        <!--end::Input group-->
+        
 
         <div v-if="/^08[0-9]\d{8,11}$/.test(data.identifier)" class="form-check mb-10">
             <Field tabindex="3" class="form-check-input" type="checkbox" id="remember_me_hp" name="remember_me" value="1"

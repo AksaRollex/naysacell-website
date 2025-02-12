@@ -187,7 +187,7 @@ const updatePassword = () => {
             >
                 <!--begin::Card body-->
                 <div class="card-body border-top p-9">
-                    <!--begin::Input group-->
+                    
                     <div class="row mb-6">
                         <!--begin::Label-->
                         <label
@@ -214,9 +214,9 @@ const updatePassword = () => {
                         </div>
                         <!--end::Col-->
                     </div>
-                    <!--end::Input group-->
+                    
 
-                    <!--begin::Input group-->
+                    
                     <div class="row mb-6">
                         <!--begin::Label-->
                         <label class="col-lg-4 col-form-label fw-semibold fs-6">
@@ -247,9 +247,9 @@ const updatePassword = () => {
                         </div>
                         <!--end::Col-->
                     </div>
-                    <!--end::Input group-->
+                    
 
-                    <!--begin::Input group-->
+                    
                     <div class="row mb-6">
                         <!--begin::Label-->
                         <label class="col-lg-4 col-form-label fw-semibold fs-6"
@@ -274,7 +274,7 @@ const updatePassword = () => {
                         </div>
                         <!--end::Col-->
                     </div>
-                    <!--end::Input group-->
+                    
                 </div>
                 <!--end::Card body-->
 

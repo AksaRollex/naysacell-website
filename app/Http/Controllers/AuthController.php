@@ -104,7 +104,6 @@ class AuthController extends Controller
             ], 422);
         }
 
-        // Check if user exists
         $user = User::where('email', $request->email)->first();
         if (!$user) {
             return response()->json([
@@ -115,15 +114,12 @@ class AuthController extends Controller
 
         try {
 
-            // Generate OTP code (6 digits)
             $otpCode = sprintf("%06d", mt_rand(1, 999999));
 
-            // Save OTP to user record
             $user->otp = $otpCode;
             $user->token_expired_at = now()->addMinutes(3);
             $user->save();
 
-            // Send email using Brevo/Sendinblue
             $response = Http::withHeaders([
                 'api-key' => env('SENDINBLUE_API_KEY'),
                 "Content-Type" => "application/json"

@@ -13,10 +13,8 @@ class Orders extends Model
     protected $fillable = [
         'product_id',
         'quantity',
-        'customer_no',
         'user_id',
         'transaction_id',
-        'customer_name',
     ];
 
     public function TransactionModel()
@@ -31,6 +29,6 @@ class Orders extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 }

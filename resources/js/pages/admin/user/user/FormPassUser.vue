@@ -79,7 +79,7 @@ function submit() {
         <div class="card-body">
             <div class="row">
                 <div class="col-md-6">
-                    <!--begin::Input group-->
+                    
                     <div class="fv-row mb-7">
                         <label class="form-label fw-bold fs-6">
                             Password
@@ -98,10 +98,10 @@ function submit() {
                             </div>
                         </div>
                     </div>
-                    <!--end::Input group-->
+                    
                 </div>
                 <div class="col-md-6">
-                    <!--begin::Input group-->
+                    
                     <div class="fv-row mb-7">
                         <label class="form-label fw-bold fs-6">
                             Konfirmasi Password
@@ -120,7 +120,7 @@ function submit() {
                             </div>
                         </div>
                     </div>
-                    <!--end::Input group-->
+                    
                 </div>
             </div>
         </div>

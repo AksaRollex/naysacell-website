@@ -1,24 +1,20 @@
 <template>
-    <div class="container mt-4">
-        <div class="row g-4">
+    <div class="card-body">
+        <div class="row">
             <!-- Pulsa & Paket Data Card -->
-            <div class="col-md-6 col-xl-6">
+            <div class="col-md-6">
                 <router-link
                     to="/ppob/pulsapaketdata"
                     class="text-decoration-none"
                 >
-                    <div
-                        class="card h-100 dashboard-card shadow-sm"
-                    >
+                    <div class="card h-100 dashboard-card shadow-sm">
                         <div class="card-body d-flex align-items-center">
                             <div
                                 class="card-icon bg-primary-light p-3 rounded-3 me-3"
                             >
                                 <i class="bi bi-phone text-primary fs-4"></i>
                             </div>
-                            <h5 class="card-title  mb-0">
-                                Pulsa & Paket Data
-                            </h5>
+                            <h5 class="card-title mb-0">Pulsa & Paket Data</h5>
                         </div>
                     </div>
                 </router-link>
@@ -30,18 +26,14 @@
                     to="/ppob/dompetelektronik"
                     class="text-decoration-none"
                 >
-                    <div
-                        class="card h-100 dashboard-card "
-                    >
+                    <div class="card h-100 dashboard-card">
                         <div class="card-body d-flex align-items-center">
                             <div
                                 class="card-icon bg-success-light p-3 rounded-3 me-3"
                             >
                                 <i class="bi bi-wallet2 text-success fs-4"></i>
                             </div>
-                            <h5 class="card-title  mb-0">
-                                Dompet Elektronik
-                            </h5>
+                            <h5 class="card-title mb-0">Dompet Elektronik</h5>
                         </div>
                     </div>
                 </router-link>

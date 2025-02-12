@@ -1,6 +1,6 @@
 <template>
     <VForm class="form w-100" @submit="submit" :validation-schema="login">
-        <!--begin::Input group-->
+        
         <div class="fv-row mb-10">
             <!--begin::Label-->
             <label class="form-label fs-6 fw-bold">Email</label>
@@ -22,9 +22,9 @@
                 </div>
             </div>
         </div>
-        <!--end::Input group-->
+        
 
-        <!--begin::Input group-->
+        
         <div class="fv-row mb-5">
             <!--begin::Wrapper-->
             <div class="d-flex flex-stack mb-2">
@@ -68,7 +68,7 @@
                 </div>
             </div>
         </div>
-        <!--end::Input group-->
+        
 
         <!-- <div class="form-check mb-4">
             <Field tabindex="3" class="form-check-input" type="checkbox" id="remember_me" name="remember_me" value="1"

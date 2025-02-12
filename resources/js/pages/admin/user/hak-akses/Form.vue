@@ -199,7 +199,7 @@ watch(
         <div class="card-body">
             <div class="row">
                 <div class="col-md-6">
-                    <!--begin::Input group-->
+                    
                     <div class="fv-row mb-7">
                         <label class="form-label fw-bold fs-6 required">
                             Nama
@@ -212,10 +212,10 @@ watch(
                             </div>
                         </div>
                     </div>
-                    <!--end::Input group-->
+                    
                 </div>
                 <div class="col-md-6">
-                    <!--begin::Input group-->
+                    
                     <div class="fv-row mb-7">
                         <label class="form-label fw-bold fs-6 required">
                             Nama Lengkap
@@ -228,7 +228,7 @@ watch(
                             </div>
                         </div>
                     </div>
-                    <!--end::Input group-->
+                    
                 </div>
                 <div class="col-md-12">
                     <template v-for="(permission, p_id) in permissions">

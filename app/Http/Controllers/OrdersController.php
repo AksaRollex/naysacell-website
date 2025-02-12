@@ -6,13 +6,12 @@ use Illuminate\Http\Request;
 use App\Models\Orders;
 use App\Models\ProductPrepaid;
 use App\Models\TransactionModel;
-use App\Models\User;
 use App\Models\UserBalance;
 use App\Traits\CodeGenerate;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class OrdersController extends Controller
 {
@@ -121,36 +120,216 @@ class OrdersController extends Controller
     }
     public function get($id)
     {
-        $data = Orders::find($id);
+        $data = Orders::with(['user', 'product', 'transaction_model'])
+            ->findOrFail($id);
 
         return response()->json([
             'data' => $data
         ], 200);
     }
 
+
     public function update($id, Request $request)
     {
+        Log::info('Update Order Status Request:', [
+            'id' => $id,
+            'data' => $request->all()
+        ]);
+
         $data = TransactionModel::find($id);
 
         $validatedData = $request->validate([
-            'order_status' => 'required|string|in:Pending,Processing,success,Cancelled',
+            'order_status' => 'required',
         ]);
 
         if ($data) {
-            $data->order_status = $validatedData['order_status'];
+            $data->order_status = strtolower($validatedData['order_status']);
+
+            // Log sebelum save
+            Log::info('Before saving transaction:', [
+                'transaction_id' => $data->id,
+                'old_status' => $data->getOriginal('order_status'),
+                'new_status' => $data->order_status
+            ]);
+
             $data->save();
+
+            // Log setelah save
+            Log::info('After saving transaction:', [
+                'transaction_id' => $data->id,
+                'new_status' => $data->order_status,
+                'user_id' => $data->transaction_user_id
+            ]);
+
+            // Pastikan relasi user terload
+            $data->load('user');
+
+            // Log user data
+            Log::info('User data for email:', [
+                'transaction_id' => $data->id,
+                'user_exists' => isset($data->user),
+                'user_data' => $data->user ? [
+                    'id' => $data->user->id,
+                    'email' => $data->user->email,
+                    'name' => $data->user->name
+                ] : null
+            ]);
+
+            $this->sendStatusUpdateEmail($data);
+
             return response()->json([
                 'status' => 'success',
                 'message' => 'Status pesanan berhasil diperbarui.',
                 'data' => $data
             ]);
         } else {
+            Log::warning('Transaction not found:', ['id' => $id]);
             return response()->json([
                 'status' => 'error',
                 'message' => 'Pesanan tidak ditemukan.'
             ], 404);
         }
     }
+
+    private function sendStatusUpdateEmail($transaction)
+    {
+        try {
+            Log::info('Starting sendStatusUpdateEmail', [
+                'transaction_id' => $transaction->id,
+                'user_exists' => isset($transaction->user)
+            ]);
+
+            if (!$transaction->user || !$transaction->user->email) {
+                Log::error('Cannot send email - missing user data', [
+                    'transaction_id' => $transaction->id
+                ]);
+                return;
+            }
+
+            $statusMessages = [
+                'pending' => 'Transaksi Anda sedang menunggu konfirmasi',
+                'processing' => 'Transaksi Anda sedang diproses',
+                'success' => 'Transaksi Anda telah berhasil diproses',
+                'cancelled' => 'Transaksi Anda telah dibatalkan'
+            ];
+
+            $message = $statusMessages[strtolower($transaction->order_status)] ?? 'Status transaksi Anda telah diperbarui';
+
+            $htmlContent = '
+                <html>
+                    <head>
+                        <style>
+                            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                            .header { background: #f8f9fa; padding: 20px; text-align: center; }
+                            .content { padding: 20px; }
+                            .footer { text-align: center; padding: 20px; font-size: 14px; }
+                            .details { background: #f8f9fa; padding: 15px; margin: 15px 0; border-radius: 5px; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="container">
+                            <div class="header">
+                                <h2>Update Status Transaksi</h2>
+                            </div>
+                            <div class="content">
+                                <p>Halo ' . $transaction->user->name . ',</p>
+                                <p>' . $message . '</p>
+                                <div class="details">
+                                    <p><strong>Detail Transaksi:</strong></p>
+                                    <ul>
+                                        <li>ID Transaksi: #' . $transaction->id . '</li>
+                                        <li>Status: ' . ucfirst($transaction->order_status) . '</li>
+                                        <li>Total: Rp ' . number_format($transaction->transaction_total, 0, ',', '.') . '</li>
+                                    </ul>
+                                </div>
+                                <p>Terima kasih telah berbelanja di toko kami.</p>
+                            </div>
+                            <div class="footer">
+                                <p>Email ini dikirim secara otomatis, mohon tidak membalas email ini.</p>
+                            </div>
+                        </div>
+                    </body>
+                </html>';
+
+            Mail::html($htmlContent, function ($mail) use ($transaction) {
+                $mail->to($transaction->user->email)
+                    ->subject('Update Status Transaksi #' . $transaction->id);
+            });
+
+            Log::info('Email sent successfully', [
+                'transaction_id' => $transaction->id,
+                'to_email' => $transaction->user->email
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to send email notification', [
+                'transaction_id' => $transaction->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+        }
+    }
+
+    // public function sendStatusUpdateEmail(Request $request)
+    // {
+
+    //     $statusMessages = [
+    //         'pending' => 'Transaksi Anda sedang menunggu konfirmasi',
+    //         'processing' => 'Transaksi Anda sedang diproses',
+    //         'success' => 'Transaksi Anda telah berhasil diproses',
+    //         'cancelled' => 'Transaksi Anda telah dibatalkan'
+    //     ];
+
+    //     $transaction = TransactionModel::where('id', $request->transaction_id)->first();
+    //     $message = $statusMessages[strtolower($transaction->order_status)] ?? 'Status transaksi Anda telah diperbarui';
+
+    //     try {
+    //         $response = Http::withHeaders([
+    //             'api-key' => env('SENDINBLUE_API_KEY'),
+    //             "Content-Type" => "application/json"
+    //         ])->post('https://api.brevo.com/v3/smtp/email', [
+    //             "sender" => [
+    //                 "name" => env('SENDINBLUE_SENDER_NAME'),
+    //                 "email" => env('SENDINBLUE_SENDER_EMAIL'),
+    //             ],
+    //             'to' => [
+    //                 ['email' => $request->$transaction->user->email]
+    //             ],
+    //             "subject" => "Kode OTP Reset Password",
+    //             "htmlContent" => "
+    //         <html>
+    //         <body>
+    //             <h2>Update Status Transaksi</h2>
+    //                         <p>Halo ' . $transaction->user->name . ',</p>
+    //                         <p>' . $message . '</p>
+    //                         <p>Detail Transaksi:</p>
+    //                         <ul>
+    //                             <li>ID Transaksi: #' . $transaction->id . '</li>
+    //                             <li>Status: ' . ucfirst($transaction->order_status) . '</li>
+    //                             <li>Total: Rp ' . number_format($transaction->transaction_total, 0, ',', '.') . '</li>
+    //                         </ul>
+    //                         <p>Terima kasih telah berbelanja di toko kami.</p>
+    //         </body>
+    //         </html>",
+    //         ]);
+    //         return response()->json([
+    //             Log::info('Email sending response:', [
+    //                 'transaction_id' => $transaction->id,
+    //                 'status_code' => $response->status(),
+    //                 'response_body' => $response->json()
+    //             ]),
+    //             'status' => true,
+    //             'message' => 'status pesanan berhasil diperbarui',
+    //         ], 200);
+    //     } catch (\Exception $e) {
+    //         Log::error('Error sending OTP: ' . $e->getMessage());
+    //         return response()->json([
+    //             'status' => false,
+    //             'message' => 'Gagal memperbarui status pesanan',
+    //         ], 500);
+    //     }
+    // }
+
 
     public function destroy($id)
     {
@@ -196,7 +375,6 @@ class OrdersController extends Controller
             DB::beginTransaction();
             try {
                 $transactionCode = $this->getCode();
-
                 $transaction = TransactionModel::create([
                     'transaction_code' => $transactionCode,
                     'transaction_date' => now()->format('Y-m-d'),
@@ -214,7 +392,6 @@ class OrdersController extends Controller
                     'product_id' => $request->product_id,
                     'transaction_id' => $transaction->id,
                     'quantity' => $request->quantity,
-                    'customer_no' => $request->customer_no,
                     'user_id' => $request->user_id,
                 ]);
 

@@ -203,6 +203,11 @@ const routes: Array<RouteRecordRaw> = [
                 name: "order",
                 component: () => import("@/pages/admin/pesanan/Index.vue"),
             },
+            {
+                path : "/order/detail",
+                name : "order-detail",
+                component : () => import("@/pages/admin/pesanan/Detail.vue")
+            }
         ],
     },
 

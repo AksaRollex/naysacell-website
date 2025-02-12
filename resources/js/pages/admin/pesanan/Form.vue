@@ -8,7 +8,7 @@ import { computed } from "vue";
 import ApiService from "@/core/services/ApiService";
 
 const data = ref({
-    order_status: "", // Pastikan order_status adalah field yang benar
+    order_status: "",
 });
 
 const props = defineProps({
@@ -30,7 +30,6 @@ function getEdit() {
     block(document.getElementById("form-product"));
     ApiService.get("master/order/get", props.selected)
         .then((response) => {
-            // Pastikan order_status sesuai dengan field yang ada di dalam response
             data.value = response.data.data;
         })
         .catch((err: any) => {
@@ -43,7 +42,7 @@ function getEdit() {
 
 function submit() {
     const formData = new FormData();
-    formData.append("order_status", String(data.value.order_status)); // Mengirimkan order_status ke backend
+    formData.append("order_status", String(data.value.order_status));
 
     if (props.selected) {
         formData.append("_method", "PUT");
@@ -138,8 +137,8 @@ const statuses = computed(() =>
         </div>
         <div class="card-body">
             <div class="row">
-                <div class="col-md-6">
-                    <!--begin::Input group-->
+                <div class="col-md-12">
+                    
                     <div class="fv-row mb-7">
                         <label class="form-label fw-bold fs-6 required">
                             Status
@@ -160,7 +159,7 @@ const statuses = computed(() =>
                             </div>
                         </div>
                     </div>
-                    <!--end::Input group-->
+                    
                 </div>
             </div>
         </div>

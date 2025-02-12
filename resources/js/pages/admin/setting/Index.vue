@@ -6,7 +6,7 @@
         <div class="card-body">
             <div class="row">
                 <div class="col-md-6">
-                    <!--begin::Input group-->
+                    
                     <div class="fv-row mb-8">
                         <label class="form-label fw-bold fs-6 required"
                             >Nama Aplikasi</label
@@ -25,9 +25,9 @@
                             </div>
                         </div>
                     </div>
-                    <!--end::Input group-->
+                    
 
-                    <!--begin::Input group-->
+                    
                     <div class="fv-row mb-8">
                         <label class="form-label fw-bold fs-6 required"
                             >Deskripsi</label
@@ -45,9 +45,9 @@
                             </div>
                         </div>
                     </div>
-                    <!--end::Input group-->
+                    
 
-                    <!--begin::Input group-->
+                    
                     <div class="fv-row mb-8">
                         <label class="form-label fw-bold fs-6 required"
                             >Alamat</label
@@ -65,9 +65,9 @@
                             </div>
                         </div>
                     </div>
-                    <!--end::Input group-->
+                    
 
-                    <!--begin::Input group-->
+                    
                     <div class="fv-row mb-8">
                         <label class="form-label fw-bold fs-6 required"
                             >Telepon</label
@@ -87,9 +87,9 @@
                             </div>
                         </div>
                     </div>
-                    <!--end::Input group-->
+                    
 
-                    <!--begin::Input group-->
+                    
                     <div class="fv-row mb-8">
                         <label class="form-label fw-bold fs-6 required"
                             >Email</label
@@ -107,7 +107,7 @@
                             </div>
                         </div>
                     </div>
-                    <!--end::Input group-->
+                    
                 </div>
 
                 <div class="col-12 d-md-none">

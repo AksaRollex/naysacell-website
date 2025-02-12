@@ -18,8 +18,8 @@ return new class extends Migration
             $table->string('transaction_code');
             $table->string('transaction_date');
             $table->time('transaction_time');
-            $table->string('transaction_number');
             $table->string('transaction_message');
+            $table->string('transaction_number');
             $table->enum('transaction_status', ['pending', 'success', 'failed', 'process', 'cancelled']);
             $table->enum('order_status', ['pending', 'processing', 'success', 'cancelled']);
             $table->string('transaction_product');

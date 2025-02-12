@@ -96,7 +96,6 @@ const handleTopup = async () => {
     loading.value = true;
 
     try {
-        // Pastikan snap sudah terload
         if (typeof snap === "undefined") {
             throw new Error("Sistem pembayaran belum siap");
         }
@@ -104,7 +103,6 @@ const handleTopup = async () => {
         const formData = new FormData();
         formData.append("amount", amount.value);
 
-        // Request snap token
         const response = await axios.post("/auth/topup", formData);
         const { snap_token, transaction } = response.data;
 
@@ -112,10 +110,8 @@ const handleTopup = async () => {
             throw new Error("Token pembayaran tidak valid");
         }
 
-        // Log untuk debugging
         console.log("Starting payment with token:", snap_token);
 
-        // Implement retry mechanism
         let retryCount = 0;
         const maxRetries = 3;
 
@@ -125,14 +121,16 @@ const handleTopup = async () => {
                     onSuccess: async (result: MidtransResult) => {
                         let retryCount = 0;
                         const maxRetries = 5;
-                        const retryInterval = 3000; // 3 detik
+                        const retryInterval = 3000; 
                         console.log("Payment success with details:", {
                             status: result.transaction_status,
                             orderId: result.order_id,
                             paymentType: result.payment_type,
                             time: new Date().toISOString(),
                         });
-
+                        axios.post("/midtrans-callback").catch((error) => {
+                            console.error("Error posting callback:", error);
+                        });
                         const checkBalance = async () => {
                             try {
                                 await fetchBalance();
@@ -152,7 +150,6 @@ const handleTopup = async () => {
                             }
                         };
 
-                        // Tambahkan delay sebelum mengecek saldo
                         await new Promise((resolve) =>
                             setTimeout(resolve, 3000)
                         );
@@ -163,7 +160,6 @@ const handleTopup = async () => {
                             amount.value = "";
                         } catch (error) {
                             console.error("Error updating balance:", error);
-                            // Tambahkan retry mechanism
                             let retryCount = 0;
                             const maxRetries = 3;
 
@@ -203,7 +199,6 @@ const handleTopup = async () => {
                         );
                     },
                     onClose: () => {
-                        // Hanya tampilkan toast jika memang user sengaja menutup
                         if (loading.value) {
                             toast.info("Pembayaran dibatalkan");
                         }

@@ -1,6 +1,6 @@
 <template>
     <section class="w-100">
-        <!--begin::Input group-->
+        
         <div class="fv-row mb-7">
             <label class="form-label fw-bold text-dark fs-6">No. Telepon</label>
             <Field class="form-control form-control-lg form-control-solid" type="text" name="phone" autocomplete="off"
@@ -11,9 +11,9 @@
                 </div>
             </div>
         </div>
-        <!--end::Input group-->
+        
 
-        <!--begin::Input group-->
+        
         <div class="fv-row mb-7">
             <label class="form-label fw-bold text-dark fs-6 d-flex align-items-center justify-content-between">Kode OTP
             </label>
@@ -35,7 +35,7 @@
                 Kode OTP dapat dikirim ulang dalam <span class="fw-bold">{{ otpInterval }}</span> detik
             </div>
         </div>
-        <!--end::Input group-->
+        
     </section>
 </template>
 

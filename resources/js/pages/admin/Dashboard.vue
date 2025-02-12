@@ -1,113 +1,42 @@
 <template>
     <main class="dashboard-container">
         <div class="row g-5">
-            <div class="col-xl-4">
+            <div
+                v-for="(card, index) in dashboardCards"
+                :key="index"
+                class="col-xl-3"
+            >
                 <div class="card h-100 shadow-sm hover-elevate-up">
                     <div class="card-body">
                         <div class="d-flex flex-column">
                             <div class="symbol symbol-60px mb-6">
                                 <span
-                                    class="symbol-label bg-primary bg-opacity-10 rounded-3"
+                                    :class="`symbol-label bg-${card.color} bg-opacity-10 rounded-3`"
                                 >
                                     <i
-                                        class="ki-duotone ki-wallet text-primary fs-1"
+                                        :class="`ki-duotone ki-${card.icon} text-${card.color} fs-1`"
                                     >
-                                        <span class="path1"></span>
-                                        <span class="path2"></span>
-                                        <span class="path3"></span>
-                                        <span class="path4"></span>
+                                        <span
+                                            v-for="n in 4"
+                                            :key="n"
+                                            :class="`path${n}`"
+                                        ></span>
                                     </i>
                                 </span>
                             </div>
                             <div class="d-flex flex-column mb-2">
                                 <span
                                     class="text-gray-600 fw-semibold fs-7 mb-1"
-                                    >Saldo Anda</span
+                                    >{{ card.title }}</span
                                 >
                                 <div class="d-flex align-items-center">
                                     <span
-                                        class="badge badge-light-primary fs-base"
+                                        :class="`badge badge-light-${card.color} fs-base`"
                                     >
                                         <i
                                             class="ki-duotone ki-arrow-up fs-7 text-success ms-n1"
                                         ></i>
-                                        {{ formatCurrency(currentBalance) }}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-4">
-                <div class="card h-100 shadow-sm hover-elevate-up">
-                    <div class="card-body">
-                        <div class="d-flex flex-column">
-                            <div class="symbol symbol-60px mb-6">
-                                <span
-                                    class="symbol-label bg-warning bg-opacity-10 rounded-3"
-                                >
-                                    <i
-                                        class="ki-duotone ki-people text-warning fs-1"
-                                    >
-                                        <span class="path1"></span>
-                                        <span class="path2"></span>
-                                        <span class="path3"></span>
-                                        <span class="path4"></span>
-                                    </i>
-                                </span>
-                            </div>
-                            <div class="d-flex flex-column mb-2">
-                                <span
-                                    class="text-gray-600 fw-semibold fs-7 mb-1"
-                                    >Pengguna</span
-                                >
-                                <div class="d-flex align-items-center">
-                                    <span
-                                        class="badge badge-light-warning fs-base"
-                                    >
-                                        <i
-                                            class="ki-duotone ki-arrow-up fs-7 text-success"
-                                        ></i>
-                                        {{ currentUser.length }}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-4 ">
-                <div class="card h-100 shadow-sm hover-elevate-up">
-                    <div class="card-body">
-                        <div class="d-flex flex-column">
-                            <div class="symbol symbol-60px mb-6">
-                                <span
-                                    class="symbol-label bg-success bg-opacity-10 rounded-3"
-                                >
-                                    <i
-                                        class="ki-duotone ki-purchase text-success fs-1"
-                                    >
-                                        <span class="path1"></span>
-                                        <span class="path2"></span>
-                                        <span class="path3"></span>
-                                        <span class="path4"></span>
-                                    </i>
-                                </span>
-                            </div>
-                            <div class="d-flex flex-column mb-2">
-                                <span
-                                    class="text-gray-600 fw-semibold fs-7 mb-1"
-                                    >Pesanan</span
-                                >
-                                <div class="d-flex align-items-center">
-                                    <span
-                                        class="badge badge-light-success fs-base"
-                                    >
-                                        <i
-                                            class="ki-duotone ki-arrow-up fs-7 text-success"
-                                        ></i>
-                                        {{ currentOrder.length }}
+                                        {{ card.value }}
                                     </span>
                                 </div>
                             </div>
@@ -116,27 +45,76 @@
                 </div>
             </div>
         </div>
+
+        <div class="card mt-5 mb-5">
+            <div class="card-body">
+                <div
+                    id="transactionChart"
+                    style="width: 100%; height: 0px"
+                ></div>
+                <div v-if="!hasChartData" class="text-center py-4">
+                    <span
+                        v-if="loading"
+                        class="spinner-border spinner-border-sm border-primary me-2"
+                        role="status"
+                        aria-hidden="true"
+                    ></span>
+                    <!-- {{ loadingMessage }} -->
+                </div>
+            </div>
+        </div>
     </main>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
+import ApexCharts from "apexcharts";
 import axios from "@/libs/axios";
 import { toast } from "vue3-toastify";
 
+const chartData = ref({ labels: [], transactions: [], amounts: [] });
+const loading = ref(true);
+const loadingMessage = ref("Loading chart...");
 const currentBalance = ref(0);
-const fetchBalance = async () => {
-    try {
-        const response = await axios.get("/auth/check-saldo");
-        currentBalance.value = response.data.balance;
-    } catch (error) {
-        toast.error("Gagal mengambil data saldo", {
-            position: toast.POSITION.TOP_RIGHT,
-            autoClose: 3000,
-        });
-        console.error("Error fetching balance:", error);
-    }
-};
+const currentUsers = ref([]);
+const currentOrders = ref([]);
+let chart = null;
+
+const hasChartData = computed(() => {
+    const { labels, transactions, amounts } = chartData.value;
+    return labels.length > 0 && transactions.length > 0 && amounts.length > 0;
+});
+
+const totalIncome = computed(() => {
+    return chartData.value.amounts.reduce((sum, amount) => sum + amount, 0);
+});
+
+const dashboardCards = computed(() => [
+    {
+        title: "Saldo Anda",
+        value: formatCurrency(currentBalance.value),
+        color: "primary",
+        icon: "wallet",
+    },
+    {
+        title: "Total Pendapatan",
+        value: formatCurrency(totalIncome.value),
+        color: "success",
+        icon: "dollar",
+    },
+    {
+        title: "Pengguna",
+        value: currentUsers.value.length,
+        color: "warning",
+        icon: "people",
+    },
+    {
+        title: "Pesanan",
+        value: currentOrders.value.length,
+        color: "info",
+        icon: "purchase",
+    },
+]);
 
 const formatCurrency = (value) => {
     return new Intl.NumberFormat("id-ID", {
@@ -146,39 +124,187 @@ const formatCurrency = (value) => {
     }).format(value);
 };
 
-onMounted(() => {
-    fetchBalance();
-    fetchUser();
-    fetchOrder();
+const initChart = () => {
+    const options = {
+        series: [
+            {
+                name: "Jumlah Transaksi",
+                type: "area",
+                data: chartData.value.transactions,
+            },
+            {
+                name: "Jumlah Penghasilan",
+                type: "area",
+                data: chartData.value.amounts,
+            },
+        ],
+        chart: {
+            height: 500,
+            type: "area",
+            stacked: false,
+            toolbar: {
+                show: true,
+                tools: {
+                    download: false,
+                    selection: true,
+                    zoom: false,
+                    zoomin: false,
+                    zoomout: false,
+                    pan: false,
+                    reset: false,
+                },
+            },
+        },
+        stroke: {
+            width: [2, 2],
+            curve: "smooth",
+        },
+        fill: {
+            type: "gradient",
+            gradient: {
+                shadeIntensity: 1,
+                inverseColors: false,
+                opacityFrom: 0.45,
+                opacityTo: 0.05,
+                stops: [20, 100, 100, 100],
+            },
+        },
+        dataLabels: { enabled: false },
+        markers: {
+            size: 4,
+            strokeWidth: 2,
+            hover: { size: 6 },
+        },
+        xaxis: {
+            categories: chartData.value.labels,
+            type: "category",
+            title: { text: "Period" },
+            labels: {
+                formatter: (value) =>
+                    new Date(value).toLocaleString("id-ID", {
+                        month: "long",
+                        year: "numeric",
+                    }),
+            },
+            tickAmount: 12,
+        },
+        yaxis: [
+            {
+                title: { text: "Jumlah Transaksi" },
+                labels: {
+                    formatter: (value) => Math.round(value),
+                },
+                min: (min) => min - min * 0.1,
+                max: (max) => max + max * 0.1,
+            },
+            {
+                opposite: true,
+                title: { text: "Jumlah Penghasilan (IDR)" },
+                labels: {
+                    formatter: (value) => formatCurrency(value),
+                },
+                min: (min) => min - min * 0.1,
+                max: (max) => max + max * 0.1,
+            },
+        ],
+        tooltip: {
+            shared: true,
+            intersect: false,
+            x: {
+                formatter: (value) =>
+                    new Date(value).toLocaleString("id-ID", {
+                        month: "long",
+                        year: "numeric",
+                    }),
+            },
+            y: {
+                formatter: (value, { seriesIndex }) => {
+                    return seriesIndex === 0
+                        ? `${value} transactions`
+                        : formatCurrency(value);
+                },
+            },
+        },
+        colors: ["#3699FF", "#1BC5BD"],
+        legend: {
+            position: "top",
+            horizontalAlign: "right",
+        },
+    };
+
+    if (chart) {
+        chart.destroy();
+    }
+
+    chart = new ApexCharts(
+        document.querySelector("#transactionChart"),
+        options
+    );
+    chart.render();
+};
+
+const fetchData = async (endpoint, errorMessage) => {
+    try {
+        const response = await axios.get(endpoint);
+        return response.data;
+    } catch (error) {
+        toast.error(errorMessage, {
+            position: toast.POSITION.TOP_RIGHT,
+            autoClose: 3000,
+        });
+        console.error(`Error fetching ${endpoint}:`, error);
+        return null;
+    }
+};
+
+const fetchOrder = async (endpoint, errorMessage) => {
+    try {
+        const response = await axios.post(endpoint);
+        return response.data;
+    } catch (error) {
+        toast.error(errorMessage, {
+            position: toast.POSITION.TOP_RIGHT,
+            autoClose: 3000,
+        });
+        console.error(`Error fetching ${endpoint}:`, error);
+        return null;
+    }
+};
+
+const fetchChartData = async () => {
+    try {
+        const response = await axios.get("/master/transaction/chart-data");
+        if (!response.data?.labels?.length) {
+            loadingMessage.value = "Data tidak ditemukan!";
+            return;
+        }
+
+        if (!Array.isArray(response.data.amounts)) {
+            response.data.amounts = [];
+        }
+
+        chartData.value = response.data;
+        initChart();
+    } catch (error) {
+        console.error("Error fetching chart data:", error);
+        loadingMessage.value = "Error loading chart data";
+        chartData.value.amounts = [];
+    }
+};
+
+onMounted(async () => {
+    const [balanceData, userData, orderData] = await Promise.all([
+        fetchData("/auth/check-saldo", "Gagal mengambil data saldo"),
+        fetchData("/master/users", "Gagal mengambil data user"),
+        fetchOrder("/master/order", "Gagal mengambil data pesanan"),
+    ]);
+
+    if (balanceData) currentBalance.value = balanceData.balance;
+    if (userData) currentUsers.value = userData.data;
+    if (orderData) currentOrders.value = orderData.data;
+
+    fetchChartData();
 });
-
-const currentUser = ref([]);
-const fetchUser = async () => {
-    try {
-        const response = await axios.get("/master/users");
-        currentUser.value = response.data.data;
-    } catch (error) {
-        toast.error("Gagal mengambil data user", {
-            position: toast.POSITION.TOP_RIGHT,
-            autoClose: 3000,
-        });
-        console.error("error fetching user : ", error);
-    }
-};
-
-const currentOrder = ref([]);
-const fetchOrder = async () => {
-    try {
-        const response = await axios.post("/master/order");
-        currentOrder.value = response.data.data;
-    } catch (error) {
-        toast.error("Gagal mengambil data pesanan", {
-            position: toast.POSITION.TOP_RIGHT,
-            autoClose: 3000,
-        });
-        console.error("error fetching order : ", error);
-    }
-};
 </script>
 
 <style>
@@ -188,34 +314,5 @@ const fetchOrder = async () => {
 
 .hover-elevate-up:hover {
     transform: translateY(-5px);
-}
-
-.timeline-label {
-    position: relative;
-    padding-left: 25px;
-}
-
-.timeline-label::before {
-    content: "";
-    position: absolute;
-    left: 13px;
-    width: 2px;
-    top: 5px;
-    bottom: 5px;
-    background-color: #e4e6ef;
-}
-
-.timeline-badge {
-    position: absolute;
-    left: 0;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #fff;
-    border: 2px solid #e4e6ef;
-    z-index: 1;
 }
 </style>

@@ -1,5 +1,4 @@
 import type { MenuItem } from "@/layouts/default-layout/config/types";
-import { createPopperBase } from "@popperjs/core";
 
 const MainMenuConfig: Array<MenuItem> = [
     {
@@ -11,12 +10,10 @@ const MainMenuConfig: Array<MenuItem> = [
             },
         ],
     },
-    // WEBSITE
     {
         route: "/dashboard/website",
         name: "website",
         pages: [
-            // USER / MITRA
             {
                 sectionTitle: "User",
                 route: "/admin",
@@ -28,11 +25,6 @@ const MainMenuConfig: Array<MenuItem> = [
                         name: "user-admin",
                         route: "/user/user-admin",
                     },
-                    // {
-                    //     heading: "List Mitra",
-                    //     name: "user-mitra",
-                    //     route: "/user/user-mitra",
-                    // },
                     {
                         heading: "List User",
                         name: "user",
@@ -45,27 +37,6 @@ const MainMenuConfig: Array<MenuItem> = [
                     },
                 ],
             },
-            // // MASTER
-            // {
-            //     sectionTitle: "Master",
-            //     route: "/master",
-            //     name: "master",
-            //     keenthemesIcon: "element-11",
-            //     sub: [
-            //         {
-            //             heading: "Brand",
-            //             name: "master-brand",
-            //             route: "/master/brand",
-            //         },
-            //         // {
-            //         //     heading: "Kode Operator",
-            //         //     name: "master-operator-code",
-            //         //     route: "/master/operator-code",
-            //         // },
-            //     ],
-            // },
-
-            // PRODUK
             {
                 sectionTitle: "Produk",
                 route: "/produk",
@@ -77,21 +48,14 @@ const MainMenuConfig: Array<MenuItem> = [
                         name: "produk-prabayar",
                         route: "/produk/prabayar",
                     },
-                    // {
-                    //     heading: "Pascabayar",
-                    //     name: "produk-pascabayar",
-                    //     route: "/produk/pascabayar",
-                    // },
                 ],
             },
-            // HISTORI
             {
                 heading: "Histori",
                 name: "histori",
                 keenthemesIcon: "archive",
                 route: "/histori",
             },
-            // LAPORAN
             {
                 sectionTitle: "Laporan Transaksi",
                 name: "laporan",
@@ -99,30 +63,15 @@ const MainMenuConfig: Array<MenuItem> = [
                 route: "/laporan",
                 sub: [
                     {
-                        heading: "Grafik Penjualan",
-                        name: "laporan-grafik-penjualan",
-                        route: "/laporan/grafik-penjualan",
-                    },
-                    {
                         heading: "Transaksi Prabayar",
                         name: "laporan-transaksi-prabayar",
                         route: "/laporan/transaksi-prabayar",
                     },
-                    // {
-                    //     heading: "Transaksi Pascabayar",
-                    //     name: "laporan-transaksi-pascabayar",
-                    //     route: "/laporan/transaksi-pascabayar",
-                    // },
                     {
                         heading: "Transaksi Deposit",
                         name: "laporan-transaksi-deposit",
                         route: "/laporan/transaksi-deposit",
                     },
-                    // {
-                    //     heading: "Semua Transaksi",
-                    //     name: "laporan-semua-transaksi",
-                    //     route: "/laporan/transaksi-semua",
-                    // },
                     {
                         heading: "Transaksi Pesanan",
                         name: "laporan-transaksi-pesanan",
@@ -130,7 +79,6 @@ const MainMenuConfig: Array<MenuItem> = [
                     },
                 ],
             },
-            // ISI SALDO
             {
                 sectionTitle: "Saldo",
                 route: "/isi-saldo",
@@ -149,21 +97,18 @@ const MainMenuConfig: Array<MenuItem> = [
                     },
                 ],
             },
-            // PPOB
             {
                 heading: "PPOB",
                 name: "PPOB",
                 keenthemesIcon: "lots-shopping",
                 route: "/ppob",
             },
-            // PESANAN
             {
                 heading: "Pesanan",
                 route: "/order",
                 name: "order",
                 keenthemesIcon: "handcart",
             },
-            // SETTING
             {
                 heading: "Setting",
                 route: "/admin/setting",

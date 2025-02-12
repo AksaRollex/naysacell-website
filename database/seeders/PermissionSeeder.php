@@ -42,7 +42,7 @@ class PermissionSeeder extends Seeder
         ];
         $menuHistori = ['histori'];
 
-        $menuPesanan = ['order'];
+        $menuPesanan = ['order', 'order-detail'];
 
         $permissionsByRole = [
             'admin' => ['dashboard', ...$menuWebsite, ...$menuUser, ...$api, ...$menuMaster, ...$menuProduct, ...$menuPPOB, ...$menuLaporan, ...$menuIsiSaldo, ... $menuPesanan],
