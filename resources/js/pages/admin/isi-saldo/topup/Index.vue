@@ -112,115 +112,40 @@ const handleTopup = async () => {
 
         console.log("Starting payment with token:", snap_token);
 
-        let retryCount = 0;
-        const maxRetries = 3;
+        snap.pay(snap_token, {
+            onSuccess: async (result: MidtransResult) => {
+                console.log("Payment success with details:", result);
+                await axios
+                    .post("/midtrans-callback", result, transaction)
+                    .then((response) => {
+                        console.log("Callback response:", response);
+                    })
+                    .catch((error) => {
+                        console.error("Error posting callback:", error);
+                    });
 
-        const initializePayment = () => {
-            try {
-                snap.pay(snap_token, {
-                    onSuccess: async (result: MidtransResult) => {
-                        let retryCount = 0;
-                        const maxRetries = 5;
-                        const retryInterval = 3000; 
-                        console.log("Payment success with details:", {
-                            status: result.transaction_status,
-                            orderId: result.order_id,
-                            paymentType: result.payment_type,
-                            time: new Date().toISOString(),
-                        });
-                        axios.post("/midtrans-callback").catch((error) => {
-                            console.error("Error posting callback:", error);
-                        });
-                        const checkBalance = async () => {
-                            try {
-                                await fetchBalance();
-                                toast.success("Top up berhasil!");
-                            } catch (error) {
-                                if (retryCount < maxRetries) {
-                                    retryCount++;
-                                    await new Promise((resolve) =>
-                                        setTimeout(resolve, retryInterval)
-                                    );
-                                    await checkBalance();
-                                } else {
-                                    toast.warning(
-                                        "Pembayaran berhasil, tapi saldo belum terupdate. Silahkan hubungi admin."
-                                    );
-                                }
-                            }
-                        };
-
-                        await new Promise((resolve) =>
-                            setTimeout(resolve, 3000)
-                        );
-
-                        try {
-                            await fetchBalance();
-                            toast.success("Top up berhasil!");
-                            amount.value = "";
-                        } catch (error) {
-                            console.error("Error updating balance:", error);
-                            let retryCount = 0;
-                            const maxRetries = 3;
-
-                            const retryFetchBalance = async () => {
-                                try {
-                                    await fetchBalance();
-                                    toast.success("Top up berhasil!");
-                                } catch (error) {
-                                    if (retryCount < maxRetries) {
-                                        retryCount++;
-                                        await new Promise((resolve) =>
-                                            setTimeout(resolve, 2000)
-                                        );
-                                        await retryFetchBalance();
-                                    } else {
-                                        toast.info(
-                                            "Pembayaran berhasil, silahkan refresh halaman untuk melihat saldo terbaru"
-                                        );
-                                    }
-                                }
-                            };
-
-                            await retryFetchBalance();
-                        }
-                    },
-                    onPending: (result: any) => {
-                        console.log("Payment pending:", result);
-                        toast.info(
-                            "Menunggu pembayaran. Silahkan selesaikan pembayaran Anda"
-                        );
-                    },
-                    onError: (result: any) => {
-                        console.error("Payment error:", result);
-                        toast.error(
-                            "Pembayaran gagal: " +
-                                (result?.message || "Terjadi kesalahan")
-                        );
-                    },
-                    onClose: () => {
-                        if (loading.value) {
-                            toast.info("Pembayaran dibatalkan");
-                        }
-                    },
-                });
-            } catch (error) {
-                console.error("Snap pay error:", error);
-                if (retryCount < maxRetries) {
-                    retryCount++;
-                    console.log(
-                        `Retrying payment (${retryCount}/${maxRetries})...`
-                    );
-                    setTimeout(initializePayment, 1000);
-                } else {
-                    toast.error(
-                        "Gagal memulai pembayaran. Silahkan coba lagi."
-                    );
+                await fetchBalance();
+                toast.success("Top up berhasil!");
+            },
+            onPending: (result: any) => {
+                console.log("Payment pending:", result);
+                toast.info(
+                    "Menunggu pembayaran. Silahkan selesaikan pembayaran Anda"
+                );
+            },
+            onError: (result: any) => {
+                console.error("Payment error:", result);
+                toast.error(
+                    "Pembayaran gagal: " +
+                        (result?.message || "Terjadi kesalahan")
+                );
+            },
+            onClose: () => {
+                if (loading.value) {
+                    toast.info("Pembayaran dibatalkan");
                 }
-            }
-        };
-
-        initializePayment();
+            },
+        });
     } catch (error: any) {
         console.error("Topup error:", error);
         toast.error(

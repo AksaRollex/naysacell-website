@@ -216,10 +216,11 @@ class TransactionController extends Controller
                 DB::raw('COUNT(*) as total_transactions'),
                 DB::raw('SUM(transaction_total) as total_amount')
             )
+                ->whereNotNull('created_at') // Filter data yang created_at-nya tidak null
                 ->groupBy('date')
                 ->orderBy('date', 'asc')
                 ->get();
-
+    
             if ($data->isEmpty()) {
                 return response()->json([
                     'labels' => [],
@@ -227,7 +228,7 @@ class TransactionController extends Controller
                     'amounts' => []
                 ]);
             }
-
+    
             $chartData = $data->map(function ($item) {
                 return [
                     'date' => $item->date,
@@ -235,7 +236,7 @@ class TransactionController extends Controller
                     'total_amount' => (float)$item->total_amount,
                 ];
             });
-
+    
             return response()->json([
                 'labels' => $chartData->pluck('date')->values(),
                 'transactions' => $chartData->pluck('total_transactions')->values(),

@@ -24,10 +24,10 @@ class DepositTransactionController extends Controller
         DB::statement('set @no=0+' . $page * $per);
 
         $data = DepositTransaction::with(['user' => function ($query) use ($request) {
-                if ($request->user_id) {
-                    $query->where('id', $request->user_id);
-                }
-            }])
+            if ($request->user_id) {
+                $query->where('id', $request->user_id);
+            }
+        }])
             ->when($request->search, function ($query, $search) {
                 $query->whereHas('user', function ($q) use ($search) {
                     $q->where('name', 'like', "%$search%")
@@ -115,7 +115,7 @@ class DepositTransactionController extends Controller
                 $params = [
                     'transaction_details' => [
                         'order_id' => $depositCode,
-                        'gross_amount' => (int) $request->amount,
+                        'gross_amount' => $request->amount,
                     ],
                     'customer_details' => [
                         'first_name' => $user->name,
@@ -177,58 +177,10 @@ class DepositTransactionController extends Controller
 
     public function handleCallback(Request $request)
     {
-        Log::debug('Raw callback received', [
-            'payload' => $request->all(),
-            'headers' => $request->headers->all()
-        ]);
-
-        // Log saat callback diterima
-        Log::info('Midtrans Callback Received:', [
-            'order_id' => $request->order_id,
-            'transaction_status' => $request->transaction_status,
-            'payment_type' => $request->payment_type,
-            'gross_amount' => $request->gross_amount
-        ]);
-
-        // Log semua data callback yang masuk
-        Log::info('Midtrans Callback Data Received:', [
-            'order_id' => $request->order_id,
-            'status_code' => $request->status_code,
-            'transaction_status' => $request->transaction_status,
-            'payment_type' => $request->payment_type,
-            'signature_key' => $request->signature_key
-        ]);
-
-
         try {
-            $serverKey = config('midtrans.server_key');
-            $hashed = hash("sha512", $request->order_id . $request->status_code . $request->gross_amount . $serverKey);
-
-            // Log verifikasi signature
-            Log::info('Signature Verification:', [
-                'received_signature' => $request->signature_key,
-                'calculated_signature' => $hashed,
-                'is_valid' => ($hashed == $request->signature_key)
-            ]);
-
-            if ($hashed != $request->signature_key) {
-                Log::warning('Invalid signature', [
-                    'received' => $request->signature_key,
-                    'calculated' => $hashed
-                ]);
-                return response()->json(['message' => 'Invalid signature'], 403);
-            }
-
             $transaction = DepositTransaction::where('deposit_code', $request->order_id)
                 ->lockForUpdate()
                 ->first();
-
-            // Log hasil pencarian transaksi
-            Log::info('Transaction lookup:', [
-                'order_id' => $request->order_id,
-                'found' => !is_null($transaction),
-                'status' => $transaction?->status ?? 'not_found'
-            ]);
 
             if (!$transaction) {
                 Log::error('Transaction not found:', ['order_id' => $request->order_id]);
@@ -236,22 +188,8 @@ class DepositTransactionController extends Controller
             }
 
             if ($transaction->status === 'pending' && in_array($request->transaction_status, ['capture', 'settlement'])) {
-                // Log sebelum mulai proses update
-                Log::info('Starting payment processing:', [
-                    'transaction_id' => $transaction->id,
-                    'amount' => $transaction->amount,
-                    'user_id' => $transaction->user_id
-                ]);
-
                 DB::beginTransaction();
                 try {
-                    // Log update status transaksi
-                    Log::info('Updating transaction status', [
-                        'transaction_id' => $transaction->id,
-                        'old_status' => $transaction->status,
-                        'new_status' => 'success'
-                    ]);
-
                     $transaction->update([
                         'status' => 'success',
                         'payment_type' => $request->payment_type,
@@ -261,12 +199,6 @@ class DepositTransactionController extends Controller
                     $userBalance = UserBalance::where('user_id', $transaction->user_id)
                         ->lockForUpdate()
                         ->first();
-
-                    // Log informasi balance sebelum update
-                    Log::info('User balance before update:', [
-                        'user_id' => $transaction->user_id,
-                        'current_balance' => $userBalance?->balance ?? 0
-                    ]);
 
                     if (!$userBalance) {
                         Log::info('Creating new user balance record', [
@@ -282,13 +214,6 @@ class DepositTransactionController extends Controller
                     $userBalance->balance += $transaction->amount;
                     $userBalance->save();
 
-                    // Log informasi balance setelah update
-                    Log::info('User balance after update:', [
-                        'user_id' => $transaction->user_id,
-                        'new_balance' => $userBalance->balance,
-                        'added_amount' => $transaction->amount
-                    ]);
-
                     DB::commit();
                     Log::info('Payment processed successfully', [
                         'transaction_id' => $transaction->id
@@ -297,15 +222,9 @@ class DepositTransactionController extends Controller
                     return response()->json(['message' => 'Payment processed successfully']);
                 } catch (\Exception $e) {
                     DB::rollback();
-                    Log::error('Failed to process payment:', [
-                        'error' => $e->getMessage(),
-                        'trace' => $e->getTraceAsString(),
-                        'transaction_id' => $transaction->id
-                    ]);
                     throw $e;
                 }
             } else {
-                // Log jika status tidak sesuai
                 Log::info('Payment status not processable:', [
                     'current_status' => $transaction->status,
                     'midtrans_status' => $request->transaction_status
@@ -314,10 +233,6 @@ class DepositTransactionController extends Controller
 
             return response()->json(['message' => 'Payment status updated']);
         } catch (\Exception $e) {
-            Log::error('Callback processing error:', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
             return response()->json(['message' => 'Internal server error'], 500);
         }
     }

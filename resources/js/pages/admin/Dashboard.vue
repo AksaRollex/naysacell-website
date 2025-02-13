@@ -178,13 +178,9 @@ const initChart = () => {
         xaxis: {
             categories: chartData.value.labels,
             type: "category",
-            title: { text: "Period" },
+            title: { text: "Periode" },
             labels: {
-                formatter: (value) =>
-                    new Date(value).toLocaleString("id-ID", {
-                        month: "long",
-                        year: "numeric",
-                    }),
+                formatter: (value) => value,
             },
             tickAmount: 12,
         },
@@ -211,16 +207,12 @@ const initChart = () => {
             shared: true,
             intersect: false,
             x: {
-                formatter: (value) =>
-                    new Date(value).toLocaleString("id-ID", {
-                        month: "long",
-                        year: "numeric",
-                    }),
+                formatter: (value) => "",
             },
             y: {
                 formatter: (value, { seriesIndex }) => {
                     return seriesIndex === 0
-                        ? `${value} transactions`
+                        ? `${value} transaksi`
                         : formatCurrency(value);
                 },
             },
@@ -273,17 +265,72 @@ const fetchOrder = async (endpoint, errorMessage) => {
 
 const fetchChartData = async () => {
     try {
-        const response = await axios.get("/master/transaction/chart-data");
+        const response = await axios.get("/master/transaction/chart-data", {
+            params: {
+                _: new Date().getTime(),
+            },
+        });
         if (!response.data?.labels?.length) {
             loadingMessage.value = "Data tidak ditemukan!";
             return;
         }
 
-        if (!Array.isArray(response.data.amounts)) {
-            response.data.amounts = [];
-        }
+        const groupedData = response.data.labels.reduce((acc, date, index) => {
+            const month = new Date(date).toLocaleString("id-ID", {
+                month: "long",
+                year: "numeric",
+            });
 
-        chartData.value = response.data;
+            if (!acc[month]) {
+                acc[month] = {
+                    transactions: 0,
+                    amounts: 0,
+                };
+            }
+            acc[month].transactions += response.data.transactions[index];
+            acc[month].amounts += response.data.amounts[index];
+            return acc;
+        }, {});
+
+        const formattedLabels = Object.keys(groupedData);
+        const formattedTransactions = Object.values(groupedData).map(
+            (d) => d.transactions
+        );
+        const formattedAmounts = Object.values(groupedData).map(
+            (d) => d.amounts
+        );
+
+        const allMonths = [
+            "Januari 2025",
+            "Februari 2025",
+            "Maret 2025",
+            "April 2025",
+            "Mei 2025",
+            "Juni 2025",
+            "Juli 2025",
+            "Agustus 2025",
+            "September 2025",
+            "Oktober 2025",
+            "November 2025",
+            "Desember 2025",
+        ];
+
+        const filledData = allMonths.map((month) => {
+            const index = formattedLabels.indexOf(month);
+            return {
+                month,
+                transactions: index !== -1 ? formattedTransactions[index] : 0,
+                amounts: index !== -1 ? formattedAmounts[index] : 0,
+            };
+        });
+
+        chartData.value.labels = filledData.map((d) => d.month);
+        chartData.value.transactions = filledData.map((d) => d.transactions);
+        chartData.value.amounts = filledData.map((d) => d.amounts);
+
+        const currentMonthText = chartData.value.labels[1];
+        console.log("Bulan saat ini:", currentMonthText);
+
         initChart();
     } catch (error) {
         console.error("Error fetching chart data:", error);

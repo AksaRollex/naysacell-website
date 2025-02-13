@@ -120,7 +120,7 @@ class OrdersController extends Controller
     }
     public function get($id)
     {
-        $data = Orders::with(['user', 'product', 'transaction_model'])
+        $data = Orders::with(['user', 'product', 'transactionModel'])
             ->findOrFail($id);
 
         return response()->json([
@@ -131,11 +131,6 @@ class OrdersController extends Controller
 
     public function update($id, Request $request)
     {
-        Log::info('Update Order Status Request:', [
-            'id' => $id,
-            'data' => $request->all()
-        ]);
-
         $data = TransactionModel::find($id);
 
         $validatedData = $request->validate([
@@ -144,37 +139,8 @@ class OrdersController extends Controller
 
         if ($data) {
             $data->order_status = strtolower($validatedData['order_status']);
-
-            // Log sebelum save
-            Log::info('Before saving transaction:', [
-                'transaction_id' => $data->id,
-                'old_status' => $data->getOriginal('order_status'),
-                'new_status' => $data->order_status
-            ]);
-
             $data->save();
-
-            // Log setelah save
-            Log::info('After saving transaction:', [
-                'transaction_id' => $data->id,
-                'new_status' => $data->order_status,
-                'user_id' => $data->transaction_user_id
-            ]);
-
-            // Pastikan relasi user terload
             $data->load('user');
-
-            // Log user data
-            Log::info('User data for email:', [
-                'transaction_id' => $data->id,
-                'user_exists' => isset($data->user),
-                'user_data' => $data->user ? [
-                    'id' => $data->user->id,
-                    'email' => $data->user->email,
-                    'name' => $data->user->name
-                ] : null
-            ]);
-
             $this->sendStatusUpdateEmail($data);
 
             return response()->json([
