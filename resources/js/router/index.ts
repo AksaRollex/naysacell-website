@@ -45,7 +45,6 @@ const routes: Array<RouteRecordRaw> = [
                 component: () => import("@/pages/admin/setting/Index.vue"),
             },
 
-            // USER
             {
                 path: "/user/hak-akses",
                 name: "mitra-hak-akses",
@@ -69,7 +68,6 @@ const routes: Array<RouteRecordRaw> = [
                 name: "user-user",
                 component: () => import("@/pages/admin/user/user/Index.vue"),
             },
-            // ISI SALDO
             {
                 path: "/isi-saldo/histori",
                 name: "isi-saldo-histori",
@@ -88,7 +86,6 @@ const routes: Array<RouteRecordRaw> = [
                 component: () =>
                     import("@/pages/admin/isi-saldo/saldo/Index.vue"),
             },
-            // LAPORAN
             {
                 path: "/laporan/grafik-penjualan",
                 name: "laporan-grafik-penjualan",
@@ -123,7 +120,6 @@ const routes: Array<RouteRecordRaw> = [
                 component: () =>
                     import("@/pages/admin/laporan/semua-transaksi/Index.vue"),
             },
-            // MASTER
             {
                 path: "/master/brand",
                 name: "master-brand",
@@ -139,7 +135,6 @@ const routes: Array<RouteRecordRaw> = [
                     ),
             },
 
-            // PPOB
             {
                 path: "/ppob",
                 name: "ppob",
@@ -178,7 +173,6 @@ const routes: Array<RouteRecordRaw> = [
                 component: () => import("@/pages/admin/ppob/tabs/Internet.vue"),
             },
 
-            // PRODUK
             {
                 path: "/produk/prabayar",
                 name: "produk-prabayar",
@@ -191,27 +185,19 @@ const routes: Array<RouteRecordRaw> = [
                 component: () =>
                     import("@/pages/admin/produk/pascabayar/Index.vue"),
             },
-            // HISTORI
             {
                 path: "/histori",
                 name: "histori",
                 component: () => import("@/pages/user/histori/Index.vue"),
             },
-            // PESANAN
             {
                 path: "/order",
                 name: "order",
                 component: () => import("@/pages/admin/pesanan/Index.vue"),
             },
-            {
-                path : "/order/detail",
-                name : "order-detail",
-                component : () => import("@/pages/admin/pesanan/Detail.vue")
-            }
         ],
     },
 
-    // AUTH
     {
         path: "/",
         component: () => import("@/layouts/AuthLayout.vue"),
@@ -222,7 +208,6 @@ const routes: Array<RouteRecordRaw> = [
                 component: () => import("@/pages/auth/sign-in/Index.vue"),
                 meta: {
                     pageTitle: "Sign In",
-                    // middleware: "guest",
                 },
             },
         ],
@@ -248,7 +233,6 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import("@/layouts/SystemLayout.vue"),
         children: [
             {
-                // the 404 route, when none of the above matches
                 path: "/404",
                 name: "404",
                 component: () => import("@/pages/errors/Error404.vue"),
@@ -276,7 +260,6 @@ const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes,
     scrollBehavior(to) {
-        // If the route has a hash, scroll to the section with the specified ID; otherwise, scroll to the top of the page.
         if (to.hash) {
             return {
                 el: to.hash,
@@ -295,14 +278,12 @@ const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
     if (to.name) {
-        // Start the route progress bar.
         NProgress.start();
     }
 
     const authStore = useAuthStore();
     const configStore = useConfigStore();
 
-    // current page view title
     if (to.meta.pageTitle) {
         document.title = `${to.meta.pageTitle} - ${
             import.meta.env.VITE_APP_NAME
@@ -311,13 +292,10 @@ router.beforeEach(async (to, from, next) => {
         document.title = import.meta.env.VITE_APP_NAME as string;
     }
 
-    // reset config to initial state
     configStore.resetLayoutConfig();
 
-    // verify auth token before each page change
     if (!authStore.isAuthenticated) await authStore.verifyAuth();
 
-    // before page access check if page requires authentication
     if (to.meta.middleware == "auth") {
         if (authStore.isAuthenticated) {
             if (
@@ -341,7 +319,6 @@ router.beforeEach(async (to, from, next) => {
 });
 
 router.afterEach(() => {
-    // Complete the animation of the route progress bar.
     NProgress.done();
 });
 

@@ -87,22 +87,23 @@ class DepositTransactionController extends Controller
         $request->validate([
             'amount' => 'required|numeric|min:1000|max:10000000'
         ]);
-
+    
         $maxAttempts = 3;
         $attempt = 0;
-        while ($attempt < $maxAttempts)
-
+        $lastException = null;
+    
+        while ($attempt < $maxAttempts) {
             try {
                 Log::info('Topup Request:', $request->all());
                 DB::beginTransaction();
-
+    
                 $user = auth()->user();
                 $depositCode = $this->getCode();
-
+    
                 if (empty($this->serverKey)) {
                     throw new \Exception('Midtrans server key is not configured');
                 }
-
+    
                 $transaction = DepositTransaction::create([
                     'user_id' => $user->id,
                     'amount' => $request->amount,
@@ -111,7 +112,7 @@ class DepositTransactionController extends Controller
                     'payment_type' => null,
                     'paid_at' => null
                 ]);
-
+    
                 $params = [
                     'transaction_details' => [
                         'order_id' => $depositCode,
@@ -147,31 +148,41 @@ class DepositTransactionController extends Controller
                         'duration' => 30
                     ]
                 ];
-
+    
                 \Midtrans\Config::$isProduction = config('midtrans.is_production', false);
-
+    
                 $snapToken = \Midtrans\Snap::getSnapToken($params);
-
+    
                 $transaction->update(['snap_token' => $snapToken]);
-
+    
                 DB::commit();
-
+    
                 return response()->json([
                     'success' => true,
                     'snap_token' => $snapToken,
                     'transaction' => $transaction
                 ]);
+    
             } catch (\Exception $e) {
                 DB::rollback();
-                Log::error('Topup Error: ' . $e->getMessage());
+                $lastException = $e;
+                $attempt++;
+                
+                Log::error('Topup Error (Attempt ' . $attempt . '/' . $maxAttempts . '): ' . $e->getMessage());
                 Log::error($e->getTraceAsString());
-
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Terjadi kesalahan saat topup saldo',
-                    'error' => $e->getMessage()
-                ], 500);
+    
+                if ($attempt < $maxAttempts) {
+                    sleep(1);
+                    continue;
+                }
             }
+        }
+    
+        return response()->json([
+            'success' => false,
+            'message' => 'Terjadi kesalahan saat topup saldo',
+            'error' => $lastException ? $lastException->getMessage() : 'Maximum retry attempts reached'
+        ], 500);
     }
 
 

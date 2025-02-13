@@ -39,10 +39,18 @@ const columns = [
         },
     }),
     column.accessor("payment_type", {
-        header : "Metode Pembayaran",
+        header: "Metode Pembayaran",
+        cell: (cell) =>
+            `
+            ${cell.row.original.payment_type ?? "-"}
+        `,
     }),
     column.accessor("paid_at", {
-        header : "Tanggal Pembayaran",
+        header: "Tanggal Pembayaran",
+        cell: (cell) =>
+            `
+    ${cell.row.original.paid_at ?? "-"}
+        `,
     }),
     column.accessor("status", {
         header: "Status",

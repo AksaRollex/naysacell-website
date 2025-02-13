@@ -235,68 +235,6 @@ class OrdersController extends Controller
             ]);
         }
     }
-
-    // public function sendStatusUpdateEmail(Request $request)
-    // {
-
-    //     $statusMessages = [
-    //         'pending' => 'Transaksi Anda sedang menunggu konfirmasi',
-    //         'processing' => 'Transaksi Anda sedang diproses',
-    //         'success' => 'Transaksi Anda telah berhasil diproses',
-    //         'cancelled' => 'Transaksi Anda telah dibatalkan'
-    //     ];
-
-    //     $transaction = TransactionModel::where('id', $request->transaction_id)->first();
-    //     $message = $statusMessages[strtolower($transaction->order_status)] ?? 'Status transaksi Anda telah diperbarui';
-
-    //     try {
-    //         $response = Http::withHeaders([
-    //             'api-key' => env('SENDINBLUE_API_KEY'),
-    //             "Content-Type" => "application/json"
-    //         ])->post('https://api.brevo.com/v3/smtp/email', [
-    //             "sender" => [
-    //                 "name" => env('SENDINBLUE_SENDER_NAME'),
-    //                 "email" => env('SENDINBLUE_SENDER_EMAIL'),
-    //             ],
-    //             'to' => [
-    //                 ['email' => $request->$transaction->user->email]
-    //             ],
-    //             "subject" => "Kode OTP Reset Password",
-    //             "htmlContent" => "
-    //         <html>
-    //         <body>
-    //             <h2>Update Status Transaksi</h2>
-    //                         <p>Halo ' . $transaction->user->name . ',</p>
-    //                         <p>' . $message . '</p>
-    //                         <p>Detail Transaksi:</p>
-    //                         <ul>
-    //                             <li>ID Transaksi: #' . $transaction->id . '</li>
-    //                             <li>Status: ' . ucfirst($transaction->order_status) . '</li>
-    //                             <li>Total: Rp ' . number_format($transaction->transaction_total, 0, ',', '.') . '</li>
-    //                         </ul>
-    //                         <p>Terima kasih telah berbelanja di toko kami.</p>
-    //         </body>
-    //         </html>",
-    //         ]);
-    //         return response()->json([
-    //             Log::info('Email sending response:', [
-    //                 'transaction_id' => $transaction->id,
-    //                 'status_code' => $response->status(),
-    //                 'response_body' => $response->json()
-    //             ]),
-    //             'status' => true,
-    //             'message' => 'status pesanan berhasil diperbarui',
-    //         ], 200);
-    //     } catch (\Exception $e) {
-    //         Log::error('Error sending OTP: ' . $e->getMessage());
-    //         return response()->json([
-    //             'status' => false,
-    //             'message' => 'Gagal memperbarui status pesanan',
-    //         ], 500);
-    //     }
-    // }
-
-
     public function destroy($id)
     {
         $data = Orders::find($id);

@@ -1,19 +1,15 @@
 <script setup lang="ts">
 import { h, ref, watch } from "vue";
 import Form from "./Form.vue";
-import Detail from "./Detail.vue";
 import { useDelete } from "@/libs/hooks";
 import { createColumnHelper } from "@tanstack/vue-table";
 import type { User } from "@/types";
 import { currency } from "@/libs/utils";
-import { useRouter } from "vue-router";
 
-const router = useRouter();
 const column = createColumnHelper<User>();
 const paginateRef = ref<any>(null);
 const selected = ref<string>("");
 const openForm = ref<boolean>(false);
-const openDetail = ref<boolean>(false);
 
 const { delete: deleteProduct } = useDelete({
     onSuccess: () => paginateRef.value.refetch(),
@@ -89,24 +85,6 @@ const columns = [
                 h(
                     "button",
                     {
-                        class: "btn btn-sm btn-icon btn-warning",
-                        onClick: () => {
-                            const id = cell.getValue();
-                            router.push({
-                                path: `/order/detail/${id}`, // gunakan path langsung
-                            });
-                            // atau gunakan named route
-                            router.push({
-                                name: "order-detail",
-                                params: { id: id },
-                            });
-                        },
-                    },
-                    h("i", { class: "la la-eye fs-2" })
-                ),
-                h(
-                    "button",
-                    {
                         class: "btn btn-sm btn-icon btn-danger",
                         onClick: () =>
                             deleteProduct(
@@ -128,12 +106,6 @@ watch(openForm, (val) => {
     window.scrollTo(0, 0);
 });
 
-watch(openDetail, (val) => {
-    if (!val) {
-        selected.value = "";
-    }
-    window.scrollTo(0, 0);
-});
 </script>
 
 <template>
@@ -143,12 +115,6 @@ watch(openDetail, (val) => {
         v-if="openForm"
         @refresh="refresh"
     />
-    <Detail
-        :selected="selected"
-        @close="openDetail = false"
-        v-if="openDetail"
-    />
-
     <div class="card">
         <div class="card-header align-items-center">
             <h2 class="mb-0">Daftar Pesanan</h2>

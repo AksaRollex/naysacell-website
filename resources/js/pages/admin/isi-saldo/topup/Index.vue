@@ -105,6 +105,7 @@ const handleTopup = async () => {
 
         const response = await axios.post("/auth/topup", formData);
         const { snap_token, transaction } = response.data;
+        console.log("Response:", response.data);
 
         if (!snap_token) {
             throw new Error("Token pembayaran tidak valid");

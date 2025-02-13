@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class AuthController extends Controller
@@ -96,14 +97,14 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'email' => 'required|email'
         ]);
-
+    
         if ($validator->fails()) {
             return response()->json([
                 'status' => false,
                 'message' => $validator->errors()->first()
             ], 422);
         }
-
+    
         $user = User::where('email', $request->email)->first();
         if (!$user) {
             return response()->json([
@@ -111,46 +112,38 @@ class AuthController extends Controller
                 'message' => 'Email tidak terdaftar dalam sistem.'
             ], 404);
         }
-
+    
         try {
-
             $otpCode = sprintf("%06d", mt_rand(1, 999999));
-
+    
             $user->otp = $otpCode;
             $user->token_expired_at = now()->addMinutes(3);
             $user->save();
-
-            $response = Http::withHeaders([
-                'api-key' => env('SENDINBLUE_API_KEY'),
-                "Content-Type" => "application/json"
-            ])->post('https://api.brevo.com/v3/smtp/email', [
-                "sender" => [
-                    "name" => env('SENDINBLUE_SENDER_NAME'),
-                    "email" => env('SENDINBLUE_SENDER_EMAIL'),
-                ],
-                'to' => [
-                    ['email' => $request->email]
-                ],
-                "subject" => "Kode OTP Reset Password",
-                "htmlContent" => "
-            <html>
-            <body>
-                <h1>Kode OTP Reset Password</h1>
-                <p>Anda telah meminta untuk mereset password akun Anda.</p>
-                <p>Kode OTP Anda adalah:</p>
-                <h2 style='font-size: 24px; 
-                          background-color: #f0f0f0; 
-                          padding: 10px; 
-                          text-align: center; 
-                          letter-spacing: 5px;'>
-                    {$otpCode}
-                </h2>
-                <p>Kode OTP ini akan kadaluarsa dalam 15 menit.</p>
-                <p>Jangan bagikan kode ini kepada siapapun.</p>
-                <p>Jika Anda tidak meminta reset password, abaikan email ini.</p>
-            </body>
-            </html>",
-            ]);
+    
+            Mail::send([], [], function ($message) use ($request, $otpCode) {
+                $message
+                    ->to($request->email)
+                    ->subject('Kode OTP Reset Password')
+                    ->html("
+                    <html>
+                    <body>
+                        <h1>Kode OTP Reset Password</h1>
+                        <p>Anda telah meminta untuk mereset password akun Anda.</p>
+                        <p>Kode OTP Anda adalah:</p>
+                        <h2 style='font-size: 24px; 
+                                  background-color: #f0f0f0; 
+                                  padding: 10px; 
+                                  text-align: center; 
+                                  letter-spacing: 5px;'>
+                            {$otpCode}
+                        </h2>
+                        <p>Kode OTP ini akan kadaluarsa dalam 15 menit.</p>
+                        <p>Jangan bagikan kode ini kepada siapapun.</p>
+                        <p>Jika Anda tidak meminta reset password, abaikan email ini.</p>
+                    </body>
+                    </html>");
+            });
+    
             return response()->json([
                 'status' => true,
                 'message' => 'Kode OTP telah dikirim ke email Anda',
