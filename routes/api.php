@@ -11,7 +11,9 @@ use App\Http\Controllers\DepositTransactionController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserBalanceController;
 
-Route::post('midtrans-callback', [DepositTransactionController::class, 'handleCallback']);
+Route::middleware('throttle:6,1')->group(function () {
+    Route::post('midtrans-callback', [DepositTransactionController::class, 'handleCallback']);
+});
 
 Route::middleware(['auth', 'json'])->prefix('auth')->group(function () {
     Route::delete('logout', [AuthController::class, 'logout']);

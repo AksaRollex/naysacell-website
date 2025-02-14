@@ -18,7 +18,7 @@
                 >
                     <div class="row w-100">
                         <div
-                            class=" col-md-12 p-5 text-white text-center text-lg-start"
+                            class="col-md-12 p-5 text-white text-center text-lg-start"
                         >
                             <img
                                 src="../../../../public/media/logo-nc.png"
@@ -44,9 +44,9 @@
                                     line-height: 2rem;
                                 "
                             >
-                                Silahkan Download Aplikasi Kami Untuk Kalian
-                                Yang Ingin Topup Pulsa, Paket Data, Uang
-                                Elektronik, Dan Game.
+                                Silahkan download alikasi kami untuk kalian
+                                yang ingin topup pulsa, paket data, dan uang
+                                elektronik !
                             </p>
                             <a
                                 @click="downloadApp"

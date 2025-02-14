@@ -6,8 +6,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
@@ -97,14 +97,14 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'email' => 'required|email'
         ]);
-    
+
         if ($validator->fails()) {
             return response()->json([
                 'status' => false,
                 'message' => $validator->errors()->first()
             ], 422);
         }
-    
+
         $user = User::where('email', $request->email)->first();
         if (!$user) {
             return response()->json([
@@ -112,14 +112,14 @@ class AuthController extends Controller
                 'message' => 'Email tidak terdaftar dalam sistem.'
             ], 404);
         }
-    
+
         try {
             $otpCode = sprintf("%06d", mt_rand(1, 999999));
-    
+
             $user->otp = $otpCode;
             $user->token_expired_at = now()->addMinutes(3);
             $user->save();
-    
+
             Mail::send([], [], function ($message) use ($request, $otpCode) {
                 $message
                     ->to($request->email)
@@ -143,7 +143,7 @@ class AuthController extends Controller
                     </body>
                     </html>");
             });
-    
+
             return response()->json([
                 'status' => true,
                 'message' => 'Kode OTP telah dikirim ke email Anda',
@@ -216,7 +216,6 @@ class AuthController extends Controller
             ], 404);
         }
 
-        // Check if email is verified
         if (!$user->email_verified_at) {
             return response()->json([
                 'status' => false,
@@ -247,6 +246,23 @@ class AuthController extends Controller
             return response()->json(['status' => false, 'message' => $validator->errors()->first()], 422);
         }
 
+        $validatedData = $validator->validated();
+
+
+        if (User::where('email', $validatedData['email'])->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email telah digunakan'
+            ], 400);
+        }
+
+        if (User::where('phone', $validatedData['phone'])->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Nomor telepon telah digunakan'
+            ], 400);
+        }
+
         if (User::where('email', $request->email)
             ->where('is_verified', true)
             ->orWhere('phone', $request->phone)
@@ -256,14 +272,12 @@ class AuthController extends Controller
             return response()->json(['status' => false, 'message' => 'Email atau nomor telepon telah terdaftar'], 422);
         }
 
-        // Hapus data user yang belum terverifikasi jika ada
         User::where('email', $request->email)
             ->where('is_verified', false)
             ->delete();
 
         $otpCode = sprintf("%06d", mt_rand(1, 999999));
 
-        // Buat user dengan status belum terverifikasi
         User::create([
             'uuid' => Str::uuid(),
             'name' => $request->name,
@@ -275,21 +289,24 @@ class AuthController extends Controller
             'is_verified' => false,
             'token_expired_at' => now()->addMinutes(15)
         ]);
-        // Send email
-        $response = Http::withHeaders([
-            'api-key' => env('SENDINBLUE_API_KEY'),
-            "Content-Type" => "application/json"
-        ])->post('https://api.brevo.com/v3/smtp/email', [
-            "sender" => [
-                "name" => env('SENDINBLUE_SENDER_NAME'),
-                "email" => env('SENDINBLUE_SENDER_EMAIL'),
-            ],
-            'to' => [
-                ['email' => $request->email]
-            ],
-            "subject" => "Kode OTP registrasi",
-            "htmlContent" => "Kode OTP Anda: {$otpCode}"
-        ]);
+        Mail::send([], [], function ($message) use ($request, $otpCode) {
+            $message->to($request->email);
+            $message->subject('Kode OTP registrasi');
+            $message->html("<html>
+                        <body>
+                            <h2 style='font-size: 24px; 
+                                      background-color: #f0f0f0; 
+                                      padding: 10px; 
+                                      text-align: center; 
+                                      letter-spacing: 5px;'>
+                                {$otpCode}
+                            </h2>
+                            <p>Kode OTP ini akan kadaluarsa dalam 15 menit.</p>
+                            <p>Jangan bagikan kode ini kepada siapapun.</p>
+                            <p>Jika Anda tidak meminta reset password, abaikan email ini.</p>
+                        </body>
+                        </html>");
+        });
 
         return response()->json([
             'status' => true,
@@ -321,28 +338,30 @@ class AuthController extends Controller
             ], 404);
         }
 
-        // Generate new OTP
         $otpCode = sprintf("%06d", mt_rand(1, 999999));
         $user->otp = $otpCode;
         $user->token_expired_at = now()->addMinutes(15);
         $user->save();
 
-        // Send email
-        $response = Http::withHeaders([
-            'api-key' => env('SENDINBLUE_API_KEY'),
-            "Content-Type" => "application/json"
-        ])->post('https://api.brevo.com/v3/smtp/email', [
-            "sender" => [
-                "name" => env('SENDINBLUE_SENDER_NAME'),
-                "email" => env('SENDINBLUE_SENDER_EMAIL'),
-            ],
-            'to' => [
-                ['email' => $request->email]
-            ],
-            "subject" => "Kode OTP registrasi",
-            "htmlContent" => "Kode OTP Anda: {$otpCode}"
-        ]);
 
+        Mail::send([], [], function ($message) use ($user, $otpCode) {
+            $message->to($user->email);
+            $message->subject('Kode OTP registrasi');
+            $message->html("<html>
+                        <body>
+                            <h2 style='font-size: 24px; 
+                                      background-color: #f0f0f0; 
+                                      padding: 10px; 
+                                      text-align: center; 
+                                      letter-spacing: 5px;'>
+                                {$otpCode}
+                            </h2>
+                            <p>Kode OTP ini akan kadaluarsa dalam 15 menit.</p>
+                            <p>Jangan bagikan kode ini kepada siapapun.</p>
+                            <p>Jika Anda tidak meminta reset password, abaikan email ini.</p>
+                        </body>
+                        </html>");
+        });
         return response()->json([
             'status' => true,
             'message' => 'Kode OTP telah dikirim ulang ke email Anda'
@@ -356,7 +375,6 @@ class AuthController extends Controller
             ->first();
 
         if (!$user || $user->otp != $request->otp || $user->token_expired_at < now()) {
-            // Hapus user jika OTP expired
             if ($user && $user->token_expired_at < now()) {
                 $user->delete();
             }
